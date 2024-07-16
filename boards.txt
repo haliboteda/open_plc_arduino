@@ -1,0 +1,64 @@
+menu.pnum=Board part number
+
+menu.xserial=U(S)ART support
+menu.usb=USB support (if available)
+menu.xusb=USB speed (if available)
+menu.virtio=Virtual serial support
+
+menu.opt=Optimize
+menu.dbg=Debug symbols and core logs
+menu.rtlib=C Runtime Library
+menu.upload_method=Upload method
+
+################################################################################
+# OPEN-pLC H7
+OPEN-PLC.name=OPEN-PLC
+
+OPEN-PLC.build.core=arduino
+OPEN-PLC.build.board= GenH7
+OPEN-PLC.build.st_extra_flags=-DCORE_CM7 -D{build.product_line} {build.enable_usb} {build.xSerial}
+OPEN-PLC.build.cmsis_lib_gcc=arm_cortexM7lfsp_math
+OPEN-PLC.build.fpu=-mfpu=fpv4-sp-d16
+OPEN-PLC.build.float-abi=-mfloat-abi=hard
+OPEN-PLC.build.series=STM32H7xx
+OPEN-PLC.build.mcu=cortex-m7
+OPEN-PLC.upload.maximum_size=0
+OPEN-PLC.upload.maximum_data_size=0
+
+# PLC H743IIKx
+OPEN-PLC.menu.pnum.PLC_H743=PLC H743
+OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_size=2097152
+OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_data_size=524288
+OPEN-PLC.menu.pnum.PLC_H743.build.board=PLC_H743
+OPEN-PLC.menu.pnum.PLC_H743.build.product_line=STM32H743xx
+OPEN-PLC.menu.pnum.PLC_H743.build.variant_h=variant_{build.board}.h
+OPEN-PLC.menu.pnum.PLC_H743.build.variant=STM32H7xx/H743
+OPEN-PLC.menu.pnum.PLC_H743.build.peripheral_pins=-DCUSTOM_PERIPHERAL_PINS
+OPEN-PLC.menu.pnum.PLC_H743.build.ldscript=PLC_H743.ld
+
+# USB connectivity
+OPEN-PLC.menu.usb.none=None
+OPEN-PLC.menu.usb.CDCgen=CDC (generic 'Serial' supersede U(S)ART)
+OPEN-PLC.menu.usb.CDCgen.build.enable_usb={build.usb_flags} -DUSBD_USE_CDC
+OPEN-PLC.menu.usb.CDC=CDC (no generic 'Serial')
+OPEN-PLC.menu.usb.CDC.build.enable_usb={build.usb_flags} -DUSBD_USE_CDC -DDISABLE_GENERIC_SERIALUSB
+OPEN-PLC.menu.xusb.FS=Low/Full Speed
+OPEN-PLC.menu.xusb.HS=High Speed
+OPEN-PLC.menu.xusb.HS.build.usb_speed=-DUSE_USB_HS
+OPEN-PLC.menu.xusb.HSFS=High Speed in Full Speed mode
+OPEN-PLC.menu.xusb.HSFS.build.usb_speed=-DUSE_USB_HS -DUSE_USB_HS_IN_FS
+
+
+# Upload menu
+
+OPEN-PLC.menu.upload_method.dfuMethod=STM32CubeProgrammer (DFU)
+OPEN-PLC.menu.upload_method.dfuMethod.upload.protocol=2
+OPEN-PLC.menu.upload_method.dfuMethod.upload.options=-g
+OPEN-PLC.menu.upload_method.dfuMethod.upload.tool=stm32CubeProg
+
+OPEN-PLC.menu.upload_method.serialMethod=Ethernet (TCP)
+OPEN-PLC.menu.upload_method.serialMethod.upload.protocol=0
+OPEN-PLC.menu.upload_method.serialMethod.upload.options=
+OPEN-PLC.menu.upload_method.serialMethod.upload.tool=
+
+################################################################################
