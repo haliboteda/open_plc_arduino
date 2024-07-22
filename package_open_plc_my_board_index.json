@@ -7,7 +7,7 @@
       "email": "gdys0033@gmail.com",
       "platforms": [
         {
-          "name": "PLC H743IIKx",
+          "name": "PLC H743IIKx my",
           "architecture": "stm32",
           "version": "0.1.0",
           "category": "Contributed",
@@ -16,26 +16,26 @@
           "checksum": "SHA-256:0d123b6a613fe25d7abb68adb46ecf93e1ce9f6c5c8af38a722ae3dd2e0d192b",
           "size": "10040587",
           "boards": [
-            {      "name": "PLC H743IIKx"  }
+            {      "name": "PLC H743IIKx my"  }
           ],
           "toolsDependencies": [
             {
-              "packager": "OPEN_PLC",
+              "packager": "MY_BOARD",
               "name": "xpack-arm-none-eabi-gcc",
               "version": "12.2.1-1.2"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "MY_BOARD",
               "name": "xpack-openocd",
               "version": "0.12.0-1"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "MY_BOARD",
               "name": "STM32Tools",
               "version": "2.2.0"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "MY_BOARD",
               "name": "CMSIS",
               "version": "5.7.0"
             }
