@@ -52,6 +52,8 @@ OPEN-PLC.menu.xusb.HSFS.build.usb_speed=-DUSE_USB_HS -DUSE_USB_HS_IN_FS
 # Upload menu
 
 OPEN-PLC.menu.upload_method.dfuMethod=STM32CubeProgrammer (DFU)
+
+# TODO  there should be a selection menu of DFU protocol ( 0: SWD  1: Serial 2: DFU)
 OPEN-PLC.menu.upload_method.dfuMethod.upload.protocol=2
 OPEN-PLC.menu.upload_method.dfuMethod.upload.options=-g
 OPEN-PLC.menu.upload_method.dfuMethod.upload.tool=stm32CubeProg
