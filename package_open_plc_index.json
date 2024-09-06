@@ -11,10 +11,10 @@
           "architecture": "stm32",
           "version": "0.1.0",
           "category": "Contributed",
-          "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/openplc_v0.1.0.zip",
-          "archiveFileName": "openplc_v0.1.0.zip",
-          "checksum": "SHA-256:0d123b6a613fe25d7abb68adb46ecf93e1ce9f6c5c8af38a722ae3dd2e0d192b",
-          "size": "10040587",
+          "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/v0.1.0.zip",
+          "archiveFileName": "open_plc_arduino-0.1.0.zip",
+          "checksum": "SHA-256:7956facb6dce4f5f5b5614bd5e5d81889b5d3ba308abb7aeaef8afcc1c12a121",
+          "size": "10041161",
           "boards": [
             {      "name": "PLC H743IIKx"  }
           ],
