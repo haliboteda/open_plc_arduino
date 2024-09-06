@@ -1,9 +1,9 @@
 {
   "packages": [
     {
-      "name": "MY_BOARD",
+      "name": "OpenPLC",
       "websiteURL": "https://github.com/haliboteda",
-      "maintainer": "MY_BOARD",
+      "maintainer": "OpenPLC",
       "email": "gdys0033@gmail.com",
       "platforms": [
         {
@@ -20,22 +20,22 @@
           ],
           "toolsDependencies": [
             {
-              "packager": "OPEN_PLC",
+              "packager": "OpenPLC",
               "name": "xpack-arm-none-eabi-gcc",
               "version": "12.2.1-1.2"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "OpenPLC",
               "name": "xpack-openocd",
               "version": "0.12.0-1"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "OpenPLC",
               "name": "STM32Tools",
               "version": "2.2.0"
             },
             {
-              "packager": "OPEN_PLC",
+              "packager": "OpenPLC",
               "name": "CMSIS",
               "version": "5.7.0"
             }
