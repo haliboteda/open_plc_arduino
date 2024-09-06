@@ -11,8 +11,8 @@
           "architecture": "stm32",
           "version": "0.1.0",
           "category": "Contributed",
-          "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/v0.1.0.zip",
-          "archiveFileName": "open_plc_arduino-0.1.0.zip",
+          "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/openplc_v0.1.0.zip",
+          "archiveFileName": "openplc_v0.1.0.zip",
           "checksum": "SHA-256:0d123b6a613fe25d7abb68adb46ecf93e1ce9f6c5c8af38a722ae3dd2e0d192b",
           "size": "10040587",
           "boards": [
@@ -180,10 +180,10 @@
           "systems": [
             {
               "host": "i686-mingw32",
-              "url": "https://github.com/stm32duino/Arduino_Tools/releases/download/2.2.0/STM32Tools-2.2.0-windows.tar.bz2",
-              "archiveFileName": "STM32Tools-2.2.0-windows.tar.bz2",
-              "checksum": "SHA-256:c8bd87064f5a6f018a6b88f539af2fce864452b70d95b8ae3b0a95b48cf766ec",
-              "size": "2342829"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/2.2.3/STM32Tools-2.2.3-windows.tar.bz2",
+              "archiveFileName": "STM32Tools-2.2.3-windows.tar.bz2",
+              "checksum": "SHA-256:85e99340d2e79b935a584bb48209509eae75d37e073f9d788c81fc16ce14e6be",
+              "size": "2772889"
             },
             {
               "host": "x86_64-apple-darwin",
@@ -194,17 +194,17 @@
             },
             {
               "host": "x86_64-pc-linux-gnu",
-              "url": "https://github.com/stm32duino/Arduino_Tools/releases/download/2.2.0/STM32Tools-2.2.0-linux.tar.bz2",
-              "archiveFileName": "STM32Tools-2.2.0-linux.tar.bz2",
-              "checksum": "SHA-256:e436bf62709abd74a179811459aa83ee0cc163c1b10f5b10831e3cb57bee3000",
-              "size": "270078"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/2.2.3/STM32Tools-2.2.3-linux.tar.bz2",
+              "archiveFileName": "STM32Tools-2.2.3-linux.tar.bz2",
+              "checksum": "SHA-256:4af440ae76684f0cfbe6604bb9312829ca29606adcecdeeb4725f18290082e49",
+              "size": "184717"
             },
             {
               "host": "i686-pc-linux-gnu",
-              "url": "https://github.com/stm32duino/Arduino_Tools/releases/download/2.2.0/STM32Tools-2.2.0-linux.tar.bz2",
-              "archiveFileName": "STM32Tools-2.2.0-linux.tar.bz2",
-              "checksum": "SHA-256:e436bf62709abd74a179811459aa83ee0cc163c1b10f5b10831e3cb57bee3000",
-              "size": "270078"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/2.2.3/STM32Tools-2.2.3-linux.tar.bz2",
+              "archiveFileName": "STM32Tools-2.2.3-linux.tar.bz2",
+              "checksum": "SHA-256:4af440ae76684f0cfbe6604bb9312829ca29606adcecdeeb4725f18290082e49",
+              "size": "184717"
             }
           ]
         }

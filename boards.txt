@@ -51,14 +51,29 @@ OPEN-PLC.menu.xusb.HSFS.build.usb_speed=-DUSE_USB_HS -DUSE_USB_HS_IN_FS
 
 # Upload menu
 
-OPEN-PLC.menu.upload_method.dfuMethod=STM32CubeProgrammer (DFU)
-OPEN-PLC.menu.upload_method.dfuMethod.upload.protocol=2
-OPEN-PLC.menu.upload_method.dfuMethod.upload.options=-g
-OPEN-PLC.menu.upload_method.dfuMethod.upload.tool=stm32CubeProg
+OPEN-PLC.menu.upload_method.swdMethod=STM32CubeProgrammer (SWD)
+OPEN-PLC.menu.upload_method.swdMethod.upload.protocol=0
+OPEN-PLC.menu.upload_method.swdMethod.upload.options=-g
+OPEN-PLC.menu.upload_method.swdMethod.upload.tool=stm32CubeProg
 
-OPEN-PLC.menu.upload_method.serialMethod=Ethernet (TCP)
-OPEN-PLC.menu.upload_method.serialMethod.upload.protocol=0
-OPEN-PLC.menu.upload_method.serialMethod.upload.options=
-OPEN-PLC.menu.upload_method.serialMethod.upload.tool=
+OPEN-PLC.menu.upload_method.serialMethod=STM32CubeProgrammer (Serial)
+OPEN-PLC.menu.upload_method.serialMethod.upload.protocol=1
+OPEN-PLC.menu.upload_method.serialMethod.upload.options=COM6
+OPEN-PLC.menu.upload_method.serialMethod.upload.tool=stm32CubeProg
+
+OPEN-PLC.menu.upload_method.stm32progdfuMethod=STM32CubeProgrammer (DFU123)
+OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.protocol=2
+OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.options=-g
+OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool=stm32CubeProg
+
+OPEN-PLC.menu.upload_method.mapleMethod=DFUUtilUpload
+OPEN-PLC.menu.upload_method.mapleMethod.upload.protocol=
+OPEN-PLC.menu.upload_method.mapleMethod.upload.options=
+OPEN-PLC.menu.upload_method.mapleMethod.upload.tool=dfuutil_upload
+
+OPEN-PLC.menu.upload_method.ethMethod=Ethernet (TCP)
+OPEN-PLC.menu.upload_method.ethMethod.upload.protocol=0
+OPEN-PLC.menu.upload_method.ethMethod.upload.options=
+OPEN-PLC.menu.upload_method.ethMethod.upload.tool=
 
 ################################################################################

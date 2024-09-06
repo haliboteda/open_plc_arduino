@@ -212,6 +212,15 @@ tools.remoteproc_gen.upload.params.verbose=
 tools.remoteproc_gen.upload.params.quiet=
 tools.remoteproc_gen.upload.pattern="{busybox}" sh "{path}/{script}" generate "{build.path}/{build.project_name}.elf" "{build.path}/run_arduino_{build.project_name}.sh"
 
+# Upload using Dfu-util over DFU
+tools.dfuutil_upload.script=dfu-util.sh
+tools.dfuutil_upload.busybox=
+tools.dfuutil_upload.busybox.windows={path}/win/busybox.exe
+tools.dfuutil_upload.path={runtime.tools.STM32Tools.path}
+tools.dfuutil_upload.upload.params.verbose=-d
+tools.dfuutil_upload.upload.params.quiet=n
+tools.dfuutil_upload.upload.pattern="{busybox}" sh "{path}/{script}" -d 0x0483:0xdf11 -D "{build.path}/{build.project_name}.bin" -s 0x8020000
+
 # Debugger configuration (general options)
 # ----------------------------------------
 # EXPERIMENTAL feature:
