@@ -7,7 +7,7 @@
       "email": "gdys0033@gmail.com",
       "platforms": [
         {
-          "name": "PLC H743IIKx",
+          "name": "OpenPLC H743IIKx",
           "architecture": "stm32",
           "version": "0.1.0",
           "category": "Contributed",
