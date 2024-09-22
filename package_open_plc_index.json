@@ -16,7 +16,7 @@
           "checksum": "SHA-256:a1a6b1ac82ce9dea8c75651886d1b20d6230c46ded3006ba2770c0111fff3292",
           "size": "10041164",
           "boards": [
-            {      "name": "PLC H743IIKx"  }
+            {      "name": "H743IIKx Alpha"  }
           ],
           "toolsDependencies": [
             {
