@@ -13,8 +13,8 @@
           "category": "Contributed",
           "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/v0.1.0.zip",
           "archiveFileName": "open_plc_arduino-0.1.0.zip",
-          "checksum": "SHA-256:a1a6b1ac82ce9dea8c75651886d1b20d6230c46ded3006ba2770c0111fff3292",
-          "size": "10041164",
+          "checksum": "SHA-256:df9d6f11fcc8b0c8ebceea98f0c7abde171028dcd0a25a6a7b4ded5664361b8f",
+          "size": "9836997",
           "boards": [
             {      "name": "H743IIKx Alpha"  }
           ],
