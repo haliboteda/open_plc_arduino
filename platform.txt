@@ -221,6 +221,17 @@ tools.dfuutil_upload.upload.params.verbose=-d
 tools.dfuutil_upload.upload.params.quiet=n
 tools.dfuutil_upload.upload.pattern="{busybox}" sh "{path}/{script}" -d 0x0483:0xdf11 -D "{build.path}/{build.project_name}.bin" -s 0x8020000
 
+# Upload using CDC Transfer  
+tools.cdctransfer.cmd=SerialPortTranfer
+tools.cdctransfer.cmd.windows=SerialPortTranfer.exe
+tools.cdctransfer.path={runtime.tools.STM32Tools.path}/win
+tools.cdctransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
+tools.cdctransfer.path.linux={runtime.tools.STM32Tools.path}/linux
+tools.cdctransfer.upload.params.verbose=
+tools.cdctransfer.upload.params.quiet=
+tools.cdctransfer.upload.pattern="{path}/{cmd}" {serial.port.file} "{build.path}/{build.project_name}.bin" 
+
+
 # Debugger configuration (general options)
 # ----------------------------------------
 # EXPERIMENTAL feature:
