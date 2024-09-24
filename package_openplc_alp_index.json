@@ -13,8 +13,8 @@
           "category": "Contributed",
           "url": "https://github.com/haliboteda/open_plc_arduino/archive/refs/tags/v0.1.0.zip",
           "archiveFileName": "open_plc_arduino-0.1.0.zip",
-          "checksum": "SHA-256:df9d6f11fcc8b0c8ebceea98f0c7abde171028dcd0a25a6a7b4ded5664361b8f",
-          "size": "9836997",
+          "checksum": "SHA-256:60358359e75ae64ce4428945f843fb5bb8623b0622701df3f9a4d3a53605e100",
+          "size": "9470079",
           "boards": [
             {      "name": "H743IIKx Alpha"  }
           ],
@@ -180,31 +180,31 @@
           "systems": [
             {
               "host": "i686-mingw32",
-              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/OpenPLC-alpha/Arduino_Tools_OpenPLC_Alpha_Windows.tar.bz2",
-              "archiveFileName": "Arduino_Tools_OpenPLC_Alpha_Windows.tar.bz2",
-              "checksum": "SHA-256:67998745f323fa94b0755f9815c40c76689897dde6cb1176ee11fbb403bd07c6",
-              "size": "4425576"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/openplc_alpha/STM32Tools.zip",
+              "archiveFileName": "STM32Tools.zip",
+              "checksum": "SHA-256:c9d6dd8590e40cec1ae055fed38b5ac37677f8f7df2dcb8ed6be8b879a1a3d9b",
+              "size": "4437600"
             },
             {
               "host": "x86_64-apple-darwin",
-              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/OpenPLC-alpha/Arduino_Tools_OpenPLC_Alpha_Mac.tar.bz2",
-              "archiveFileName": "Arduino_Tools_OpenPLC_Alpha_Mac.tar.bz2",
-              "checksum": "SHA-256:ebb176f05bab7cfcb4099cab700c9de73b6c9e6a628650d0ca57a03dcc0e3b5e",
-              "size": "247808"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/openplc_alpha/STM32Tools_mac.tar.gz",
+              "archiveFileName": "STM32Tools_mac.tar.gz",
+              "checksum": "SHA-256:d3a6da88a8bdd60dfd70181ca1c8feed889d852f5d1e0293159ddb6d66b7ffc6",
+              "size": "116973"
             },
             {
               "host": "x86_64-pc-linux-gnu",
-              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/OpenPLC-alpha/Arduino_Tools_OpenPLC_Alpha_Linux.tar.bz2",
-              "archiveFileName": "Arduino_Tools_OpenPLC_Alpha_Linux.tar.bz2",
-              "checksum": "SHA-256:e90dc125329f33dfd6a1bb9bd71322586ccfbe5e325232478dc835a76201097e",
-              "size": "2005579"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/openplc_alpha/STM32Tools_linux.zip",
+              "archiveFileName": "STM32Tools_linux.zip",
+              "checksum": "SHA-256:4f66ceea41b4e1be15bd3145c2639fb5d0d5a7ee18fda7868e1d0b1a867ae44b",
+              "size": "2013861"
             },
             {
               "host": "i686-pc-linux-gnu",
-              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/OpenPLC-alpha/Arduino_Tools_OpenPLC_Alpha_Linux.tar.bz2",
-              "archiveFileName": "Arduino_Tools_OpenPLC_Alpha_Linux.tar.bz2",
-              "checksum": "SHA-256:e90dc125329f33dfd6a1bb9bd71322586ccfbe5e325232478dc835a76201097e",
-              "size": "2005579"
+              "url": "https://github.com/haliboteda/Arduino_Tools/releases/download/openplc_alpha/STM32Tools_linux.zip",
+              "archiveFileName": "STM32Tools_linux.zip",
+              "checksum": "SHA-256:4f66ceea41b4e1be15bd3145c2639fb5d0d5a7ee18fda7868e1d0b1a867ae44b",
+              "size": "2013861"
             }
           ]
         }
