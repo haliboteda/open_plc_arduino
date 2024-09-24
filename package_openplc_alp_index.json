@@ -32,7 +32,7 @@
             {
               "packager": "OpenPLC_Alpha",
               "name": "STM32Tools",
-              "version": "2.2.0"
+              "version": "2.2.3"
             },
             {
               "packager": "OpenPLC_Alpha",
