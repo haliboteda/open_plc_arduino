@@ -311,6 +311,8 @@
 // UART Definitions
 #ifndef SERIAL_UART_INSTANCE
   #define SERIAL_UART_INSTANCE  4
+  #define RS232_Enable_Pin PB10
+  #define LED3_Pin PE2
 #endif
 
 // Default pin used for generic 'Serial' instance
