@@ -25,6 +25,8 @@
 #include "usbd_cdc_if.h"
 #include "bootloader.h"
 
+extern RTC_HandleTypeDef hrtc;
+
 #ifdef USE_USB_HS
   #define CDC_MAX_PACKET_SIZE USB_OTG_HS_MAX_PACKET_SIZE
 #elif defined(USB_OTG_FS) || defined(USB_OTG_FS_MAX_PACKET_SIZE)
@@ -172,6 +174,13 @@ static int8_t USBD_CDC_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length)
       linecoding.format     = pbuf[4];
       linecoding.paritytype = pbuf[5];
       linecoding.datatype   = pbuf[6];
+    //
+    uint32_t regV = HAL_RTCEx_BKUPRead(&hrtc, MAGIC_BKP_REG);
+    if (linecoding.bitrate == MAGIC_CDC_RATE && regV != MAGIC_BOOTLOADER_FLAG)
+    {
+      HAL_RTCEx_BKUPWrite(&hrtc, MAGIC_BKP_REG, MAGIC_BOOTLOADER_FLAG);
+			HAL_NVIC_SystemReset();
+    }
       break;
 
     case CDC_GET_LINE_CODING:
