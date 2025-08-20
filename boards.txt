@@ -34,7 +34,7 @@ OPEN-PLC.menu.pnum.PLC_H743.build.product_line=STM32H743xx
 OPEN-PLC.menu.pnum.PLC_H743.build.variant_h=variant_{build.board}.h
 OPEN-PLC.menu.pnum.PLC_H743.build.variant=STM32H7xx/H743
 OPEN-PLC.menu.pnum.PLC_H743.build.peripheral_pins=-DCUSTOM_PERIPHERAL_PINS
-OPEN-PLC.menu.pnum.PLC_H743.build.ldscript=PLC_H743.ld
+OPEN-PLC.menu.pnum.PLC_H743.build.ldscript=ldscript.ld
 
 # USB connectivity
 # OPEN-PLC.menu.usb.none=None

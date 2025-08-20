@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "usbd_cdc_rndis.h": "c",
+        "stm32h7xx_hal_qspi.h": "c",
+        "variant.h": "c",
+        "stm32h7xx_hal_eth.h": "c",
+        "pinaf_stm32f1.h": "c",
+        "arduino.h": "c"
+    }
+}

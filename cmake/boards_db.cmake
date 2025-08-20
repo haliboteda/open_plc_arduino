@@ -32,7 +32,7 @@ target_include_directories(PLC_H743 INTERFACE
 
 target_link_options(PLC_H743 INTERFACE
   "LINKER:--default-script=${PLC_H743_VARIANT_PATH}/ldscript.ld"
-  "LINKER:--defsym=LD_FLASH_OFFSET=0"
+  "LINKER:--defsym=LD_FLASH_OFFSET=262144"
 	"LINKER:--defsym=LD_MAX_SIZE=2097152"
 	"LINKER:--defsym=LD_MAX_DATA_SIZE=524288"
   "SHELL:-mfpu=fpv4-sp-d16 -mfloat-abi=hard"
