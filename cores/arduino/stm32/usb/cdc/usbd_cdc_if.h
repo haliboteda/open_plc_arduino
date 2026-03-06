@@ -46,7 +46,8 @@ extern CDC_ReceiveQueue_TypeDef ReceiveQueue;
 
 /* Exported macro ------------------------------------------------------------*/
 #define MAGIC_CDC_RATE 1200
-#define MAGIC_BOOTLOADER_FLAG 0xAF
+#define MAGIC_CDC_FLAG 0xAF
+#define MAGIC_ETH_FLAG 0xAE
 #define MAGIC_BKP_REG RTC_BKP_DR0
 #define CDC_RX_BUFFER_SIZE 32 * 1024
 /* Exported functions ------------------------------------------------------- */

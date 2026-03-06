@@ -3,7 +3,7 @@ version=0.1.0rc0
 
 # STM compile variables
 # ----------------------
-compiler.stm.extra_include="-I{build.source.path}" "-I{build.core.path}/avr" "-I{build.core.path}/stm32" "-I{build.core.path}/stm32/LL" "-I{build.core.path}/stm32/usb" "-I{build.core.path}/stm32/OpenAMP" "-I{build.core.path}/stm32/usb/hid" "-I{build.core.path}/stm32/usb/cdc" "-I{build.system.path}/Drivers/{build.series}_HAL_Driver/Inc" "-I{build.system.path}/Drivers/{build.series}_HAL_Driver/Src" "-I{build.system.path}/{build.series}" "-I{build.system.path}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc" "-I{build.system.path}/Middlewares/ST/STM32_USB_Device_Library/Core/Src" {build.virtio_extra_include}
+compiler.stm.extra_include="-I{build.source.path}" "-I{build.core.path}/avr" "-I{build.core.path}/stm32" "-I{build.core.path}/stm32/LL" "-I{build.core.path}/stm32/usb" "-I{build.core.path}/stm32/OpenAMP" "-I{build.core.path}/stm32/usb/hid" "-I{build.core.path}/stm32/usb/cdc" "-I{build.system.path}/Drivers/{build.series}_HAL_Driver/Inc" "-I{build.system.path}/Drivers/{build.series}_HAL_Driver/Src" "-I{build.system.path}/{build.series}" "-I{build.system.path}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc" "-I{build.system.path}/Middlewares/ST/STM32_USB_Device_Library/Core/Src" "-I{build.variant.path}" "-I{build.core.path}/stm32/OpenPLC_Net" "-I{runtime.platform.path}/libraries/STM32duino_LwIP/src" {build.virtio_extra_include}
 
 compiler.warning_flags=-w
 compiler.warning_flags.none=-w
@@ -52,10 +52,10 @@ build.variant_h=variant_generic.h
 
 # These can be overridden in platform.local.txt
 compiler.c.st_extra_flags={build.peripheral_pins}
-compiler.c.extra_flags=
+compiler.c.extra_flags=-DVECT_TAB_OFFSET={build.flash_offset}
 compiler.c.std=gnu17
 compiler.c.elf.extra_flags=
-compiler.cpp.extra_flags=
+compiler.cpp.extra_flags=-DVECT_TAB_OFFSET={build.flash_offset}
 compiler.cpp.std=gnu++17
 compiler.S.st_extra_flags={build.startup_file}
 compiler.S.extra_flags=
@@ -102,7 +102,7 @@ build.float-abi=
 build.flags.optimize=-Os
 build.flags.debug=-DNDEBUG
 build.flags.ldspecs=--specs=nano.specs
-build.flash_offset=0
+build.flash_offset=0x40000
 
 # Pre and post build hooks
 build.opt.name=build.opt
@@ -222,15 +222,24 @@ tools.dfuutil_upload.upload.params.quiet=n
 tools.dfuutil_upload.upload.pattern="{busybox}" sh "{path}/{script}" -d 0x0483:0xdf11 -D "{build.path}/{build.project_name}.bin" -s 0x8020000
 
 # Upload using CDC Transfer  
-tools.cdctransfer.cmd=SerialPortTransfer
-tools.cdctransfer.cmd.windows=SerialPortTransfer.exe
+tools.cdctransfer.cmd=IAPTool
+tools.cdctransfer.cmd.windows=IAPTool.exe
 tools.cdctransfer.path={runtime.tools.STM32Tools.path}/win
 tools.cdctransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
 tools.cdctransfer.path.linux={runtime.tools.STM32Tools.path}/linux
 tools.cdctransfer.upload.params.verbose=
 tools.cdctransfer.upload.params.quiet=
-tools.cdctransfer.upload.pattern="{path}/{cmd}" "{serial.port}" "{build.path}/{build.project_name}.bin" 
+tools.cdctransfer.upload.pattern="{path}/{cmd}" "cdc" "{build.path}/{build.project_name}.bin" "{serial.port}"
 
+# Upload using ETH Transfer  
+tools.ethtransfer.cmd=IAPTool
+tools.ethtransfer.cmd.windows=IAPTool.exe
+tools.ethtransfer.path={runtime.tools.STM32Tools.path}/win
+tools.ethtransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
+tools.ethtransfer.path.linux={runtime.tools.STM32Tools.path}/linux
+tools.ethtransfer.upload.params.verbose=
+tools.ethtransfer.upload.params.quiet=
+tools.ethtransfer.upload.pattern="{path}/{cmd}" "ether" "{build.path}/{build.project_name}.bin"
 
 # Debugger configuration (general options)
 # ----------------------------------------

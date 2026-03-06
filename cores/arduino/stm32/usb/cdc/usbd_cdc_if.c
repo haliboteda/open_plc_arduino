@@ -176,9 +176,9 @@ static int8_t USBD_CDC_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length)
       linecoding.datatype   = pbuf[6];
     //
     uint32_t regV = HAL_RTCEx_BKUPRead(&hrtc, MAGIC_BKP_REG);
-    if (linecoding.bitrate == MAGIC_CDC_RATE && regV != MAGIC_BOOTLOADER_FLAG)
+    if (linecoding.bitrate == MAGIC_CDC_RATE && regV != MAGIC_CDC_FLAG)
     {
-      HAL_RTCEx_BKUPWrite(&hrtc, MAGIC_BKP_REG, MAGIC_BOOTLOADER_FLAG);
+      HAL_RTCEx_BKUPWrite(&hrtc, MAGIC_BKP_REG, MAGIC_CDC_FLAG);
 			HAL_NVIC_SystemReset();
     }
       break;

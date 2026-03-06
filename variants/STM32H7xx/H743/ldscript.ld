@@ -34,18 +34,18 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);	/* end of "RAM_D1" Ram type memory */
 
-_Min_Heap_Size = 0x1000;      /* required amount of heap  */
-_Min_Stack_Size = 0x2000; /* required amount of stack */
+_Min_Heap_Size = 0x200;	/* required amount of heap  */
+_Min_Stack_Size = 0x400;	/* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
 {
-  DTCMRAM  (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
-  ITCMRAM  (xrw)    : ORIGIN = 0x00000000,   LENGTH = 64K
-  RAM_D1   (xrw)    : ORIGIN = 0x24000000,   LENGTH = 512K
-  RAM_D2   (xrw)    : ORIGIN = 0x30000000,   LENGTH = 288K
-  RAM_D3   (xrw)    : ORIGIN = 0x38000000,   LENGTH = 64K
-  FLASH    (rx)     : ORIGIN = 0x08000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE - LD_FLASH_OFFSET
+  DTCMRAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
+  ITCMRAM    (xrw)    : ORIGIN = 0x00000000,   LENGTH = 64K
+  RAM_D1    (xrw)    : ORIGIN = 0x24000000,   LENGTH = 512K
+  RAM_D2    (xrw)    : ORIGIN = 0x30000000,   LENGTH = 288K
+  RAM_D3    (xrw)    : ORIGIN = 0x38000000,   LENGTH = 64K
+  FLASH    (rx)    : ORIGIN = 0x8000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE - LD_FLASH_OFFSET
 }
 
 /* Define output sections */
@@ -158,20 +158,20 @@ SECTIONS
     . = ALIGN(8);
   } >RAM_D1
 
-  /* ETH_CODE: add placement of DMA descriptors and RX buffers */
+  /* Remove information from the standard libraries */
+
+  /* LwIP DMA descriptors and RX pool in D2 SRAM */
   .lwip_sec (NOLOAD) :
   {
     . = ABSOLUTE(0x30040000);
-    *(.RxDecripSection) 
-    
+    *(.RxDecripSection)
+
     . = ABSOLUTE(0x30040060);
     *(.TxDecripSection)
-    
-    . = ABSOLUTE(0x30040200);
-    *(.Rx_PoolSection)  
-  } >RAM_D2
 
-  /* Remove information from the standard libraries */
+    . = ABSOLUTE(0x30040200);
+    *(.Rx_PoolSection)
+  } >RAM_D2
   /DISCARD/ :
   {
     libc.a ( * )

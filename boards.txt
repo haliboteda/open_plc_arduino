@@ -35,6 +35,8 @@ OPEN-PLC.menu.pnum.PLC_H743.build.variant_h=variant_{build.board}.h
 OPEN-PLC.menu.pnum.PLC_H743.build.variant=STM32H7xx/H743
 OPEN-PLC.menu.pnum.PLC_H743.build.peripheral_pins=-DCUSTOM_PERIPHERAL_PINS
 OPEN-PLC.menu.pnum.PLC_H743.build.ldscript=ldscript.ld
+OPEN-PLC.menu.pnum.PLC_H743.build.extra_flags=-DLAN8742A_PHY_ADDRESS=0 -DETH_RXBUFNB=4 -DETH_TXBUFNB=4 -DETH_RX_BUF_SIZE=1536 -DETH_TX_BUF_SIZE=1536 -DMAC_ADDR0=0x00 -DMAC_ADDR1=0x80 -DMAC_ADDR2=0xE1 -DMAC_ADDR3=0x00 -DMAC_ADDR4=0x43 -DMAC_ADDR5=0x21 -DOPENPLC_UDP_PORT=16861 -DOPENPLC_UDP_SERVER_AUTOSTART -DD_CACHE_DISABLED
+
 
 # USB connectivity
 # OPEN-PLC.menu.usb.none=None
@@ -55,6 +57,11 @@ OPEN-PLC.menu.upload_method.cdcMethod=CDC Transfer
 OPEN-PLC.menu.upload_method.cdcMethod.upload.protocol=
 OPEN-PLC.menu.upload_method.cdcMethod.upload.options=
 OPEN-PLC.menu.upload_method.cdcMethod.upload.tool=cdctransfer
+
+OPEN-PLC.menu.upload_method.ethMethod=ETH Transfer
+OPEN-PLC.menu.upload_method.ethMethod.upload.protocol=
+OPEN-PLC.menu.upload_method.ethMethod.upload.options=
+OPEN-PLC.menu.upload_method.ethMethod.upload.tool=ethtransfer
 
 OPEN-PLC.menu.upload_method.swdMethod=STM32CubeProgrammer (SWD)
 OPEN-PLC.menu.upload_method.swdMethod.upload.protocol=0

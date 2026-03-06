@@ -1,0 +1,53 @@
+#ifndef _OPENPLC_STM32LWIPOPTS_H_
+#define _OPENPLC_STM32LWIPOPTS_H_
+
+#include "lwipopts_default.h"
+
+#undef NO_SYS
+#define NO_SYS 1
+
+#undef LWIP_DHCP
+#define LWIP_DHCP 1
+
+#undef LWIP_DNS
+#define LWIP_DNS 1
+
+#undef LWIP_UDP
+#define LWIP_UDP 1
+
+#undef MEM_SIZE
+#define MEM_SIZE 131048
+
+/* Match Cube H7 no-RTOS profile */
+#undef LWIP_RAM_HEAP_POINTER
+#define LWIP_RAM_HEAP_POINTER 0x30020000
+
+#undef LWIP_SUPPORT_CUSTOM_PBUF
+#define LWIP_SUPPORT_CUSTOM_PBUF 1
+
+#undef LWIP_ETHERNET
+#define LWIP_ETHERNET 1
+
+#undef MEMP_NUM_PBUF
+#define MEMP_NUM_PBUF 64
+
+#undef PBUF_POOL_SIZE
+#define PBUF_POOL_SIZE 256
+
+#undef PBUF_POOL_BUFSIZE
+#define PBUF_POOL_BUFSIZE 1524
+
+#undef MEMP_NUM_UDP_PCB
+#define MEMP_NUM_UDP_PCB 8
+
+#undef LWIP_STATS
+#define LWIP_STATS 0
+
+#undef ETHERNET_RMII_MODE_CONFIGURATION
+#define ETHERNET_RMII_MODE_CONFIGURATION 1
+
+/* ETH HAL v2 Rx buffer size for H7 new driver */
+#undef ETH_RX_BUFFER_SIZE
+#define ETH_RX_BUFFER_SIZE 1536
+
+#endif
