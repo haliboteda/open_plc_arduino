@@ -32,4 +32,3 @@ cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
   #endif
 #endif
 EOC
-

@@ -35,6 +35,17 @@
 
 #include "wiring.h"
 
+/*
+ * OpenPLC core networking lives under core/, but it depends on STM32duino_LwIP
+ * symbols provided as an Arduino library. Make this dependency visible from the
+ * sketch root include graph so Arduino's library resolution can pick it.
+ */
+#if defined(__has_include)
+  #if __has_include(<LwIP.h>)
+    #include <LwIP.h>
+  #endif
+#endif
+
 /* sketch */
 
 #ifdef __cplusplus
