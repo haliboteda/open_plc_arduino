@@ -24,5 +24,9 @@ else
 fi
 
 
-# Force include of SrcWrapper library
-echo "#include <SrcWrapper.h>" > "$BUILD_PATH/sketch/SrcWrapper.cpp"
+# Force include of SrcWrapper, OpenPLC_Net and LwIP to ensure library linking
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
+#include <SrcWrapper.h>
+#include <OpenPLC_Net_Autostart.h>
+#include <LwIP.h>
+EOC
