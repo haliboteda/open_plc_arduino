@@ -23,9 +23,13 @@ else
   printf '\n-fmacro-prefix-map="%s"=.' "${BOARD_PLATFORM_PATH//\\/\\\\}" >> "$BUILD_PATH/sketch/build.opt"
 fi
 
-
-# Force include of mandatory core-side libraries so Arduino builder links them
-cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOF'
+# Force include of SrcWrapper and optionally LwIP to help library discovery
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
 #include <SrcWrapper.h>
-#include <LwIP.h>
-EOF
+#if defined(__has_include)
+  #if __has_include(<LwIP.h>)
+    #include <LwIP.h>
+  #endif
+#endif
+EOC
+
