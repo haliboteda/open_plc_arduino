@@ -24,5 +24,8 @@ else
 fi
 
 
-# Force include of SrcWrapper library
-echo "#include <SrcWrapper.h>" > "$BUILD_PATH/sketch/SrcWrapper.cpp"
+# Force include of SrcWrapper and OpenPLC_Net autostart entry to help Arduino library discovery
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
+#include <SrcWrapper.h>
+#include <OpenPLC_Net_Autostart.h>
+EOC
