@@ -24,5 +24,8 @@ else
 fi
 
 
-# Force include of SrcWrapper library
-echo "#include <SrcWrapper.h>" > "$BUILD_PATH/sketch/SrcWrapper.cpp"
+# Force include of mandatory core-side libraries so Arduino builder links them
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOF'
+#include <SrcWrapper.h>
+#include <LwIP.h>
+EOF
