@@ -23,7 +23,6 @@ else
   printf '\n-fmacro-prefix-map="%s"=.' "${BOARD_PLATFORM_PATH//\\/\\\\}" >> "$BUILD_PATH/sketch/build.opt"
 fi
 
-
 # Force include of SrcWrapper and optionally LwIP to help library discovery
 cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
 #include <SrcWrapper.h>
