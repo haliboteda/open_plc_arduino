@@ -24,5 +24,12 @@ else
 fi
 
 
-# Force include of SrcWrapper library
-echo "#include <SrcWrapper.h>" > "$BUILD_PATH/sketch/SrcWrapper.cpp"
+# Force include of SrcWrapper and optionally LwIP to help library discovery
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
+#include <SrcWrapper.h>
+#if defined(__has_include)
+  #if __has_include(<LwIP.h>)
+    #include <LwIP.h>
+  #endif
+#endif
+EOC
