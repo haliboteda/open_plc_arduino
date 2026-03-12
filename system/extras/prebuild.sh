@@ -27,5 +27,4 @@ fi
 cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
 #include <SrcWrapper.h>
 #include <OpenPLC_Net_Autostart.h>
-#include <LwIP.h>
 EOC

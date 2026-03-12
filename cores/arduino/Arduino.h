@@ -61,6 +61,11 @@ extern void loop(void) ;
 void yield(void);
 #ifdef __cplusplus
 } // extern "C"
+
+#ifdef OPENPLC_UDP_SERVER_AUTOSTART
+extern HardwareSerial Serial_Test;
+#endif
+
 #endif // __cplusplus
 
 // Include pins variant

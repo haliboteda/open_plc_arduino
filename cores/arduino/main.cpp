@@ -28,10 +28,9 @@ extern "C" {
   void openplc_udp_server_start(void (*reboot_cb)(void));
   uint8_t openplc_net_get_ipv4(uint8_t out[4]);
   uint8_t openplc_net_has_ip(void);
-
-  HardwareSerial Serial_Test(PC_11, PC_10);
-  bool g_ip_uart_done = false;
 }
+HardwareSerial Serial_Test(PC_11, PC_10);
+bool g_ip_uart_done = false;
 #endif
 
 
@@ -68,10 +67,9 @@ int main(void)
   initVariant();
 
 #ifdef OPENPLC_UDP_SERVER_AUTOSTART
-    openplc_net_init();
-    openplc_udp_server_start(NULL);
-    pinMode(PB_10, OUTPUT);
-    Serial_Test.begin(115200);
+  openplc_net_init();
+  openplc_udp_server_start(NULL);
+  pinMode(PB_10, OUTPUT);
 #endif
 
   setup();
@@ -87,6 +85,7 @@ int main(void)
     if (!g_ip_uart_done && openplc_net_has_ip()) {
       uint8_t ip[4] = {0};
       if (openplc_net_get_ipv4(ip)) {
+        Serial_Test.begin(115200);
         Serial_Test.print("IP: ");
         Serial_Test.print(ip[0]); Serial_Test.print(".");
         Serial_Test.print(ip[1]); Serial_Test.print(".");
@@ -94,11 +93,9 @@ int main(void)
         Serial_Test.println(ip[3]);
         Serial_Test.flush();
         Serial_Test.end();      // release UART
-        pinMode(PB_10, INPUT);  // recycle GPIO
         g_ip_uart_done = true;
       }
     }
-
 #endif
 
     loop();

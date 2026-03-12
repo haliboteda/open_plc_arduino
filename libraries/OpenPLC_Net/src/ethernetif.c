@@ -154,12 +154,13 @@ lan8742_IOCtx_t  LAN8742_IOCtx = {ETH_PHY_IO_Init,
 
 /* Private functions ---------------------------------------------------------*/
 void pbuf_free_custom(struct pbuf *p);
+#if !defined(MAC_ADDR0) || !defined(MAC_ADDR1) || !defined(MAC_ADDR2) || !defined(MAC_ADDR3) || !defined(MAC_ADDR4) || !defined(MAC_ADDR5)
 static void openplc_make_mac_from_uid(uint8_t mac[6]);
-
+#endif
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
+#if !defined(MAC_ADDR0) || !defined(MAC_ADDR1) || !defined(MAC_ADDR2) || !defined(MAC_ADDR3) || !defined(MAC_ADDR4) || !defined(MAC_ADDR5)
 static void openplc_make_mac_from_uid(uint8_t mac[6])
 {
   uint32_t u0 = HAL_GetUIDw0();
@@ -175,6 +176,7 @@ static void openplc_make_mac_from_uid(uint8_t mac[6])
   mac[4] = (uint8_t)h;
   mac[5] = (uint8_t)(u0 ^ u1 ^ u2);
 }
+#endif
 
 /*******************************************************************************
                        LL Driver Interface ( LwIP stack --> ETH)
@@ -297,6 +299,7 @@ static void low_level_init(struct netif *netif)
 
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
+  (void)netif;
   uint32_t i = 0U;
   struct pbuf *q = NULL;
   err_t errval = ERR_OK;
@@ -344,6 +347,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
    */
 static struct pbuf * low_level_input(struct netif *netif)
 {
+  (void)netif;
   struct pbuf *p = NULL;
 
   if(RxAllocStatus == RX_ALLOC_OK)
