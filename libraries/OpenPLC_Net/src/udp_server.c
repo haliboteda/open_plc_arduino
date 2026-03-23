@@ -8,25 +8,7 @@
 #include "lwip/netif.h"
 #include "rtc.h"
 
-#ifndef OPENPLC_UDP_PORT
-#define OPENPLC_UDP_PORT 16861
-#endif
-
-#ifndef OPENPLC_DEVICE_NAME
-#define OPENPLC_DEVICE_NAME "STM32H743"
-#endif
-
-#ifndef OPENPLC_CUSAPP_VERSION
-#define OPENPLC_CUSAPP_VERSION "0.1.0"
-#endif
-
-#ifndef MAGIC_ETH_FLAG
-#define MAGIC_ETH_FLAG 0xAEU
-#endif
-
-#ifndef MAGIC_BKP_REG
-#define MAGIC_BKP_REG RTC_BKP_DR0
-#endif
+#include "IAP_config.h"
 
 extern struct netif gnetif;
 
@@ -99,8 +81,8 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     }
   } else if (strcmp(recv_buf, "ping") == 0) {
     char reply_msg[96] = {0};
-    (void)snprintf(reply_msg, sizeof(reply_msg), "%s_cusapp_%s",
-                   OPENPLC_DEVICE_NAME, OPENPLC_CUSAPP_VERSION);
+    (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s",
+                   OPENPLC_DEVICE_NAME, UDP_SERVER_NAME, OPENPLC_CUSAPP_VERSION);
     openplc_udp_reply(pcb, addr, port, reply_msg);
   }
 }

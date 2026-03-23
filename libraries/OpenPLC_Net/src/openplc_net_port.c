@@ -1,4 +1,5 @@
 #include "ethernetif.h"
+#include "Arduino.h"
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
