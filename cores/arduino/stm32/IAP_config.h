@@ -4,8 +4,8 @@
 /* Shared magic values used for boot flags and CDC behavior. */
 #define CDC_RX_BUFFER_SIZE  (32U * 1024U)
 
-#ifndef OPENPLC_UDP_PORT
-#define OPENPLC_UDP_PORT 16861
+#ifndef OPENPLC_SERVER_PORT
+#define OPENPLC_SERVER_PORT 56865
 #endif
 
 #ifndef OPENPLC_DEVICE_NAME
@@ -13,11 +13,11 @@
 #endif
 
 #ifndef OPENPLC_CUSAPP_VERSION
-#define OPENPLC_CUSAPP_VERSION "0.1.0"
+#define OPENPLC_CUSAPP_VERSION "0.1.2"
 #endif
 
 #ifndef UDP_SERVER_NAME
-#define UDP_SERVER_NAME "APP"
+#define UDP_SERVER_NAME "CUSAPP"
 #endif
 
 #ifndef MAGIC_CDC_RATE
