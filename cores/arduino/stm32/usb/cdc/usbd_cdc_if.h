@@ -31,6 +31,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
 #include "cdc_queue.h"
+#include "IAP_config.h"
 
 /* Periodically, the state of the buffer "UserTxBuffer" is checked.
    The period depends on CDC_POLLING_INTERVAL */
@@ -45,10 +46,7 @@ extern CDC_ReceiveQueue_TypeDef ReceiveQueue;
 
 
 /* Exported macro ------------------------------------------------------------*/
-#define MAGIC_CDC_RATE 1200
-#define MAGIC_BOOTLOADER_FLAG 0xAF
-#define MAGIC_BKP_REG RTC_BKP_DR0
-#define CDC_RX_BUFFER_SIZE 32 * 1024
+
 /* Exported functions ------------------------------------------------------- */
 void CDC_continue_transmit(void);
 bool CDC_resume_receive(void);

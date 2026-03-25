@@ -23,6 +23,8 @@ else
   printf '\n-fmacro-prefix-map="%s"=.' "${BOARD_PLATFORM_PATH//\\/\\\\}" >> "$BUILD_PATH/sketch/build.opt"
 fi
 
-
-# Force include of SrcWrapper library
-echo "#include <SrcWrapper.h>" > "$BUILD_PATH/sketch/SrcWrapper.cpp"
+# Force include of SrcWrapper, OpenPLC_Net and LwIP to ensure library linking
+cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
+#include <SrcWrapper.h>
+#include <OpenPLC_Net_Autostart.h>
+EOC
