@@ -251,6 +251,10 @@ static void low_level_init(struct netif *netif)
     netif->flags |= NETIF_FLAG_BROADCAST;
   #endif /* LWIP_ARP */
 
+  #if LWIP_IGMP
+    netif->flags |= NETIF_FLAG_IGMP;
+  #endif
+
 /* USER CODE BEGIN PHY_PRE_CONFIG */
 
 /* USER CODE END PHY_PRE_CONFIG */
