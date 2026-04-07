@@ -1,0 +1,6 @@
+.settings/
+.vscode
+.claude
+.idea/
+
+Debug/
