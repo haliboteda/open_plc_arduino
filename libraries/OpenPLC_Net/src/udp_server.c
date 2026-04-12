@@ -14,6 +14,13 @@ extern struct netif gnetif;
 
 static void (*udp_reboot_callback)(void) = NULL;
 static struct udp_pcb *udp_server_pcb = NULL;
+static volatile uint32_t udp_server_start_counter = 0u;
+static volatile uint32_t udp_server_recv_counter = 0u;
+static volatile uint32_t udp_server_reply_counter = 0u;
+static volatile uint32_t udp_server_bind_fail_counter = 0u;
+static volatile uint32_t udp_server_last_rx_tick_ms = 0u;
+static volatile uint16_t udp_server_last_rx_port_value = 0u;
+static volatile uint16_t udp_server_last_rx_len_value = 0u;
 
 static void openplc_uid_hex(char out[25])
 {
@@ -33,6 +40,7 @@ static void openplc_udp_reply(struct udp_pcb *pcb, const ip_addr_t *addr, u16_t 
   }
   memcpy(reply_pbuf->payload, msg, len);
   udp_sendto(pcb, reply_pbuf, addr, port);
+  udp_server_reply_counter++;
   pbuf_free(reply_pbuf);
 }
 
@@ -61,6 +69,10 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   char recv_buf[64] = {0};
   const uint16_t n = (p->len < sizeof(recv_buf) - 1U) ? p->len : (sizeof(recv_buf) - 1U);
   memcpy(recv_buf, p->payload, n);
+  udp_server_recv_counter++;
+  udp_server_last_rx_tick_ms = HAL_GetTick();
+  udp_server_last_rx_port_value = port;
+  udp_server_last_rx_len_value = n;
   pbuf_free(p);
 
   if ((strcmp(recv_buf, "DISCOVER") == 0) ||
@@ -85,6 +97,7 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 void openplc_udp_server_start(void (*reboot_cb)(void))
 {
   udp_reboot_callback = reboot_cb;
+  udp_server_start_counter++;
 
   if (udp_server_pcb != NULL) {
     return;
@@ -96,6 +109,7 @@ void openplc_udp_server_start(void (*reboot_cb)(void))
   }
 
   if (udp_bind(udp_server_pcb, IP_ADDR_ANY, OPENPLC_SERVER_PORT) != ERR_OK) {
+    udp_server_bind_fail_counter++;
     udp_remove(udp_server_pcb);
     udp_server_pcb = NULL;
     return;
@@ -112,4 +126,39 @@ void openplc_udp_server_stop(void)
     udp_remove(udp_server_pcb);
     udp_server_pcb = NULL;
   }
+}
+
+uint32_t openplc_udp_server_start_count(void)
+{
+  return udp_server_start_counter;
+}
+
+uint32_t openplc_udp_server_recv_count(void)
+{
+  return udp_server_recv_counter;
+}
+
+uint32_t openplc_udp_server_reply_count(void)
+{
+  return udp_server_reply_counter;
+}
+
+uint32_t openplc_udp_server_bind_fail_count(void)
+{
+  return udp_server_bind_fail_counter;
+}
+
+uint32_t openplc_udp_server_last_rx_tick(void)
+{
+  return udp_server_last_rx_tick_ms;
+}
+
+uint16_t openplc_udp_server_last_rx_port(void)
+{
+  return udp_server_last_rx_port_value;
+}
+
+uint16_t openplc_udp_server_last_rx_len(void)
+{
+  return udp_server_last_rx_len_value;
 }

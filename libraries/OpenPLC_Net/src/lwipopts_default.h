@@ -121,6 +121,9 @@ a lot of data that needs to be copied, this should be set high. */
 #define LWIP_UDP                1
 #define UDP_TTL                 255
 
+/* ---------- IGMP options ---------- */
+#define LWIP_IGMP               1   /* Required for KNX IP multicast (224.0.23.12) */
+
 
 /* ---------- Statistics options ---------- */
 #define LWIP_STATS 0

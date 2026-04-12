@@ -7,11 +7,20 @@
 #include "lwip/timeouts.h"
 #include "lwip/dhcp.h"
 #include "lwip/ip4_addr.h"
+#include "lwip/stats.h"
+#if LWIP_IGMP
+#include "lwip/igmp.h"
+#endif
 
 struct netif gnetif;
 
 static uint32_t ethernetLinkTimer = 0;
 static uint8_t netInited = 0;
+/* Set to 1 once IGMP REPORTs have been re-sent with the real IP address.
+ * igmp_joingroup() is called before DHCP completes (IP = 0.0.0.0), so the
+ * IGMP REPORT carries a source of 0.0.0.0 — multicast switches may not
+ * record it.  Re-sending once DHCP assigns an address fixes discovery. */
+static uint8_t igmpRefreshed = 0;
 
 static void ethernet_link_status_updated(struct netif *netif)
 {
@@ -54,6 +63,15 @@ void openplc_net_process(void)
     ethernetLinkTimer = HAL_GetTick();
     ethernet_link_check_state(&gnetif);
   }
+
+  /* Once DHCP assigns a real IP, re-send IGMP REPORTs so network switches
+   * record the group membership from a valid source address. */
+#if LWIP_IGMP
+  if (!igmpRefreshed && dhcp_supplied_address(&gnetif)) {
+    igmp_report_groups(&gnetif);
+    igmpRefreshed = 1U;
+  }
+#endif
 }
 
 const ip_addr_t *openplc_net_ip_addr(void)
@@ -97,3 +115,119 @@ uint8_t openplc_net_get_ipv4(uint8_t out[4])
   return 1U;
 }
 
+uint8_t openplc_lwip_stats_enabled(void)
+{
+#if LWIP_STATS
+  return 1U;
+#else
+  return 0U;
+#endif
+}
+
+uint32_t openplc_lwip_mem_avail(void)
+{
+#if LWIP_STATS && MEM_STATS
+  return (uint32_t)lwip_stats.mem.avail;
+#else
+  return 0U;
+#endif
+}
+
+uint32_t openplc_lwip_mem_used(void)
+{
+#if LWIP_STATS && MEM_STATS
+  return (uint32_t)lwip_stats.mem.used;
+#else
+  return 0U;
+#endif
+}
+
+uint32_t openplc_lwip_mem_max(void)
+{
+#if LWIP_STATS && MEM_STATS
+  return (uint32_t)lwip_stats.mem.max;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_udp_pcb_used(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_UDP_PCB]->used;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_udp_pcb_max(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_UDP_PCB]->max;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_udp_pcb_err(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_UDP_PCB]->err;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_pbuf_used(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_PBUF]->used;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_pbuf_max(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_PBUF]->max;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_pbuf_err(void)
+{
+#if LWIP_STATS && MEMP_STATS
+  return (uint16_t)lwip_stats.memp[MEMP_PBUF]->err;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_igmp_group_used(void)
+{
+#if LWIP_STATS && MEMP_STATS && LWIP_IGMP
+  return (uint16_t)lwip_stats.memp[MEMP_IGMP_GROUP]->used;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_igmp_group_max(void)
+{
+#if LWIP_STATS && MEMP_STATS && LWIP_IGMP
+  return (uint16_t)lwip_stats.memp[MEMP_IGMP_GROUP]->max;
+#else
+  return 0U;
+#endif
+}
+
+uint16_t openplc_lwip_igmp_group_err(void)
+{
+#if LWIP_STATS && MEMP_STATS && LWIP_IGMP
+  return (uint16_t)lwip_stats.memp[MEMP_IGMP_GROUP]->err;
+#else
+  return 0U;
+#endif
+}
