@@ -1,112 +1,83 @@
 /*
  * KNX_Basic — Minimal OpenPLC_KNX usage example.
  *
- * Demonstrates:
- *   - Initializing KNX TP transport (STKNX via USART1)
- *   - Registering group objects with write callbacks
- *   - Sending a GroupValue.Write on a timer
- *   - Reading back DPT-1, DPT-5, and DPT-9 values in callbacks
+ * Default MASK_VERSION is 0x5780 (IP+TP dual device): the board communicates
+ * on BOTH KNXnet/IP (Ethernet) and KNX TP bus simultaneously.  Group object
+ * callbacks fire for writes arriving from either medium.  Outgoing writes
+ * (e.g. go.objectWritten()) are broadcast on both IP and TP.
  *
- * Hardware: OpenPLC board with STM32H743, STKNX connected to KNX bus.
+ * Before first use, program the device with ETS:
+ *   1. Press the button on PG9 to enter programming mode (LED on PG11 lights).
+ *   2. In ETS, assign the individual address and download the application
+ *      (ETS connects over KNXnet/IP on the Ethernet port).
+ *   3. ETS maps group addresses to group objects — the indices used below
+ *      must match the group object table in your ETS application design.
  *
- * Group address assignments used in this sketch (adjust to your ETS project):
- *   0/0/1  DPT-1.001  Switch output — controls DOUT_1
- *   0/0/2  DPT-5.001  Dimmer level 0-255 — controls PWM on DOUT_5
- *   0/0/3  DPT-9.001  Temperature setpoint (°C)
+ * Default wiring (Bridge MPU schematic):
+ *   Prog button : PG9    (EXTI9_5, pull-up, active-low)
+ *   Prog LED    : PG11   (active-high)
+ *   Relay 0     : PE6    (REL_1, coil energised = GPIO_PIN_SET)
+ *   Relay 1     : PE5    (REL_2, coil energised = GPIO_PIN_SET)
+ *   KNX TP TX   : PB14   (USART1 AF4)
+ *   KNX TP RX   : PA10   (USART1 AF7)
+ *
+ * Group object table (configure the same layout in ETS):
+ *   GO index 1  DPT-1.001 (1-bit switch) — controls relay channel 0 (PE6)
+ *   GO index 2  DPT-1.001 (1-bit switch) — controls relay channel 1 (PE5)
  */
 
 #include <OpenPLC_KNX.h>
 
-/* KNX individual address of this device — must match ETS project */
-static const KnxIndividualAddr MY_ADDR = knxIA(1, 1, 5);
-
-/* Group addresses */
-static const KnxGroupAddr GA_SWITCH   = knxGA(0, 0, 1);
-static const KnxGroupAddr GA_DIMMER   = knxGA(0, 0, 2);
-static const KnxGroupAddr GA_TEMP_SP  = knxGA(0, 0, 3);
-
 /* -------------------------------------------------------------------------
- * Group object callbacks
+ * Group object callbacks — invoked by the KNX stack on GroupValue.Write.
+ * The GO index used in getGroupObject() must match the ETS project.
  * ---------------------------------------------------------------------- */
 
-void onSwitch(const KnxGroupObject *go)
+static void onRelay0(GroupObject &go)
 {
-    bool state = dpt1_decode(go->value, go->value_len);
-    /* Control DOUT_1 (PB13) based on received switch command */
-    digitalWrite(DOUT_1, state ? REL_OUTA : REL_OUTB);
+    bool on = (bool)go.value(DPT_Switch);
+    KNXHelper.setRelayChannel(0, on);
+    /* Optionally acknowledge back to the bus (status feedback): */
+    go.objectWritten();
 }
 
-void onDimmer(const KnxGroupObject *go)
+static void onRelay1(GroupObject &go)
 {
-    uint8_t level = dpt5_decode(go->value, go->value_len);
-    /* Scale 0-255 → PWM 0-255, output on DOUT_5 (PA8, TIM1-CH1) */
-    analogWrite(DOUT_5, level);
-}
-
-void onTempSetpoint(const KnxGroupObject *go)
-{
-    float temp_c = dpt9_decode(go->value);
-    /* Store or act on temperature setpoint; just print here */
-    Serial.print("KNX: temperature setpoint = ");
-    Serial.print(temp_c, 2);
-    Serial.println(" C");
+    bool on = (bool)go.value(DPT_Switch);
+    KNXHelper.setRelayChannel(1, on);
+    go.objectWritten();
 }
 
 /* -------------------------------------------------------------------------
  * setup()
  * ---------------------------------------------------------------------- */
-
 void setup()
 {
-    Serial.begin(115200);
-    Serial.println("OpenPLC_KNX basic example starting");
+    /* 1. Initialise KNX stack: loads Flash NVM, configures prog-LED on PG11
+     *    and prog-button EXTI on PG9, sets serial number visible in ETS. */
+    KNXHelper.setup("OPENPLC000001");
 
-    /* Configure digital outputs used by this sketch */
-    pinMode(DOUT_1, OUTPUT);
-    pinMode(DOUT_5, OUTPUT);
-    digitalWrite(DOUT_1, LOW);
+    /* 2. Initialise 2-channel relay profile: configures PE6 / PE5 as GPIO
+     *    outputs and restores the last relay states from NVM. */
+    KNXHelper.initRelayProfile2CH();
 
-    /* Start KNX TP transport */
-    KNX.beginTP(MY_ADDR);
+    /* 3. Register group-object callbacks.
+     *    configured() is false until ETS has downloaded an application.
+     *    On a freshly-programmed board the callbacks are always registered. */
+    if (KNX.configured()) {
+        KNX.getGroupObject(1).callback(onRelay0);
+        KNX.getGroupObject(2).callback(onRelay1);
+    }
 
-    /* Register group objects */
-    KNX.addGroupObject(GA_SWITCH,  1, 1, onSwitch);
-    KNX.addGroupObject(GA_DIMMER,  5, 1, onDimmer);
-    KNX.addGroupObject(GA_TEMP_SP, 9, 1, onTempSetpoint);
-
-    Serial.print("KNX TP initialized. Own address: ");
-    Serial.print(knxIA_area(MY_ADDR));
-    Serial.print(".");
-    Serial.print(knxIA_line(MY_ADDR));
-    Serial.print(".");
-    Serial.println(knxIA_device(MY_ADDR));
+    /* 4. Enable the transport(s) — must be called after all GO registrations. */
+    KNXHelper.start();
 }
 
 /* -------------------------------------------------------------------------
  * loop()
  * ---------------------------------------------------------------------- */
-
-static uint32_t last_send_ms = 0u;
-
 void loop()
 {
-    /* Required: drive the KNX receive engine and programming mode FSM */
-    KNX.process();
-
-    /* Every 10 seconds: broadcast current temperature setpoint */
-    if ((millis() - last_send_ms) >= 10000u) {
-        last_send_ms = millis();
-
-        float temp_sp = 21.5f;
-        if (KNX.groupWrite(GA_TEMP_SP, temp_sp)) {
-            Serial.print("KNX: sent temp setpoint ");
-            Serial.println(temp_sp);
-        }
-
-        /* Print bus status */
-        Serial.print("Bus OK: ");
-        Serial.print(KNX.tpBusOk() ? "YES" : "NO");
-        Serial.print("  Prog mode: ");
-        Serial.println(KNX.isProgMode() ? "ON" : "OFF");
-    }
+    /* Drive the KNX stack: receive frames, run timers, handle prog-mode FSM. */
+    KNXHelper.loop();
 }

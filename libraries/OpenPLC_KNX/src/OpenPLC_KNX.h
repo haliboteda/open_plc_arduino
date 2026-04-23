@@ -1,156 +1,142 @@
 #pragma once
 
-#include <Arduino.h>
-#include "knx_config.h"
-#include "knx_address.h"
-#include "knx_telegram.h"
-#include "knx_dpt.h"
-#include "knx_tp.h"
-#include "knx_ip.h"
-
 /*
- * OpenPLC_KNX — Arduino API for KNX communication on OpenPLC boards.
+ * OpenPLC_KNX.h — Public API for KNX communication on OpenPLC STM32H743 boards.
  *
- * Supports two transport modes:
- *   KNX_TRANSPORT_TP  — KNX Twisted-Pair via STKNX transceiver (USART1)
- *   KNX_TRANSPORT_IP  — KNXnet/IP Routing via Ethernet (LwIP / OpenPLC_Net)
+ * This is a thin facade over the thelsing/knx reference library.
+ * By default it uses KnxFacade<Stm32H743OpenPLCPlatform, Bau57B0>
+ * (mask version 0x57B0: KNXnet/IP device). The sketch/build may override
+ * MASK_VERSION when TP-only or IP/TP coupler behaviour is required.
  *
- * Quick start:
+ * Usage (Arduino sketch):
  *
  *   #include <OpenPLC_KNX.h>
  *
- *   void onSwitch(const KnxGroupObject *go) {
- *       bool val = dpt1_decode(go->value, go->value_len);
- *       digitalWrite(LED, val);
+ *   void onSwitch(GroupObject& go) {
+ *       bool on = go.value<bool>();
+ *       digitalWrite(LED_BUILTIN, on);
  *   }
  *
  *   void setup() {
- *       KNX.beginTP(knxIA(1, 1, 5));
- *       KNX.addGroupObject(knxGA(0,0,1), 1, 1, onSwitch);
+ *       KNX.setup("OPENPLC000001");   // serial number / ETS identifier
+ *       GroupObject& go = KNX.getGroupObject(0);  // index 0 in ETS table
+ *       go.callback(onSwitch);
+ *       KNX.start();
  *   }
  *
  *   void loop() {
- *       KNX.process();
- *       // ... application code ...
+ *       KNX.loop();
  *   }
  *
- * Group object callbacks are invoked from within KNX.process().
+ * Programming mode button / LED are handled internally (HAL EXTI + GPIO).
+ * Press the button on PG9 to toggle ETS programming mode.
  */
 
-/* Transport type selector */
-typedef enum {
-    KNX_TRANSPORT_TP  = 0,  /* KNX TP via STKNX / USART1 */
-    KNX_TRANSPORT_IP  = 1,  /* KNXnet/IP Routing via Ethernet */
-    KNX_TRANSPORT_BOTH = 2  /* Bridge mode: receive from both, send to both */
-} KnxTransport;
+/* Pull in MASK_VERSION + KNX_NO_AUTOMATIC_GLOBAL_INSTANCE before any
+ * reference-library header — they are defined in the platform header. */
+#include "stm32h743_openplc_platform.h"
 
-/*
- * A registered group object.
+/* Reference library public headers */
+#include <knx.h>                        /* KnxFacade + all BAU headers  */
+#include <knx/group_object.h>           /* GroupObject class            */
+
+/* Application-layer headers (HAL-only, no Arduino) */
+#include "knx_nvm.h"
+#include "knx_profiles.h"
+
+/* -------------------------------------------------------------------------
+ * Global KNX instance type alias — selected by MASK_VERSION at compile time.
  *
- * One group object = one group address + optional write callback.
- * The library maintains up to KNX_MAX_GROUP_OBJECTS objects.
- * Use KNX.addGroupObject() to register; the returned pointer is stable for
- * the lifetime of the sketch.
- */
-struct KnxGroupObject {
-    KnxGroupAddr  address;                      /* Group address this object listens to */
-    uint8_t       dpt_main;                     /* DPT main type (1, 5, 9, 14, …) */
-    uint8_t       dpt_sub;                      /* DPT sub type (e.g. 1 for DPT-1.001) */
-    uint8_t       value[KNX_APDU_MAX_DATA_LEN]; /* Last received / sent raw DPT value */
-    uint8_t       value_len;                    /* Number of valid bytes in value[] */
-    void        (*on_write)(const KnxGroupObject *go);  /* Called on GroupValue.Write */
-    void        (*on_read) (const KnxGroupObject *go);  /* Called on GroupValue.Read (optional) */
-};
+ * MASK_VERSION is set in stm32h743_openplc_platform.h (default 0x5780) or
+ * may be overridden per-sketch via a -D compiler flag or board variant.
+ *
+ *   0x5780  IP+TP dual device  (DEFAULT) — both transports, group objects ✓
+ *   0x07B0  KNX TP device      — TP only, group objects ✓
+ *   0x57B0  KNXnet/IP device   — IP only, group objects ✓
+ *   0x091A  IP/TP coupler      — both transports, routes between them, no local GOs
+ *
+ * For 0x5780, 0x07B0, 0x57B0: KNX.getGroupObject(n) is available.
+ * For 0x091A (coupler): application group objects are not supported.
+ * ---------------------------------------------------------------------- */
+#if   MASK_VERSION == 0x5780
+  using OpenPLC_KNX_t = KnxFacade<Stm32H743OpenPLCPlatform, Bau5780>;
+#elif MASK_VERSION == 0x07B0
+  using OpenPLC_KNX_t = KnxFacade<Stm32H743OpenPLCPlatform, Bau07B0>;
+#elif MASK_VERSION == 0x57B0
+  using OpenPLC_KNX_t = KnxFacade<Stm32H743OpenPLCPlatform, Bau57B0>;
+#elif MASK_VERSION == 0x091A
+  using OpenPLC_KNX_t = KnxFacade<Stm32H743OpenPLCPlatform, Bau091A>;
+#else
+  #error "OpenPLC_KNX: unsupported MASK_VERSION. Use 0x5780 (IP+TP, default), 0x07B0 (TP), 0x57B0 (IP), or 0x091A (coupler)."
+#endif
 
-class OpenPLC_KNX_Class {
+/* -------------------------------------------------------------------------
+ * Singleton — declared here, defined in OpenPLC_KNX.cpp
+ * ---------------------------------------------------------------------- */
+extern OpenPLC_KNX_t KNX;
+
+/* -------------------------------------------------------------------------
+ * Convenience wrapper
+ *
+ * Provides the same simple API as before for sketches that do not need
+ * direct access to the KnxFacade internals.
+ * ---------------------------------------------------------------------- */
+class OpenPLC_KNX_Class
+{
 public:
-    OpenPLC_KNX_Class();
+    /* --- Initialisation ----------------------------------------------- */
 
-    /* --- Initialization -------------------------------------------------- */
+    /* Call once in setup().
+     *   serial     — 12-char device serial number shown in ETS (e.g. "OPENPLC000001")
+     *   mfr_id     — KNX manufacturer ID (default 0x00FA = Weinzierl Engineering)
+     * Configures prog-button interrupt on PG9 and prog-LED on PG11.
+     * Does NOT start the stack — call start() after registering group objects. */
+    void setup(const char* serial = "OPENPLC000001",
+               uint16_t    mfr_id = 0x00FAu);
 
-    /* Start the TP transport.  own_addr is this device's KNX individual address.
-     * Call in setup() before any other KNX method. */
-    bool beginTP(KnxIndividualAddr own_addr);
+    /* Register all group objects (via KNX.bau().groupObjectTableObject()),
+     * then call start() to enable the stack and transports. */
+    void start();
 
-    /* Start the KNXnet/IP Routing transport.
-     * Requires openplc_net_init() to have been called and a DHCP address to be
-     * available before this function is called.  Returns false if LwIP is not
-     * ready.  Retry from the main loop until it returns true. */
-    bool beginIP(KnxIndividualAddr own_addr);
+    /* Call every iteration of loop(). */
+    void loop();
 
-    /* --- Group object registration --------------------------------------- */
+    /* --- Application NVM (relay channels etc.) ------------------------ */
+    bool loadAppConfig();
+    bool saveAppConfig();
+    KnxNvmConfig* appConfig() { return &_config; }
 
-    /* Register a group address.  Returns a pointer to the stored group object,
-     * or NULL if the table is full (KNX_MAX_GROUP_OBJECTS).
-     * on_write is called whenever a GroupValue.Write telegram is received for
-     * this address.  on_read (optional) is called for GroupValue.Read; if NULL,
-     * no automatic response is sent. */
-    KnxGroupObject *addGroupObject(KnxGroupAddr ga,
-                                   uint8_t dpt_main, uint8_t dpt_sub,
-                                   void (*on_write)(const KnxGroupObject *go),
-                                   void (*on_read )(const KnxGroupObject *go) = NULL);
+    /* --- Relay profile helpers ---------------------------------------- */
+    bool initRelayProfile2CH();
+    bool setRelayChannel(uint8_t channel, bool on);
+    bool relayChannelState(uint8_t channel) const;
 
-    /* --- Group communication --------------------------------------------- */
+    /* --- Firmware self-programming (bypass ETS for bench testing) ------- */
+    /* Programs the KNX address/association/group-object/app-program tables
+     * directly into NVM so that KNX.configured() returns true without an ETS
+     * application download.  Must be called BEFORE the first call to
+     * KNX.configured().  Persists to flash; survives power cycles.
+     *
+     * Table layout programmed:
+     *   GO #1  DPT-1  group addr 0/0/1  → relay channel 0
+     *   GO #2  DPT-1  group addr 0/0/2  → relay channel 1
+     *
+     * Returns true on success. */
+    bool selfProgram2CH(uint16_t ia = KNX_DEFAULT_INDIVIDUAL_ADDR);
 
-    /* Send GroupValue.Write for a DPT-1 (boolean) value. */
-    bool groupWrite(KnxGroupAddr ga, bool value);
+    /* --- Status -------------------------------------------------------- */
+    bool tpBusOk()   const;  /* STKNX bus-OK GPIO (PD7) */
+    bool tpVccOk()   const;  /* STKNX VCC-OK GPIO (PH12) */
+    bool progMode()  const  { return KNX.progMode(); }
 
-    /* Send GroupValue.Write for a DPT-5 (uint8) value. */
-    bool groupWrite(KnxGroupAddr ga, uint8_t value);
-
-    /* Send GroupValue.Write for a DPT-9 (KNX 2-byte float) value. */
-    bool groupWrite(KnxGroupAddr ga, float value);
-
-    /* Send GroupValue.Write with a raw DPT payload (any length). */
-    bool groupWriteRaw(KnxGroupAddr ga, const uint8_t *data, uint8_t len);
-
-    /* Send GroupValue.Read. */
-    bool groupRead(KnxGroupAddr ga);
-
-    /* --- Main loop ------------------------------------------------------- */
-
-    /* Must be called every iteration of loop().
-     * Drives the TP UART receiver, programming key debounce, and the
-     * programming mode LED state machine. */
-    void process(void);
-
-    /* --- Programming mode ----------------------------------------------- */
-
-    /* Returns true if the device is currently in KNX programming mode.
-     * In programming mode the KNX_PROG_LED blinks and ETS can assign a new
-     * individual address over the bus. */
-    bool isProgMode(void) const;
-
-    /* Forcibly set programming mode on or off. */
-    void setProgMode(bool on);
-
-    /* --- Status ---------------------------------------------------------- */
-
-    KnxTransport      transport(void) const { return _transport; }
-    KnxIndividualAddr ownAddress(void) const { return _own_addr; }
-    bool              tpBusOk(void)      const;  /* KNX_TP_OK_PIN (bus powered) */
-    bool              tpConnected(void) const;  /* chip responded to reset */
-    bool              ipReady(void)  const;
+    /* Prog-button ISR thunk — static so it can be called from the C
+     * EXTI9_5_IRQHandler.  Must be public so the extern "C" handler can
+     * reach it without a friend declaration. */
+    static void _progButtonISR();
 
 private:
-    /* Dispatch a received telegram to registered group objects */
-    void dispatch(const KnxTelegram *tg);
-
-    /* Internal send helper that routes to the active transport(s) */
-    bool send(KnxTelegram *tg);
-
-    /* Static C callbacks forwarded to the instance */
-    static void s_tp_rx(const KnxTelegram *tg);
-    static void s_ip_rx(const KnxTelegram *tg);
-
-    KnxTransport      _transport;
-    KnxIndividualAddr _own_addr;
-    bool              _prog_mode;
-    uint32_t          _prog_led_last_ms;    /* Last LED toggle timestamp */
-
-    KnxGroupObject    _objects[KNX_MAX_GROUP_OBJECTS];
-    uint8_t           _obj_count;
+    KnxNvmConfig             _config;
+    const KnxRelayProfile   *_relayProfile = nullptr;
 };
 
-/* Singleton instance — use as KNX.beginTP(...), KNX.process(), etc. */
-extern OpenPLC_KNX_Class KNX;
+extern OpenPLC_KNX_Class KNXHelper;
