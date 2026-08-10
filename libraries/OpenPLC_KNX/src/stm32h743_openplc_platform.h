@@ -4,13 +4,13 @@
  * stm32h743_openplc_platform.h
  *
  * Concrete Platform implementation for the OpenPLC Bridge board (STM32H743).
- * Inherits directly from Platform (not ArduinoPlatform) — pure HAL + LwIP.
+ * Inherits directly from Platform (not ArduinoPlatform) - pure HAL + LwIP.
  *
  * Responsibilities:
- *   UART   — USART1 interrupt-driven RX ring-buffer (STKNX TP transceiver)
- *   IP     — LwIP UDP multicast (KNXnet/IP routing)
- *   NVM    — HAL Flash erase/program (Bank 2 Sector 6, reference library data)
- *   System — HAL_GetUID, NVIC_SystemReset, netif_default
+ *   UART   - USART1 interrupt-driven RX ring-buffer (STKNX TP transceiver)
+ *   IP     - LwIP UDP multicast (KNXnet/IP routing)
+ *   NVM    - HAL Flash erase/program (Bank 2 Sector 6, reference library data)
+ *   System - HAL_GetUID, NVIC_SystemReset, netif_default
  */
 
 #include <stdint.h>
@@ -90,7 +90,7 @@ public:
     uint8_t* getEepromBuffer(uint32_t size) override;
     void     commitToEeprom()               override;
 
-    /* Called from USART1_IRQHandler — do not call from application code */
+    /* Called from USART1_IRQHandler - do not call from application code */
     void _uartRxByteISR(uint8_t byte);
 
 private:

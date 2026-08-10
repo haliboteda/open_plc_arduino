@@ -9,7 +9,7 @@
  *
  * Using uart_init() / uart_attach_rx_callback() registers our handle in the
  * SrcWrapper's uart_handlers[] table, so SrcWrapper's USART1_IRQHandler
- * (uart.c) correctly calls HAL_UART_IRQHandler on our handle — no custom
+ * (uart.c) correctly calls HAL_UART_IRQHandler on our handle - no custom
  * ISR needed here.
  *
  * TX: blocking HAL_UART_Transmit (acceptable at 19200 bps).
@@ -80,7 +80,7 @@ uint32_t Stm32H743OpenPLCPlatform::uniqueSerialNumber()
 }
 
 /* =========================================================================
- * Network info — read from LwIP netif_default
+ * Network info - read from LwIP netif_default
  *
  * LwIP stores addresses in network byte order (big-endian).
  * The reference library expects host byte order, so lwip_ntohl() is applied
@@ -115,7 +115,7 @@ void Stm32H743OpenPLCPlatform::macAddress(uint8_t* data)
 }
 
 /* =========================================================================
- * UART — USART1, 19200 8E1, interrupt-driven RX ring buffer
+ * UART - USART1, 19200 8E1, interrupt-driven RX ring buffer
  * ======================================================================= */
 
 void Stm32H743OpenPLCPlatform::setupUart()
@@ -243,12 +243,12 @@ void Stm32H743OpenPLCPlatform::_onUdpReceive(struct pbuf* p,
                                               u16_t port)
 {
     if (_ipRxLen > 0u) {
-        /* Previous packet not yet consumed — drop this one */
+        /* Previous packet not yet consumed - drop this one */
         pbuf_free(p);
         return;
     }
     if (p->tot_len > KNX_IP_RXBUF_SIZE) {
-        /* oversized packet — truncated to KNX_IP_RXBUF_SIZE */
+        /* oversized packet - truncated to KNX_IP_RXBUF_SIZE */
     }
     uint16_t len = (p->tot_len < KNX_IP_RXBUF_SIZE)
                    ? (uint16_t)p->tot_len : (uint16_t)KNX_IP_RXBUF_SIZE;
@@ -355,7 +355,7 @@ bool Stm32H743OpenPLCPlatform::sendBytesUniCast(uint32_t addr, uint16_t port,
 }
 
 /* =========================================================================
- * NVM — Eeprom type, backed by Flash Bank 2 Sector 6
+ * NVM - Eeprom type, backed by Flash Bank 2 Sector 6
  *
  * getEepromBuffer: allocate RAM buffer, load from Flash on first call
  * commitToEeprom:  erase sector, write buffer back in 32-byte chunks

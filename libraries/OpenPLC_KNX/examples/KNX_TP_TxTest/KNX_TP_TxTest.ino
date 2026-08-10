@@ -1,7 +1,7 @@
 /*
- * KNX_TP_TxTest — Periodic TP bus transmit test for oscilloscope verification.
+ * KNX_TP_TxTest - Periodic TP bus transmit test for oscilloscope verification.
  *
- * Default MASK_VERSION is 0x5780 (IP+TP dual device) — both Ethernet and TP
+ * Default MASK_VERSION is 0x5780 (IP+TP dual device) - both Ethernet and TP
  * bus are active.  The TP bus signal is visible on an oscilloscope at TP+/TP-.
  * ETS can also observe the group telegrams on the IP side simultaneously.
  *
@@ -41,7 +41,7 @@ void setup()
 {
     Serial_Test.begin(115200);
     delay(500);
-    Serial_Test.println("=== KNX TP Transmit Test (MASK 0x5780 — IP+TP dual) ===");
+    Serial_Test.println("=== KNX TP Transmit Test (MASK 0x5780 - IP+TP dual) ===");
 
     /* Erase KNX stack NVM (Flash Bank2 Sector6, 0x081C0000) before setup().
      * Required after a MASK_VERSION change: old table data causes a crash
@@ -68,15 +68,15 @@ void setup()
 
     /* 3. Check bus hardware before starting the stack. */
     Serial_Test.print("TP bus-OK  (PD7) : ");
-    Serial_Test.println(KNXHelper.tpBusOk()  ? "HIGH — bus detected"  : "LOW  — no bus signal");
+    Serial_Test.println(KNXHelper.tpBusOk()  ? "HIGH - bus detected"  : "LOW  - no bus signal");
     Serial_Test.print("TP VCC-OK (PH12) : ");
-    Serial_Test.println(KNXHelper.tpVccOk() ? "HIGH — bus powered"   : "LOW  — no bus power");
+    Serial_Test.println(KNXHelper.tpVccOk() ? "HIGH - bus powered"   : "LOW  - no bus power");
 
     /* 4. Self-program without ETS. Sector 6 was just erased so
      *    selfProgram2CH() will always write fresh tables. */
     bool ok = KNXHelper.selfProgram2CH();
     Serial_Test.print("selfProgram2CH() : ");
-    Serial_Test.println(ok ? "OK" : "FAILED — check Flash/NVM");
+    Serial_Test.println(ok ? "OK" : "FAILED - check Flash/NVM");
 
     /* 5. Enable the TP transport.  Must come after table setup. */
     KNXHelper.start();
@@ -84,7 +84,7 @@ void setup()
     Serial_Test.print("Individual addr  : 0x");
     Serial_Test.println(KNX.individualAddress(), HEX);
     Serial_Test.print("Configured       : ");
-    Serial_Test.println(KNX.configured() ? "yes" : "no — telegrams may not transmit");
+    Serial_Test.println(KNX.configured() ? "yes" : "no - telegrams may not transmit");
     Serial_Test.println();
     Serial_Test.print("Sending GO1/GO2 toggle every ");
     Serial_Test.print(TX_INTERVAL_MS);
@@ -97,7 +97,7 @@ void setup()
  * ---------------------------------------------------------------------- */
 void loop()
 {
-    /* Must be called on every iteration — drives RX, timers, prog-mode FSM. */
+    /* Must be called on every iteration - drives RX, timers, prog-mode FSM. */
     KNXHelper.loop();
 
     if (millis() - s_lastTx >= TX_INTERVAL_MS) {
@@ -108,7 +108,7 @@ void loop()
         GroupObject &go1 = KNX.getGroupObject(1);
         go1.value(KNXValue(s_state), DPT_Switch);
 
-        /* Send on GO #2 (GA 0/0/2) — inverted, gives alternating pattern */
+        /* Send on GO #2 (GA 0/0/2) - inverted, gives alternating pattern */
         GroupObject &go2 = KNX.getGroupObject(2);
         go2.value(KNXValue(!s_state), DPT_Switch);
 

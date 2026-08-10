@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * knx_facade.h — stripped for STM32H743 / OpenPLC only.
+ * knx_facade.h - stripped for STM32H743 / OpenPLC only.
  *
  * All non-STM32H743 platform branches (ESP32, RP2040, SAMD, Linux, CC1310,
  * LibreTiny …) have been removed.  The only supported configuration is:
@@ -11,7 +11,7 @@
  *           or Bau57B0  (MASK_VERSION 0x57B0, IP device)
  *           or Bau091A  (MASK_VERSION 0x091A, IP/TP1 coupler)
  *
- * KNX_NO_AUTOMATIC_GLOBAL_INSTANCE is always defined — the global KNX
+ * KNX_NO_AUTOMATIC_GLOBAL_INSTANCE is always defined - the global KNX
  * instance is created explicitly in OpenPLC_KNX.cpp.
  */
 
@@ -20,7 +20,7 @@
  * but it comes after the config.h include.  Set it here so a direct
  * #include "knx_facade.h" also works without the platform header first. */
 #ifndef MASK_VERSION
-#  define MASK_VERSION 0x5780u   /* IP+TP dual device — both transports active */
+#  define MASK_VERSION 0x5780u   /* IP+TP dual device - both transports active */
 #endif
 
 #include "knx/bits.h"
@@ -30,7 +30,7 @@
 #include "knx/bau57B0.h"
 #include "knx/bau5780.h"
 
-/* Our platform — already defines KNX_NO_AUTOMATIC_GLOBAL_INSTANCE and
+/* Our platform - already defines KNX_NO_AUTOMATIC_GLOBAL_INSTANCE and
  * MASK_VERSION if not set by the user.  Include it exactly once here. */
 #include "stm32h743_openplc_platform.h"
 
@@ -237,7 +237,7 @@ template <class P, class B> class KnxFacade : private SaveRestore
             _bau.deviceObject().version(value);
         }
 
-        /* start() — sets up LED pin if ledPin >= 0, button pin if buttonPin >= 0.
+        /* start() - sets up LED pin if ledPin >= 0, button pin if buttonPin >= 0.
          * For STM32H743 we set both to -1 and use HAL callbacks instead,
          * so this reduces to enabled(true). */
         void start()
@@ -344,7 +344,7 @@ template <class P, class B> class KnxFacade : private SaveRestore
             return _bau.beforeRestartCallback();
         }
 
-        /* Expose interface object lookup — used by selfProgram helpers to access
+        /* Expose interface object lookup - used by selfProgram helpers to access
          * table objects (AddrTable=1, AssocTable=2, GroupObjTable=3, AppProg=4). */
         InterfaceObject* getInterfaceObject(uint8_t idx)
         {
@@ -400,4 +400,4 @@ template <class P, class B> class KnxFacade : private SaveRestore
         }
 };
 
-/* No automatic global instance — OpenPLC_KNX.cpp creates it explicitly. */
+/* No automatic global instance - OpenPLC_KNX.cpp creates it explicitly. */

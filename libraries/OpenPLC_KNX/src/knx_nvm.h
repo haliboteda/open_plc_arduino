@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 /*
- * knx_nvm.h — Application non-volatile configuration for OpenPLC KNX.
+ * knx_nvm.h - Application non-volatile configuration for OpenPLC KNX.
  *
  * This structure holds application-level state that must survive power cycles:
  * relay output modes, last relay states, friendly name, etc.

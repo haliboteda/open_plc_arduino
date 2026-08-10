@@ -6,13 +6,13 @@
 #include "knx_nvm.h"
 
 /*
- * knx_profiles.h — OpenPLC device profiles (relay channels, etc.)
+ * knx_profiles.h - OpenPLC device profiles (relay channels, etc.)
  *
  * All GPIO is accessed via HAL_GPIO_WritePin / HAL_GPIO_ReadPin.
  * No Arduino.h dependency.
  *
  * User-facing code (Arduino sketches) can continue to use Arduino GPIO macros
- * for their own pins — this header only controls the profile outputs.
+ * for their own pins - this header only controls the profile outputs.
  */
 
 /* HAL GPIO port + pin pair */

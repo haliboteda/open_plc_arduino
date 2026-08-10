@@ -4,7 +4,7 @@
 
 /*
  * Application NVM stored in STM32H743 internal Flash:
- *   Bank 2, Sector 7 — 0x081E0000, 128 KB sector
+ *   Bank 2, Sector 7 - 0x081E0000, 128 KB sector
  *
  * The STM32H743 requires 256-bit (32-byte) aligned writes.
  * On read, the Flash is directly memory-mapped so we just memcpy.
@@ -74,7 +74,7 @@ bool knx_nvm_is_valid(const KnxNvmConfig *config)
 }
 
 /* -------------------------------------------------------------------------
- * Load — direct memory-mapped Flash read
+ * Load - direct memory-mapped Flash read
  * ---------------------------------------------------------------------- */
 
 bool knx_nvm_load(KnxNvmConfig *config)
@@ -85,7 +85,7 @@ bool knx_nvm_load(KnxNvmConfig *config)
 }
 
 /* -------------------------------------------------------------------------
- * Save — erase sector, write 32-byte aligned chunks
+ * Save - erase sector, write 32-byte aligned chunks
  * ---------------------------------------------------------------------- */
 
 bool knx_nvm_save(KnxNvmConfig *config)

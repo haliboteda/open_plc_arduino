@@ -41,7 +41,7 @@ OPEN-PLC.menu.pnum.PLC_H743.build.ldscript=ldscript.ld
 OPEN-PLC.menu.pnum.PLC_H743.build.extra_flags=-DLAN8742A_PHY_ADDRESS=0 -DETH_RXBUFNB=4 -DETH_TXBUFNB=4 -DETH_RX_BUF_SIZE=1536 -DETH_TX_BUF_SIZE=1536 -DOPENPLC_UDP_SERVER_AUTOSTART -DD_CACHE_DISABLED
 #-DMAC_ADDR0=0x00 -DMAC_ADDR1=0x80 -DMAC_ADDR2=0xE1 -DMAC_ADDR3=0x00 -DMAC_ADDR4=0x43 -DMAC_ADDR5=0x21 
 
-# KNX role — sets MASK_VERSION for the OpenPLC_KNX library.
+# KNX role - sets MASK_VERSION for the OpenPLC_KNX library.
 # Default (no selection needed): 0x5780 IP+TP dual device, set above in build.knx_flags.
 # Override here only for single-transport or coupler roles.
 OPEN-PLC.menu.knxrole.dual_device=IP+TP Device (both transports, MASK 0x5780) [DEFAULT]

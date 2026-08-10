@@ -25,7 +25,7 @@
     #endif
 #elif defined(ARDUINO_ARCH_SAMD) || defined(DeviceFamily_CC13X0)
     /* Use inline functions so htonl/htons accept rvalue arguments
-     * (the getbyte macro takes &x, which requires an lvalue — unusable
+     * (the getbyte macro takes &x, which requires an lvalue - unusable
      * with function-return temporaries like currentIpAddress()).
      * Guard against redefinition: LwIP maps htons → lwip_htons etc. */
     #ifndef htons

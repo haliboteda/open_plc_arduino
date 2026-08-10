@@ -39,7 +39,7 @@ void OpenPLC_KNX_Class::_progButtonISR()
 }
 
 /* -------------------------------------------------------------------------
- * Prog-LED callbacks — use HAL GPIO (not Arduino digitalWrite)
+ * Prog-LED callbacks - use HAL GPIO (not Arduino digitalWrite)
  * ---------------------------------------------------------------------- */
 static void progLedOn()
 {
@@ -227,10 +227,10 @@ bool OpenPLC_KNX_Class::tpVccOk() const
 /* EXTI9_5_IRQHandler is provided by SrcWrapper (interrupt.cpp).
  * The prog-button callback is registered via stm32_interrupt_enable()
  * in setup(), which routes through SrcWrapper's HAL_GPIO_EXTI_Callback
- * dispatch — no custom ISR needed here. */
+ * dispatch - no custom ISR needed here. */
 
 /* -------------------------------------------------------------------------
- * selfProgram2CH() — firmware-side KNX table initialisation
+ * selfProgram2CH() - firmware-side KNX table initialisation
  *
  * Programs the four KNX system-B table objects (AddrTable, AssocTable,
  * GroupObjTable, AppProgram) directly via the property-write path so the
@@ -265,7 +265,7 @@ static bool _selfLoadTable(InterfaceObject* obj, const uint8_t* src, uint32_t n)
     cnt = 1u;
     obj->writeProperty(PID_LOAD_STATE_CONTROL, 1u, buf, cnt);
 
-    /* 2. LE_ADDITIONAL_LOAD_CONTROLS — Data Relative Allocation (0x0B) */
+    /* 2. LE_ADDITIONAL_LOAD_CONTROLS - Data Relative Allocation (0x0B) */
     buf[0] = 3u;                    /* LE_ADDITIONAL_LOAD_CONTROLS      */
     buf[1] = 0x0Bu;                 /* sub-opcode: Data Relative Alloc  */
     buf[2] = 0u;                    /* size high bytes (n < 256 here)   */
@@ -283,7 +283,7 @@ static bool _selfLoadTable(InterfaceObject* obj, const uint8_t* src, uint32_t n)
     if (dest == nullptr) return false;
     memcpy(dest, src, n);
 
-    /* 4. LE_LOAD_COMPLETED — table transitions to LS_LOADED; flash saved */
+    /* 4. LE_LOAD_COMPLETED - table transitions to LS_LOADED; flash saved */
     buf[0] = 2u;
     cnt = 1u;
     obj->writeProperty(PID_LOAD_STATE_CONTROL, 1u, buf, cnt);
@@ -293,7 +293,7 @@ static bool _selfLoadTable(InterfaceObject* obj, const uint8_t* src, uint32_t n)
 
 bool OpenPLC_KNX_Class::selfProgram2CH(uint16_t ia)
 {
-    /* Check address table load state — skip if already programmed. */
+    /* Check address table load state - skip if already programmed. */
     InterfaceObject* addrObj = KNX.getInterfaceObject(1u); /* idx=1 = AddrTable */
     if (addrObj == nullptr) return false;
     {
@@ -345,7 +345,7 @@ bool OpenPLC_KNX_Class::selfProgram2CH(uint16_t ia)
      *             bits9:6 = priority: (0x1700 >> 6) & 0x0C = 0x0C = LowPriority
      *             bits5:0 = size code 0 → 1-bit DPT-1
      *
-     * Note: read (bit11) is disabled — device will not respond to GroupValueRead.
+     * Note: read (bit11) is disabled - device will not respond to GroupValueRead.
      * Enable bit11 (→ 0x1F00) if read-back from ETS is required. */
     static const uint8_t goData[] = {
         0x00u, 0x02u,   /* count = 2    */
@@ -355,7 +355,7 @@ bool OpenPLC_KNX_Class::selfProgram2CH(uint16_t ia)
     if (!_selfLoadTable(KNX.getInterfaceObject(3u), goData, sizeof(goData)))
         return false;
 
-    /* --- Application Program (idx=4) — 1-byte placeholder, just needs LS_LOADED */
+    /* --- Application Program (idx=4) - 1-byte placeholder, just needs LS_LOADED */
     static const uint8_t appData[] = {0x00u};
     if (!_selfLoadTable(KNX.getInterfaceObject(4u), appData, sizeof(appData)))
         return false;

@@ -1,10 +1,10 @@
 #pragma once
 
 /*
- * knx_config.h — Compile-time hardware configuration for OpenPLC_KNX.
+ * knx_config.h - Compile-time hardware configuration for OpenPLC_KNX.
  *
  * All pin references use STM32 HAL GPIO port/pin constants.
- * No Arduino.h dependency — safe to include from pure-HAL translation units.
+ * No Arduino.h dependency - safe to include from pure-HAL translation units.
  *
  * Override any macro via compiler flag (e.g. -DKNX_USART_BAUD=19200)
  * before this header is processed.
@@ -13,7 +13,7 @@
 #include <stm32h7xx_hal.h>
 
 /* -----------------------------------------------------------------------
- * KNX TP — STKNX transceiver via USART1
+ * KNX TP - STKNX transceiver via USART1
  *   TX = PB14  (AF4)   → STKNX via TLP2362 optocoupler
  *   RX = PA10  (AF7)   ← STKNX via TLP2362 optocoupler
  * --------------------------------------------------------------------- */
@@ -59,7 +59,7 @@
 #endif
 
 /* -----------------------------------------------------------------------
- * Relay outputs — OpenPLC Bridge MPU schematic
+ * Relay outputs - OpenPLC Bridge MPU schematic
  * --------------------------------------------------------------------- */
 #ifndef KNX_RELAY1_PORT
 #  define KNX_RELAY1_PORT       GPIOI
@@ -74,7 +74,7 @@
 #endif
 
 /* -----------------------------------------------------------------------
- * KNXnet/IP — UDP multicast
+ * KNXnet/IP - UDP multicast
  * --------------------------------------------------------------------- */
 #ifndef KNX_IP_PORT
 #  define KNX_IP_PORT           3671u

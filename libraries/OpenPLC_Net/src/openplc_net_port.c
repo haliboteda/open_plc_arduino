@@ -18,7 +18,7 @@ static uint32_t ethernetLinkTimer = 0;
 static uint8_t netInited = 0;
 /* Set to 1 once IGMP REPORTs have been re-sent with the real IP address.
  * igmp_joingroup() is called before DHCP completes (IP = 0.0.0.0), so the
- * IGMP REPORT carries a source of 0.0.0.0 — multicast switches may not
+ * IGMP REPORT carries a source of 0.0.0.0 - multicast switches may not
  * record it.  Re-sending once DHCP assigns an address fixes discovery. */
 static uint8_t igmpRefreshed = 0;
 

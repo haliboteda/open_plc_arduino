@@ -137,7 +137,7 @@ blockquote {
     font-style: normal;
     font-size: 0.75em;
     font-weight: 700;
-    content: "\a—  " attr(cite);
+    content: "\a-  " attr(cite);
     white-space: pre; }
 
 code, kbd, pre, samp {

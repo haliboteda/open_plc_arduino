@@ -1,5 +1,5 @@
 /*
- * KNX_IP_Test — Phase 1 IP transport test for OpenPLC_KNX.
+ * KNX_IP_Test - Phase 1 IP transport test for OpenPLC_KNX.
  *
  * PURPOSE
  *   Verify the KNXnet/IP stack end-to-end:
@@ -10,7 +10,7 @@
  *
  * REQUIRED BUILD SETTINGS (Arduino IDE)
  *   Board : OPEN-PLC → PLC H743
- *   KNX Role : IP+TP Device (both transports, MASK 0x5780)  [DEFAULT — no change needed]
+ *   KNX Role : IP+TP Device (both transports, MASK 0x5780)  [DEFAULT - no change needed]
  *   USB  : CDC (generic 'Serial' supersede U(S)ART)          ← for Serial output
  *
  * HARDWARE NEEDED
@@ -22,8 +22,8 @@
  * ETS PROJECT SETUP
  *   Create a new ETS project.  Add a "Generic" device, set mask version 0x5780.
  *   In the Group Object Table, create two GOs:
- *     GO #1  DPT-1.001  Send/Receive  — link to group address 0/0/1
- *     GO #2  DPT-1.001  Send/Receive  — link to group address 0/0/2
+ *     GO #1  DPT-1.001  Send/Receive  - link to group address 0/0/1
+ *     GO #2  DPT-1.001  Send/Receive  - link to group address 0/0/2
  *   Download to device after individual address programming.
  *
  * EXPECTED RESULTS (in order)
@@ -48,7 +48,7 @@
 #include <OpenPLC_KNX.h>
 #include <OpenPLC_Net_Autostart.h>
 
-/* Relay group-object callbacks — called when ETS / another KNX device
+/* Relay group-object callbacks - called when ETS / another KNX device
  * sends a GroupValue.Write to the group address linked to GO #1 or #2. */
 
 static void onRelay0(GroupObject &go)
@@ -144,7 +144,7 @@ void setup()
     while (!openplc_net_has_ip()) {
         openplc_net_process();
         if ((millis() - t0) > 15000u) {
-            Serial_Test.println("[NET] DHCP timeout — using 0.0.0.0 (check cable/router)");
+            Serial_Test.println("[NET] DHCP timeout - using 0.0.0.0 (check cable/router)");
             break;
         }
     }
@@ -177,10 +177,10 @@ void setup()
     if (KNXHelper.selfProgram2CH(0x1101u)) {
         Serial_Test.println("[KNX] selfProgram2CH: tables ready (firmware or ETS).");
     } else {
-        Serial_Test.println("[KNX] selfProgram2CH: FAILED — relay callbacks not registered.");
+        Serial_Test.println("[KNX] selfProgram2CH: FAILED - relay callbacks not registered.");
     }
 
-    /* 6. Register group-object callbacks — only safe after tables are loaded. */
+    /* 6. Register group-object callbacks - only safe after tables are loaded. */
     if (KNX.configured()) {
         KNX.getGroupObject(1).callback(onRelay0);
         KNX.getGroupObject(2).callback(onRelay1);
@@ -190,12 +190,12 @@ void setup()
      *    KNXnet/IP search requests on 224.0.23.12:3671. */
     KNXHelper.start();
 
-    Serial_Test.println("[KNX] Stack started (MASK 0x5780 — IP+TP dual device)");
+    Serial_Test.println("[KNX] Stack started (MASK 0x5780 - IP+TP dual device)");
     if (KNX.configured()) {
         Serial_Test.println("[KNX] Already configured by ETS:");
         printIndividualAddr(KNX.individualAddress());
     } else {
-        Serial_Test.println("[KNX] Not yet configured — use ETS to assign address.");
+        Serial_Test.println("[KNX] Not yet configured - use ETS to assign address.");
         Serial_Test.println("[KNX] Press button on PG9 to enter programming mode.");
     }
 }
@@ -207,7 +207,7 @@ static uint32_t s_statusMs = 0u;
 
 void loop()
 {
-    /* Ethernet packet pump — must be called at least every few ms. */
+    /* Ethernet packet pump - must be called at least every few ms. */
     openplc_net_process();
 
     /* KNX stack: receive frames, run protocol timers, handle prog-mode. */

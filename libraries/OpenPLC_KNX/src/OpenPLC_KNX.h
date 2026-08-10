@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * OpenPLC_KNX.h — Public API for KNX communication on OpenPLC STM32H743 boards.
+ * OpenPLC_KNX.h - Public API for KNX communication on OpenPLC STM32H743 boards.
  *
  * This is a thin facade over the thelsing/knx reference library.
  * By default it uses KnxFacade<Stm32H743OpenPLCPlatform, Bau57B0>
@@ -33,7 +33,7 @@
  */
 
 /* Pull in MASK_VERSION + KNX_NO_AUTOMATIC_GLOBAL_INSTANCE before any
- * reference-library header — they are defined in the platform header. */
+ * reference-library header - they are defined in the platform header. */
 #include "stm32h743_openplc_platform.h"
 
 /* Reference library public headers */
@@ -45,15 +45,15 @@
 #include "knx_profiles.h"
 
 /* -------------------------------------------------------------------------
- * Global KNX instance type alias — selected by MASK_VERSION at compile time.
+ * Global KNX instance type alias - selected by MASK_VERSION at compile time.
  *
  * MASK_VERSION is set in stm32h743_openplc_platform.h (default 0x5780) or
  * may be overridden per-sketch via a -D compiler flag or board variant.
  *
- *   0x5780  IP+TP dual device  (DEFAULT) — both transports, group objects ✓
- *   0x07B0  KNX TP device      — TP only, group objects ✓
- *   0x57B0  KNXnet/IP device   — IP only, group objects ✓
- *   0x091A  IP/TP coupler      — both transports, routes between them, no local GOs
+ *   0x5780  IP+TP dual device  (DEFAULT) - both transports, group objects ✓
+ *   0x07B0  KNX TP device      - TP only, group objects ✓
+ *   0x57B0  KNXnet/IP device   - IP only, group objects ✓
+ *   0x091A  IP/TP coupler      - both transports, routes between them, no local GOs
  *
  * For 0x5780, 0x07B0, 0x57B0: KNX.getGroupObject(n) is available.
  * For 0x091A (coupler): application group objects are not supported.
@@ -71,7 +71,7 @@
 #endif
 
 /* -------------------------------------------------------------------------
- * Singleton — declared here, defined in OpenPLC_KNX.cpp
+ * Singleton - declared here, defined in OpenPLC_KNX.cpp
  * ---------------------------------------------------------------------- */
 extern OpenPLC_KNX_t KNX;
 
@@ -87,10 +87,10 @@ public:
     /* --- Initialisation ----------------------------------------------- */
 
     /* Call once in setup().
-     *   serial     — 12-char device serial number shown in ETS (e.g. "OPENPLC000001")
-     *   mfr_id     — KNX manufacturer ID (default 0x00FA = Weinzierl Engineering)
+     *   serial     - 12-char device serial number shown in ETS (e.g. "OPENPLC000001")
+     *   mfr_id     - KNX manufacturer ID (default 0x00FA = Weinzierl Engineering)
      * Configures prog-button interrupt on PG9 and prog-LED on PG11.
-     * Does NOT start the stack — call start() after registering group objects. */
+     * Does NOT start the stack - call start() after registering group objects. */
     void setup(const char* serial = "OPENPLC000001",
                uint16_t    mfr_id = 0x00FAu);
 
@@ -129,7 +129,7 @@ public:
     bool tpVccOk()   const;  /* STKNX VCC-OK GPIO (PH12) */
     bool progMode()  const  { return KNX.progMode(); }
 
-    /* Prog-button ISR thunk — static so it can be called from the C
+    /* Prog-button ISR thunk - static so it can be called from the C
      * EXTI9_5_IRQHandler.  Must be public so the extern "C" handler can
      * reach it without a friend declaration. */
     static void _progButtonISR();

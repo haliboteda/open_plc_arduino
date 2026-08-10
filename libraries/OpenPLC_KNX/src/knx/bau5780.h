@@ -13,7 +13,7 @@
  * Thin wrappers that expose sendFrame() (now protected after the change in
  * ip_data_link_layer.h / tpuart_data_link_layer.h) as a public forwarder.
  * Required because DataLinkLayer::sendFrame() cannot be called across
- * unrelated instances — each class may only call sendFrame() on *itself*.
+ * unrelated instances - each class may only call sendFrame() on *itself*.
  */
 class _Bau5780IpDLL : public IpDataLinkLayer
 {
@@ -30,7 +30,7 @@ public:
 };
 
 /*
- * Dual-send proxy DLL — registered with NetworkLayerEntity as the outgoing DLL.
+ * Dual-send proxy DLL - registered with NetworkLayerEntity as the outgoing DLL.
  * Every outgoing frame is forwarded to both IP and TP sub-DLLs simultaneously.
  * Receiving is handled independently by _Bau5780IpDLL and _Bau5780TpDLL,
  * each holding a reference to the same NetworkLayerEntity so frames from
@@ -56,7 +56,7 @@ private:
 };
 
 /*
- * Bau5780 — KNX IP+TP dual-transport application device (OpenPLC MASK 0x5780).
+ * Bau5780 - KNX IP+TP dual-transport application device (OpenPLC MASK 0x5780).
  *
  * Merges Bau57B0 (IP) and Bau07B0 (TP) capabilities:
  *   - Application group objects via KNX.getGroupObject() (like any app device).

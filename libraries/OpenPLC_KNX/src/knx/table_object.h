@@ -32,7 +32,7 @@ class TableObject: public InterfaceObject
         const uint8_t* restore(const uint8_t* buffer) override;
         uint16_t saveSize() override;
 
-        /* Direct access to the allocated table buffer — used by selfProgram helpers
+        /* Direct access to the allocated table buffer - used by selfProgram helpers
          * to write pre-built table binary data into the eeprom RAM buffer. */
         uint8_t* tableData() const { return _data; }
 

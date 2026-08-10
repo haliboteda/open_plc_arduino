@@ -157,7 +157,7 @@
 #define PC3_C                   PIN_A31
 
 /*----------------------------------------------------------------------------
- * OpenPLC Bridge MPU  —  hardware-signal aliases
+ * OpenPLC Bridge MPU  -  hardware-signal aliases
  *
  * Sources (Production/ folder):
  *   Bridge/1436_01_SCHAE-BR.pdf          Bridge MPU schematic (STM32H743IIK6)
@@ -166,15 +166,15 @@
  *   JunctionLink/Schematics/1434_01_SCHAE-JL.pdf
  *----------------------------------------------------------------------------*/
 
-/* Dual-pad ADC3 pins — direct internal path, better accuracy than normal GPIO */
+/* Dual-pad ADC3 pins - direct internal path, better accuracy than normal GPIO */
 #ifndef PC2_C
-#  define PC2_C   PIN_A30   /* PC2_C — ADC3_INP0 (D138) */
+#  define PC2_C   PIN_A30   /* PC2_C - ADC3_INP0 (D138) */
 #endif
 #ifndef PC3_C
-#  define PC3_C   PIN_A31   /* PC3_C — ADC3_INP1 (D139) */
+#  define PC3_C   PIN_A31   /* PC3_C - ADC3_INP1 (D139) */
 #endif
 
-/*-------- RELAY OUTPUTS — Lower Deck Klemmblock B -------------------------*/
+/*-------- RELAY OUTPUTS - Lower Deck Klemmblock B -------------------------*/
 /* Coil drive, active-high (GPIO_PIN_SET = relay closed)                     */
 /* Terminals: B01/B02=REL_1  B03/B04=REL_2  ...  B11/B12=REL_6             */
 #define REL_1   PI8    /* RELAIS_1                                           */
@@ -187,85 +187,85 @@
 #define REL_OUTA   1   /* coil-A polarity (active-high)                     */
 #define REL_OUTB   0   /* coil-B polarity                                   */
 
-/*-------- DIGITAL OUTPUTS — Lower Deck Klemmblock A (high-side FETs) ------*/
+/*-------- DIGITAL OUTPUTS - Lower Deck Klemmblock A (high-side FETs) ------*/
 /* All PWM-capable via hardware timers (see timer AF column)                 */
 /* Active-high: HIGH = FET on = load powered                                 */
 /* Terminals: A03=DO1  A04=DO2  ...  A10=DO8                                */
-#define DOUT_1  PB13   /* High-side FET 1 — TIM1_CH1N  (PWM)               */
-#define DOUT_2  PB0    /* High-side FET 2 — TIM1_CH2N  (PWM)               */
-#define DOUT_3  PH15   /* High-side FET 3 — TIM8_CH3N  (PWM)               */
-#define DOUT_4  PE4    /* High-side FET 4 — TIM15_CH1N (PWM)               */
-#define DOUT_5  PA8    /* High-side FET 5 — TIM1_CH1   (PWM)               */
-#define DOUT_6  PA9    /* High-side FET 6 — TIM1_CH2   (PWM)               */
-#define DOUT_7  PI7    /* High-side FET 7 — TIM8_CH3   (PWM)               */
-#define DOUT_8  PE5    /* High-side FET 8 — TIM15_CH1  (PWM)               */
+#define DOUT_1  PB13   /* High-side FET 1 - TIM1_CH1N  (PWM)               */
+#define DOUT_2  PB0    /* High-side FET 2 - TIM1_CH2N  (PWM)               */
+#define DOUT_3  PH15   /* High-side FET 3 - TIM8_CH3N  (PWM)               */
+#define DOUT_4  PE4    /* High-side FET 4 - TIM15_CH1N (PWM)               */
+#define DOUT_5  PA8    /* High-side FET 5 - TIM1_CH1   (PWM)               */
+#define DOUT_6  PA9    /* High-side FET 6 - TIM1_CH2   (PWM)               */
+#define DOUT_7  PI7    /* High-side FET 7 - TIM8_CH3   (PWM)               */
+#define DOUT_8  PE5    /* High-side FET 8 - TIM15_CH1  (PWM)               */
 
-/*-------- DIGITAL INPUTS — Upper Deck Klemmblock D ------------------------*/
+/*-------- DIGITAL INPUTS - Upper Deck Klemmblock D ------------------------*/
 /* All support hardware encoder counter mode (quadrature pairs noted)        */
 /* Terminals: D02=DI1  D03=DI2  ...  D09=DI8                                */
-#define DIN_1   PC6    /* Digital IN 1 — TIM3_CH1, encoder-1A               */
-#define DIN_2   PB5    /* Digital IN 2 — TIM3_CH2, encoder-1B               */
-#define DIN_3   PB6    /* Digital IN 3 — TIM4_CH1, encoder-2A               */
-#define DIN_4   PB7    /* Digital IN 4 — TIM4_CH2, encoder-2B               */
-#define DIN_5   PH10   /* Digital IN 5 — TIM5_CH1, encoder-3A               */
-#define DIN_6   PH11   /* Digital IN 6 — TIM5_CH2, encoder-3B               */
-#define DIN_7   PI5    /* Digital IN 7 — GPIO input                          */
-#define DIN_8   PI6    /* Digital IN 8 — GPIO input                          */
+#define DIN_1   PC6    /* Digital IN 1 - TIM3_CH1, encoder-1A               */
+#define DIN_2   PB5    /* Digital IN 2 - TIM3_CH2, encoder-1B               */
+#define DIN_3   PB6    /* Digital IN 3 - TIM4_CH1, encoder-2A               */
+#define DIN_4   PB7    /* Digital IN 4 - TIM4_CH2, encoder-2B               */
+#define DIN_5   PH10   /* Digital IN 5 - TIM5_CH1, encoder-3A               */
+#define DIN_6   PH11   /* Digital IN 6 - TIM5_CH2, encoder-3B               */
+#define DIN_7   PI5    /* Digital IN 7 - GPIO input                          */
+#define DIN_8   PI6    /* Digital IN 8 - GPIO input                          */
 
-/*-------- ANALOG INPUTS — Upper Deck Klemmblock D -------------------------*/
+/*-------- ANALOG INPUTS - Upper Deck Klemmblock D -------------------------*/
 /* Terminals: D12=AI1  D13=AI2                                               */
-#define AIN_1   PC3_C  /* Analog IN 1 — ADC3_INP1 (dual-pad direct path)   */
-#define AIN_2   PA6    /* Analog IN 2 — ADC1_INP3                           */
+#define AIN_1   PC3_C  /* Analog IN 1 - ADC3_INP1 (dual-pad direct path)   */
+#define AIN_2   PA6    /* Analog IN 2 - ADC1_INP3                           */
 
-/*-------- ANALOG OUTPUTS — Upper Deck Klemmblock D ------------------------*/
+/*-------- ANALOG OUTPUTS - Upper Deck Klemmblock D ------------------------*/
 /* Terminals: D14=AO1  D15=AO2                                               */
-#define AOUT_1      PA4  /* Analog OUT 1 — DAC1_OUT1                        */
-#define AOUT_2      PA5  /* Analog OUT 2 — DAC1_OUT2                        */
+#define AOUT_1      PA4  /* Analog OUT 1 - DAC1_OUT1                        */
+#define AOUT_2      PA5  /* Analog OUT 2 - DAC1_OUT2                        */
 #define AOUT_1_EF   PI4  /* Analog OUT 1 fault/enable (active-low)          */
 #define AOUT_2_EF   PE3  /* Analog OUT 2 fault/enable (active-low)          */
 
-/*-------- TEMPERATURE SENSORS — Lower Deck --------------------------------*/
-#define TEMP_SCPROT  PA0  /* Short-circuit protection NTC — ADC1_INP16      */
-#define TEMP_HSSW    PA3  /* High-side FET temperature NTC — ADC1_INP15     */
+/*-------- TEMPERATURE SENSORS - Lower Deck --------------------------------*/
+#define TEMP_SCPROT  PA0  /* Short-circuit protection NTC - ADC1_INP16      */
+#define TEMP_HSSW    PA3  /* High-side FET temperature NTC - ADC1_INP15     */
 
-/*-------- KNX PROGRAMMING INTERFACE — Upper Deck --------------------------*/
+/*-------- KNX PROGRAMMING INTERFACE - Upper Deck --------------------------*/
 /* KNX TP UART (USART1, PB14=TX AF4, PA10=RX AF7) defined in knx_config.h  */
 #define KNX_PROG_KEY    PG9    /* Programming button (active-low, EXTI9_5)  */
 #define KNX_PROG_LED    PG11   /* Programming LED    (active-high)          */
 #define KNX_TP_OK       PD7    /* KNX bus status: HIGH = bus operational    */
 #define KNX_TP_VCC_OK   PH12   /* KNX transceiver VCC OK                   */
 
-/*-------- RS232 — Upper Deck Klemmblock C ---------------------------------*/
-/* USART3 AF7 — Terminals: C05=TxD, C06=RxD                                */
+/*-------- RS232 - Upper Deck Klemmblock C ---------------------------------*/
+/* USART3 AF7 - Terminals: C05=TxD, C06=RxD                                */
 #define RS232_UART_INSTANCE   3
 #define RS232_TX_Pin          PC10  /* USART3_TX → terminal C05             */
 #define RS232_RX_Pin          PC11  /* USART3_RX ← terminal C06             */
 #define RS232_EN_Pin          PB10  /* RS232 transceiver enable (active-high)*/
 
-/*-------- RS485 — Upper Deck Klemmblock C ---------------------------------*/
-/* USART2 AF7 — Terminals: C09=RS485-A/B, C10=Direction                    */
+/*-------- RS485 - Upper Deck Klemmblock C ---------------------------------*/
+/* USART2 AF7 - Terminals: C09=RS485-A/B, C10=Direction                    */
 #define RS485_UART_INSTANCE   2
 #define RS485_TX_Pin          PD5   /* USART2_TX / RS485 DI                 */
 #define RS485_RX_Pin          PD6   /* USART2_RX / RS485 RO                 */
 #define RS485_DIR_Pin         PD4   /* RS485 direction (USART2_DE)          */
 
-/*-------- CAN — Upper Deck Klemmblock C -----------------------------------*/
-/* FDCAN1 — Terminals: C07=CAN-L, C08=CAN-H                                */
+/*-------- CAN - Upper Deck Klemmblock C -----------------------------------*/
+/* FDCAN1 - Terminals: C07=CAN-L, C08=CAN-H                                */
 #define CAN_TX_Pin   PB9   /* FDCAN1_TX → terminal C07                     */
 #define CAN_RX_Pin   PI9   /* FDCAN1_RX ← terminal C08                     */
 
-/*-------- USB — Bridge MPU ------------------------------------------------*/
+/*-------- USB - Bridge MPU ------------------------------------------------*/
 /* USB Full-Speed Device (USB-C connector)                                   */
 #define USB_DM_Pin   PA11  /* USB_FS2_D_N (D-)                              */
 #define USB_DP_Pin   PA12  /* USB_FS2_D_P (D+)                              */
 
-/*-------- SD CARD — Bridge MPU (SDMMC1, 1-bit mode) ----------------------*/
+/*-------- SD CARD - Bridge MPU (SDMMC1, 1-bit mode) ----------------------*/
 #define SDMMC_CLK_Pin  PC12  /* SDMMC1_CK                                   */
 #define SDMMC_CMD_Pin  PD2   /* SDMMC1_CMD                                  */
 #define SDMMC_D0_Pin   PC8   /* SDMMC1_D0                                   */
 #define SDMMC_CD_Pin   PE6   /* Card detect (active-low)                    */
 
-/*-------- SPI6 — JunctionLink expansion connector -------------------------*/
+/*-------- SPI6 - JunctionLink expansion connector -------------------------*/
 /* SPI2 is the primary SPI (uses PIN_SPI_* below); SPI6 is secondary        */
 #define SPI6_MOSI_Pin  PG14  /* SPI6_MOSI                                   */
 #define SPI6_MISO_Pin  PB4   /* SPI6_MISO                                   */
@@ -349,7 +349,7 @@
   #define USER_BTN              PNUM_NOT_DEFINED
 #endif
 
-// SPI definitions — SPI2 on JunctionLink expansion connector
+// SPI definitions - SPI2 on JunctionLink expansion connector
 #ifndef PIN_SPI_SS
   #define PIN_SPI_SS            PI0    /* SPI2_NSS  */
 #endif
@@ -372,7 +372,7 @@
   #define PIN_SPI_SCK           PI1    /* SPI2_SCK  */
 #endif
 
-// I2C definitions — I2C2 on JunctionLink expansion connector (PH4=SCL, PH5=SDA)
+// I2C definitions - I2C2 on JunctionLink expansion connector (PH4=SCL, PH5=SDA)
 #ifndef PIN_WIRE_SDA
   #define PIN_WIRE_SDA          PH5    /* I2C2_SDA (AF4) */
 #endif

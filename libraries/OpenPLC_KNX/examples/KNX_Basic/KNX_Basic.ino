@@ -1,5 +1,5 @@
 /*
- * KNX_Basic — Minimal OpenPLC_KNX usage example.
+ * KNX_Basic - Minimal OpenPLC_KNX usage example.
  *
  * Default MASK_VERSION is 0x5780 (IP+TP dual device): the board communicates
  * on BOTH KNXnet/IP (Ethernet) and KNX TP bus simultaneously.  Group object
@@ -10,7 +10,7 @@
  *   1. Press the button on PG9 to enter programming mode (LED on PG11 lights).
  *   2. In ETS, assign the individual address and download the application
  *      (ETS connects over KNXnet/IP on the Ethernet port).
- *   3. ETS maps group addresses to group objects — the indices used below
+ *   3. ETS maps group addresses to group objects - the indices used below
  *      must match the group object table in your ETS application design.
  *
  * Default wiring (Bridge MPU schematic):
@@ -22,14 +22,14 @@
  *   KNX TP RX   : PA10   (USART1 AF7)
  *
  * Group object table (configure the same layout in ETS):
- *   GO index 1  DPT-1.001 (1-bit switch) — controls relay channel 0 (PE6)
- *   GO index 2  DPT-1.001 (1-bit switch) — controls relay channel 1 (PE5)
+ *   GO index 1  DPT-1.001 (1-bit switch) - controls relay channel 0 (PE6)
+ *   GO index 2  DPT-1.001 (1-bit switch) - controls relay channel 1 (PE5)
  */
 
 #include <OpenPLC_KNX.h>
 
 /* -------------------------------------------------------------------------
- * Group object callbacks — invoked by the KNX stack on GroupValue.Write.
+ * Group object callbacks - invoked by the KNX stack on GroupValue.Write.
  * The GO index used in getGroupObject() must match the ETS project.
  * ---------------------------------------------------------------------- */
 
@@ -69,7 +69,7 @@ void setup()
         KNX.getGroupObject(2).callback(onRelay1);
     }
 
-    /* 4. Enable the transport(s) — must be called after all GO registrations. */
+    /* 4. Enable the transport(s) - must be called after all GO registrations. */
     KNXHelper.start();
 }
 
