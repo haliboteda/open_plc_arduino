@@ -88,8 +88,10 @@ typedef struct
   uint8_t buff[(ETH_RX_BUFFER_SIZE + 31) & ~31] __ALIGNED(32);
 } RxBuff_t;
 
-/* Memory Pool Declaration */
-#define ETH_RX_BUFFER_CNT             4U
+/* Memory Pool Declaration.
+ * Kept equal to the bootloader's value so both images lay out .Rx_PoolSection
+ * identically -- see the .lwip_sec block in ldscript.ld for the arithmetic. */
+#define ETH_RX_BUFFER_CNT             12U
 LWIP_MEMPOOL_DECLARE(RX_POOL, ETH_RX_BUFFER_CNT, sizeof(RxBuff_t), "Zero-copy RX PBUF pool");
 
 /* Variable Definitions */

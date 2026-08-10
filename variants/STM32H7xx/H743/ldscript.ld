@@ -44,7 +44,13 @@ MEMORY
   ITCMRAM    (xrw)    : ORIGIN = 0x00000000,   LENGTH = 64K
   RAM_D1    (xrw)    : ORIGIN = 0x24000000,   LENGTH = 512K
   RAM_D2    (xrw)    : ORIGIN = 0x30000000,   LENGTH = 288K
-  RAM_D3    (xrw)    : ORIGIN = 0x38000000,   LENGTH = 64K
+  /* First 32 bytes of SRAM4 are carved out of the region on purpose: they hold
+     the boot-mode handoff record (see cores/arduino/stm32/IAP_boot_handoff.h).
+     Because the address is outside every MEMORY region the linker cannot place
+     anything there, in this image or any future one -- a guarantee, not a
+     convention. Keep this identical to the bootloader's
+     open_plc_cube_ide/STM32H743IIKX_FLASH.ld. */
+  RAM_D3    (xrw)    : ORIGIN = 0x38000020,   LENGTH = 64K - 32
   FLASH    (rx)    : ORIGIN = 0x8000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE - LD_FLASH_OFFSET
 }
 
@@ -160,16 +166,38 @@ SECTIONS
 
   /* Remove information from the standard libraries */
 
-  /* LwIP DMA descriptors and RX pool in D2 SRAM */
+  /* LwIP DMA descriptors and RX pool in D2 SRAM.
+   *
+   * Kept identical to the bootloader's STM32H743IIKX_FLASH.ld, including the
+   * order and the pool depth:
+   *
+   *   0x30000000  lwIP heap       131048 + 24            = 131072 B -> 0x3001FFFF
+   *   0x30020000  Rx descriptors  ETH_RX_DESC_CNT(4)  * 24 =    96 B -> 0x3002005F
+   *   0x30020060  Tx descriptors  ETH_TX_DESC_CNT(4)  * 24 =    96 B -> 0x300200BF
+   *   0x30020100  Rx pbuf pool    ETH_RX_BUFFER_CNT(12) * sizeof(RxBuff_t)(32+1536)
+   *                                                      = 18816 B -> 0x30024A7F
+   *   0x30024A80  free: 141K, contiguous
+   *
+   * The heap comes first because an MPU region must be aligned to its own size:
+   * the 128K region that marks the heap non-cacheable can only start at
+   * 0x30000000 or 0x30020000, so descriptors-first would strand ~108K in between.
+   *
+   * The heap occupies MEM_SIZE_ALIGNED + 2 * SIZEOF_STRUCT_MEM, not MEM_SIZE --
+   * lwIP adds two 12-byte sentinel headers, and STM32lwipopts.h's MEM_SIZE
+   * 131048 is picked so that 131048 + 24 is exactly 128K.
+   *
+   * An overlap here is silent: the lwIP heap is a raw pointer, not a linker
+   * section, so ld cannot catch it. Recompute before moving anything.
+   */
   .lwip_sec (NOLOAD) :
   {
-    . = ABSOLUTE(0x30040000);
+    . = ABSOLUTE(0x30020000);
     *(.RxDecripSection)
 
-    . = ABSOLUTE(0x30040060);
+    . = ABSOLUTE(0x30020060);
     *(.TxDecripSection)
 
-    . = ABSOLUTE(0x30040200);
+    . = ABSOLUTE(0x30020100);
     *(.Rx_PoolSection)
   } >RAM_D2
   /DISCARD/ :

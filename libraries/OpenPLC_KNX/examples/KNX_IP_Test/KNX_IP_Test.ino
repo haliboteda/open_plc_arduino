@@ -47,6 +47,7 @@
 
 #include <OpenPLC_KNX.h>
 #include <OpenPLC_Net_Autostart.h>
+#include <OpenPLC_IAP_Autostart.h>
 
 /* Relay group-object callbacks - called when ETS / another KNX device
  * sends a GroupValue.Write to the group address linked to GO #1 or #2. */

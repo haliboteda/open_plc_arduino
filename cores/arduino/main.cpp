@@ -150,7 +150,7 @@ int main(void)
   openplc_diag_boot_banner();
   openplc_net_init();
   openplc_udp_server_start(NULL);
-  pinMode(PB_10, OUTPUT);
+  pinMode(RS232_EN_Pin, OUTPUT); 
 #endif
 
   setup();
@@ -162,16 +162,6 @@ int main(void)
 
 #ifdef OPENPLC_UDP_SERVER_AUTOSTART
     openplc_net_process();
-
-    // if (!g_ip_uart_done && openplc_net_has_ip()) {
-    //   openplc_diag_print_ip();
-    //   g_ip_uart_done = true;
-    // }
-
-    // if ((millis() - g_last_diag_ms) >= 5000UL) {
-    //   g_last_diag_ms = millis();
-    //   openplc_diag_heartbeat();
-    // }
 #endif
 
     loop();

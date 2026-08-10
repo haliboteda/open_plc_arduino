@@ -24,8 +24,7 @@
 #include "usbd_desc.h"
 #include "usbd_cdc_if.h"
 #include "bootloader.h"
-
-extern RTC_HandleTypeDef hrtc;
+#include "IAP_boot_handoff.h"
 
 #ifdef USE_USB_HS
   #define CDC_MAX_PACKET_SIZE USB_OTG_HS_MAX_PACKET_SIZE
@@ -174,12 +173,17 @@ static int8_t USBD_CDC_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length)
       linecoding.format     = pbuf[4];
       linecoding.paritytype = pbuf[5];
       linecoding.datatype   = pbuf[6];
-    //
-    uint32_t regV = HAL_RTCEx_BKUPRead(&hrtc, MAGIC_BKP_REG);
-    if (linecoding.bitrate == MAGIC_CDC_RATE && regV != MAGIC_CDC_FLAG)
+    /* Opening the port at 1200 baud is the PC tool's "reboot into the
+     * bootloader" signal. This used to write an RTC backup register straight
+     * from here, which only worked while PWR_CR1.DBP happened to be set -- and
+     * the IAP nonce counter clears it, so a CDC upload attempted after any
+     * ethernet challenge silently lost the flag and rebooted back into the
+     * sketch. boot_handoff_request() has no such precondition, verifies the
+     * record landed, and only then resets; if it returns at all the request was
+     * not stored and resetting would just repeat the silent failure. */
+    if (linecoding.bitrate == MAGIC_CDC_RATE)
     {
-      HAL_RTCEx_BKUPWrite(&hrtc, MAGIC_BKP_REG, MAGIC_CDC_FLAG);
-			HAL_NVIC_SystemReset();
+      (void)boot_handoff_request(BOOT_REQ_CDC);
     }
       break;
 

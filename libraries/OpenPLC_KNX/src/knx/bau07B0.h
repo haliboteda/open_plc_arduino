@@ -17,7 +17,7 @@ class Bau07B0 : public BauSystemBDevice, public ITpUartCallBacks, public DataLin
         void enabled(bool value) override;
         void syncCemiClientAddress();
 
-        TpUartDataLinkLayer* getDataLinkLayer();
+        TpUartDataLinkLayer* getDataLinkLayer() { return &_dlLayer; }
         InterfaceObject* getInterfaceObject(uint8_t idx);
         InterfaceObject* getInterfaceObject(ObjectType objectType, uint16_t objectInstance);
     protected:

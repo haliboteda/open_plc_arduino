@@ -1,7 +1,7 @@
 #ifndef IAP_CONFIG_H
 #define IAP_CONFIG_H
 
-/* Shared magic values used for boot flags and CDC behavior. */
+/* Values shared between the IAP command channels. */
 #define CDC_RX_BUFFER_SIZE  (32U * 1024U)
 
 #ifndef OPENPLC_SERVER_PORT
@@ -20,24 +20,16 @@
 #define UDP_SERVER_NAME "CUSAPP"
 #endif
 
+/* The baud rate the PC tool opens the CDC port at to ask for upload mode. Not a
+ * flag -- this one stays. */
 #ifndef MAGIC_CDC_RATE
 #define MAGIC_CDC_RATE 1200U
 #endif
 
-#ifndef MAGIC_APP_FLAG
-#define MAGIC_APP_FLAG 0xAAU
-#endif
-
-#ifndef MAGIC_ETH_FLAG
-#define MAGIC_ETH_FLAG 0xAEU
-#endif
-
-#ifndef MAGIC_CDC_FLAG
-#define MAGIC_CDC_FLAG 0xAFU
-#endif
-
-#ifndef MAGIC_BKP_REG
-#define MAGIC_BKP_REG RTC_BKP_DR0
-#endif
+/* MAGIC_APP_FLAG / MAGIC_ETH_FLAG / MAGIC_CDC_FLAG / MAGIC_BKP_REG are gone.
+ * The boot-mode request no longer lives in an RTC backup register; see
+ * IAP_boot_handoff.h for the replacement and for why the register was the wrong
+ * place for it. Keep this file in step with the bootloader's
+ * open_plc_cube_ide/Core/Inc/IAP_config.h. */
 
 #endif /* IAP_CONFIG_H */

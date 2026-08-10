@@ -178,8 +178,4 @@ TPAckType Bau07B0::isAckRequired(uint16_t address, bool isGrpAddr)
     return TPAckType::AckReqNone;
 }
 
-TpUartDataLinkLayer* Bau07B0::getDataLinkLayer()
-{
-    return (TpUartDataLinkLayer*)&_dlLayer;
-}
 #endif

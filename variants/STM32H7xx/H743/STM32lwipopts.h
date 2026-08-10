@@ -18,9 +18,15 @@
 #undef MEM_SIZE
 #define MEM_SIZE 131048
 
-/* Match Cube H7 no-RTOS profile */
+/* Match Cube H7 no-RTOS profile.
+ * 0x30000000 is the base of RAM_D2 and the start of the 128K MPU region that
+ * marks the heap non-cacheable; the ETH descriptors and the RX pool follow at
+ * 0x30020000. See the .lwip_sec block in ldscript.ld for the full layout and
+ * why the heap has to come first. MEM_SIZE 131048 + lwIP's two 12-byte sentinel
+ * headers is exactly 128K, so this fills the region and must not be raised on
+ * its own. */
 #undef LWIP_RAM_HEAP_POINTER
-#define LWIP_RAM_HEAP_POINTER 0x30020000
+#define LWIP_RAM_HEAP_POINTER 0x30000000
 
 #undef LWIP_SUPPORT_CUSTOM_PBUF
 #define LWIP_SUPPORT_CUSTOM_PBUF 1

@@ -6,9 +6,11 @@
 #include "lwip/ip_addr.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/netif.h"
-#include "rtc.h"
 
 #include "IAP_config.h"
+#include "IAP_boot_handoff.h"
+#include "iap_auth.h"
+#include "iap_keyderive.h"
 
 extern struct netif gnetif;
 
@@ -21,15 +23,6 @@ static volatile uint32_t udp_server_bind_fail_counter = 0u;
 static volatile uint32_t udp_server_last_rx_tick_ms = 0u;
 static volatile uint16_t udp_server_last_rx_port_value = 0u;
 static volatile uint16_t udp_server_last_rx_len_value = 0u;
-
-static void openplc_uid_hex(char out[25])
-{
-  uint32_t u0 = HAL_GetUIDw0();
-  uint32_t u1 = HAL_GetUIDw1();
-  uint32_t u2 = HAL_GetUIDw2();
-  (void)snprintf(out, 25, "%08lX%08lX%08lX",
-                 (unsigned long)u2, (unsigned long)u1, (unsigned long)u0);
-}
 
 static void openplc_udp_reply(struct udp_pcb *pcb, const ip_addr_t *addr, u16_t port, const char *msg)
 {
@@ -44,14 +37,25 @@ static void openplc_udp_reply(struct udp_pcb *pcb, const ip_addr_t *addr, u16_t 
   pbuf_free(reply_pbuf);
 }
 
+/*
+ * Ask the bootloader to stay in ethernet upload mode after the next reset.
+ *
+ * This used to write an RTC backup register here, which meant remembering to
+ * open the backup domain first -- and iap_auth's nonce counter closes it again
+ * as the last thing it does, on every "openplc_server_reboot_challenge", i.e.
+ * always immediately before this call. The write was therefore discarded, the
+ * board reset, and the bootloader jumped straight back into the app with nothing
+ * logged anywhere. boot_handoff_request() has no such hidden precondition and
+ * verifies the record landed before it resets.
+ */
 static void openplc_set_eth_flag_and_reset(void)
 {
-  uint32_t regV = HAL_RTCEx_BKUPRead(&hrtc, MAGIC_BKP_REG);
-  if (regV != MAGIC_ETH_FLAG) {
-    HAL_RTCEx_BKUPWrite(&hrtc, MAGIC_BKP_REG, MAGIC_ETH_FLAG);
+  /* Does not return on success. If it returns, the request was not stored, so
+   * resetting would be worse than useless: the board would come straight back
+   * into the app and the operator would see "no response" all over again. */
+  if (!boot_handoff_request(BOOT_REQ_ETH)) {
+    printf("Refusing to reset: ethernet boot request could not be stored\r\n");
   }
-  HAL_Delay(20);
-  HAL_NVIC_SystemReset();
 }
 
 static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
@@ -66,7 +70,7 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     return;
   }
 
-  char recv_buf[64] = {0};
+  char recv_buf[128] = {0};
   const uint16_t n = (p->len < sizeof(recv_buf) - 1U) ? p->len : (sizeof(recv_buf) - 1U);
   memcpy(recv_buf, p->payload, n);
   udp_server_recv_counter++;
@@ -79,17 +83,44 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
       (strcmp(recv_buf, "openplc_discover") == 0) ||
       (strcmp(recv_buf, "openplc_server_where_r_y") == 0) ||
       (strcmp(recv_buf, "ping") == 0)) {
-    char uid_hex[25] = {0};
+    char uid_hex[IAP_MACHINE_ID_HEX_LEN + 1U] = {0};
     char reply_msg[96] = {0};
-    openplc_uid_hex(uid_hex);
+    iap_keyderive_get_machine_id_hex(uid_hex);
     (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s_%s",
                    OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_CUSAPP_VERSION);
     openplc_udp_reply(pcb, addr, port, reply_msg);
-  } else if (strcmp(recv_buf, "openplc_server_reboot") == 0) {
-    if (udp_reboot_callback != NULL) {
-      udp_reboot_callback();
-    } else {
-      openplc_set_eth_flag_and_reset();
+  } else if (strcmp(recv_buf, "openplc_server_reboot_challenge") == 0) {
+    char nonce_hex[IAP_AUTH_NONCE_SIZE * 2U + 1U];
+    iap_auth_issue_challenge(nonce_hex);
+    openplc_udp_reply(pcb, addr, port, nonce_hex);
+  } else if (strncmp(recv_buf, "openplc_server_reboot ", 22) == 0) {
+    // "openplc_server_reboot <hmac_hex>" -- hmac must be
+    // HMAC-SHA256(auth_key, nonce || "openplc_server_reboot") for the nonce
+    // most recently returned by "openplc_server_reboot_challenge"
+    char hmac_hex[65] = {0};
+    if (sscanf(recv_buf, "openplc_server_reboot %64s", hmac_hex) == 1) {
+      uint8_t hmac_bytes[IAP_AUTH_HMAC_SIZE];
+      bool decodedOk = (strlen(hmac_hex) == IAP_AUTH_HMAC_SIZE * 2U);
+      if (decodedOk) {
+        uint32_t i;
+        for (i = 0; i < IAP_AUTH_HMAC_SIZE && decodedOk; i++) {
+          char hi = hmac_hex[i * 2U], lo = hmac_hex[i * 2U + 1U];
+          int hi_v = (hi >= '0' && hi <= '9') ? hi - '0' : (hi >= 'a' && hi <= 'f') ? hi - 'a' + 10 : -1;
+          int lo_v = (lo >= '0' && lo <= '9') ? lo - '0' : (lo >= 'a' && lo <= 'f') ? lo - 'a' + 10 : -1;
+          if (hi_v < 0 || lo_v < 0) { decodedOk = false; break; }
+          hmac_bytes[i] = (uint8_t)((hi_v << 4) | lo_v);
+        }
+      }
+
+      if (decodedOk && iap_auth_verify_and_consume((const uint8_t *)"openplc_server_reboot", 21U, hmac_bytes)) {
+        if (udp_reboot_callback != NULL) {
+          udp_reboot_callback();
+        } else {
+          openplc_set_eth_flag_and_reset();
+        }
+      } else {
+        printf("Rejected unauthenticated openplc_server_reboot request\r\n");
+      }
     }
   }
 }

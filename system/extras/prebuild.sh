@@ -23,8 +23,15 @@ else
   printf '\n-fmacro-prefix-map="%s"=.' "${BOARD_PLATFORM_PATH//\\/\\\\}" >> "$BUILD_PATH/sketch/build.opt"
 fi
 
-# Force include of SrcWrapper, OpenPLC_Net and LwIP to ensure library linking
+# Force include of SrcWrapper, OpenPLC_Net, OpenPLC_IAP and LwIP to ensure
+# library linking. main.cpp calls openplc_udp_server_start()/etc.
+# unconditionally using its own local extern "C" prototypes -- it never
+# includes OpenPLC_IAP_Autostart.h itself, so this force-include is the only
+# thing that makes the Arduino dependency scanner compile OpenPLC_IAP's
+# sources (udp_server.c, iap_auth.c, iap_keyderive.c, sha256.c) into the
+# build at all. Removing this line breaks every sketch's link step.
 cat > "$BUILD_PATH/sketch/SrcWrapper.cpp" <<'EOC'
 #include <SrcWrapper.h>
 #include <OpenPLC_Net_Autostart.h>
+#include <OpenPLC_IAP_Autostart.h>
 EOC

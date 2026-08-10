@@ -29,8 +29,12 @@ OPEN-PLC.upload.maximum_size=0
 OPEN-PLC.upload.maximum_data_size=0
 
 # PLC H743IIKx
+# upload.maximum_size is 128K (one Flash sector) short of the full 2MB:
+# the last sector is reserved by the bootloader for firmware metadata/event
+# log (see IAP_STATE_SECTOR_ADDR / IAP_APP_MAX_SIZE in the bootloader project)
+# and must never be linked into by the application.
 OPEN-PLC.menu.pnum.PLC_H743=PLC H743
-OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_size=2097152
+OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_size=1966080
 OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_data_size=524288
 OPEN-PLC.menu.pnum.PLC_H743.build.board=PLC_H743
 OPEN-PLC.menu.pnum.PLC_H743.build.product_line=STM32H743xx
@@ -75,26 +79,36 @@ OPEN-PLC.menu.upload_method.cdcMethod=CDC Transfer
 OPEN-PLC.menu.upload_method.cdcMethod.upload.protocol=
 OPEN-PLC.menu.upload_method.cdcMethod.upload.options=
 OPEN-PLC.menu.upload_method.cdcMethod.upload.tool=cdctransfer
+OPEN-PLC.menu.upload_method.cdcMethod.upload.tool.serial=cdctransfer
+OPEN-PLC.menu.upload_method.cdcMethod.upload.tool.network=cdctransfer
 
 OPEN-PLC.menu.upload_method.ethMethod=ETH Transfer
 OPEN-PLC.menu.upload_method.ethMethod.upload.protocol=
 OPEN-PLC.menu.upload_method.ethMethod.upload.options=
 OPEN-PLC.menu.upload_method.ethMethod.upload.tool=ethtransfer
+OPEN-PLC.menu.upload_method.ethMethod.upload.tool.serial=ethtransfer
+OPEN-PLC.menu.upload_method.ethMethod.upload.tool.network=ethtransfer
 
 OPEN-PLC.menu.upload_method.swdMethod=STM32CubeProgrammer (SWD)
 OPEN-PLC.menu.upload_method.swdMethod.upload.protocol=0
 OPEN-PLC.menu.upload_method.swdMethod.upload.options=-g
 OPEN-PLC.menu.upload_method.swdMethod.upload.tool=stm32CubeProg
+OPEN-PLC.menu.upload_method.swdMethod.upload.tool.serial=stm32CubeProg
+OPEN-PLC.menu.upload_method.swdMethod.upload.tool.network=stm32CubeProg
 
 OPEN-PLC.menu.upload_method.serialMethod=STM32CubeProgrammer (Serial)
 OPEN-PLC.menu.upload_method.serialMethod.upload.protocol=1
 OPEN-PLC.menu.upload_method.serialMethod.upload.options=COM6
 OPEN-PLC.menu.upload_method.serialMethod.upload.tool=stm32CubeProg
+OPEN-PLC.menu.upload_method.serialMethod.upload.tool.serial=stm32CubeProg
+OPEN-PLC.menu.upload_method.serialMethod.upload.tool.network=stm32CubeProg
 
 OPEN-PLC.menu.upload_method.stm32progdfuMethod=STM32CubeProgrammer (DFU)
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.protocol=2
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.options=-g
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool=stm32CubeProg
+OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool.serial=stm32CubeProg
+OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool.network=stm32CubeProg
 
 # OPEN-PLC.menu.upload_method.ethMethod=Ethernet (TCP)
 # OPEN-PLC.menu.upload_method.ethMethod.upload.protocol=0

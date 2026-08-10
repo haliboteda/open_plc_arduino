@@ -102,7 +102,7 @@ build.float-abi=
 build.flags.optimize=-Os
 build.flags.debug=-DNDEBUG
 build.flags.ldspecs=--specs=nano.specs
-build.flash_offset=0x40000
+build.flash_offset=0x20000
 
 # Pre and post build hooks
 build.opt.name=build.opt
@@ -239,7 +239,19 @@ tools.ethtransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
 tools.ethtransfer.path.linux={runtime.tools.STM32Tools.path}/linux
 tools.ethtransfer.upload.params.verbose=
 tools.ethtransfer.upload.params.quiet=
-tools.ethtransfer.upload.pattern="{path}/{cmd}" "ether" "{build.path}/{build.project_name}.bin"
+tools.ethtransfer.upload.pattern="{path}/{cmd}" "ether" "{build.path}/{build.project_name}.bin" "{serial.port}"
+
+# Pluggable discovery (network/IP ports)
+# -----------------------------------------------------------------------
+# Broadcasts a UDP "who's there" on the LAN (see udp_server.c /
+# IAP_config.h for the wire protocol) and lists responding boards as
+# network ports. Windows/Linux get an OS+arch binary directly; macOS
+# has no per-arch suffix in platform.txt so it goes through a small
+# arch-detecting launcher script instead. Rebuild all four binaries via
+# tools/discovery/build.sh (or build.ps1 on Windows).
+pluggable_discovery.network_discovery.pattern.windows="{runtime.platform.path}/tools/discovery/bin/windows_amd64/network_discovery.exe"
+pluggable_discovery.network_discovery.pattern.linux="{runtime.platform.path}/tools/discovery/bin/linux_amd64/network_discovery"
+pluggable_discovery.network_discovery.pattern.macosx="{runtime.platform.path}/tools/discovery/macos-launcher.sh"
 
 # Debugger configuration (general options)
 # ----------------------------------------
