@@ -47,6 +47,11 @@ compiler.define=-DARDUINO=
 build.st_extra_flags=
 build.extra_flags=
 build.bootloader_flags=
+# Overridden per selection by the "Downgrade policy" menu; empty keeps the upload
+# tool's own default (ask) for boards that do not offer the menu.
+upload.iapflags=
+# Version this image reports, for boards that do not set it in boards.txt.
+build.fw_version=0.0.0
 build.ldscript=ldscript.ld
 build.variant_h=variant_generic.h
 
@@ -136,6 +141,14 @@ recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.f
 
 ## Create output (.bin file)
 recipe.objcopy.bin.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf2bin.flags} {compiler.elf2bin.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
+
+# Drop the image's version next to the .bin, encoded the way the device reports
+# it, so the upload tool's downgrade check always has something to compare. It
+# comes from build.fw_version, the same value compiled into the firmware.
+recipe.hooks.objcopy.postobjcopy.1.pattern="{runtime.tools.STM32Tools.path}/{build.iaptool_dir}/IAPTool" version "{build.fw_version}" "--out={build.path}/{build.project_name}.version"
+recipe.hooks.objcopy.postobjcopy.1.pattern.windows="{runtime.tools.STM32Tools.path}/win/IAPTool.exe" version "{build.fw_version}" "--out={build.path}/{build.project_name}.version"
+build.iaptool_dir=linux
+build.iaptool_dir.macosx=macosx
 
 ## Create output (.hex file)
 recipe.objcopy.hex.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
@@ -229,7 +242,7 @@ tools.cdctransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
 tools.cdctransfer.path.linux={runtime.tools.STM32Tools.path}/linux
 tools.cdctransfer.upload.params.verbose=
 tools.cdctransfer.upload.params.quiet=
-tools.cdctransfer.upload.pattern="{path}/{cmd}" "cdc" "{build.path}/{build.project_name}.bin" "{serial.port}"
+tools.cdctransfer.upload.pattern="{path}/{cmd}" "cdc" "{build.path}/{build.project_name}.bin" "{serial.port}" {upload.iapflags}
 
 # Upload using ETH Transfer  
 tools.ethtransfer.cmd=IAPTool
@@ -239,7 +252,7 @@ tools.ethtransfer.path.macosx={runtime.tools.STM32Tools.path}/macosx
 tools.ethtransfer.path.linux={runtime.tools.STM32Tools.path}/linux
 tools.ethtransfer.upload.params.verbose=
 tools.ethtransfer.upload.params.quiet=
-tools.ethtransfer.upload.pattern="{path}/{cmd}" "ether" "{build.path}/{build.project_name}.bin" "{serial.port}"
+tools.ethtransfer.upload.pattern="{path}/{cmd}" "ether" "{build.path}/{build.project_name}.bin" "{serial.port}" {upload.iapflags}
 
 # Pluggable discovery (network/IP ports)
 # -----------------------------------------------------------------------

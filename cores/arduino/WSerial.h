@@ -12,6 +12,8 @@
     #if !defined(Serial)
       #define Serial SerialUSB
       #define serialEvent serialEventUSB
+      /* Serial is not a HardwareSerial here. */
+      #define SERIAL_IS_NOT_HWSERIAL
     #endif
   #endif
 
@@ -28,6 +30,8 @@
     #if !defined(Serial)
       #define Serial SerialVirtIO
       #define serialEvent serialEventVirtIO
+      /* Serial is not a HardwareSerial here. */
+      #define SERIAL_IS_NOT_HWSERIAL
     #endif
   #endif
 

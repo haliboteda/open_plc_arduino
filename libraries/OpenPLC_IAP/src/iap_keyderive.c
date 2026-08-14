@@ -5,18 +5,15 @@
  */
 
 #include "iap_keyderive.h"
-#include "iap_fixed_password_generated.h"
 #include "sha256.h"
 #include "Arduino.h"
 #include "stm32_def.h"
 #include <stdio.h>
 
-/* *** PLACEHOLDER TEST-ONLY PASSWORD. Single source of truth is
- * open_plc_cube_ide/IAPServer/iap_fixed_password.txt -- edit that file and
- * run generate_fixed_password.sh/.ps1 there to regenerate this copy, the
- * bootloader-side copy, and IAPTranfer_Tool/iapcrypto's Go copy together.
- * Never edit IAP_FIXED_PASSWORD by hand in the generated header. *** */
-static const uint8_t iap_fixed_password[] = IAP_FIXED_PASSWORD;
+/* Rotate with open_plc_cube_ide/IAPServer/keys/rotate_keys.sh. */
+static const uint8_t iap_fixed_password[] =
+#include "keys/iap_fixed_password.txt"
+;
 
 void iap_keyderive_get_machine_id(uint8_t out_id[IAP_MACHINE_ID_SIZE])
 {

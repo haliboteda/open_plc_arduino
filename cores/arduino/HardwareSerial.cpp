@@ -131,7 +131,10 @@ HardwareSerial::HardwareSerial(void *peripheral, HalfDuplexMode_t halfDuplex)
   _serial.pin_rx = NC;
   // If Serial is defined in variant set
   // the Rx/Tx pins for com port if defined
-#if defined(Serial) && defined(PIN_SERIAL_TX)
+  // Skipped when Serial is SerialUSB/SerialVirtIO: no HardwareSerial can ever be
+  // that object, and comparing against it makes the compiler read the write to
+  // _serial as running off the end of it (-Warray-bounds).
+#if defined(Serial) && defined(PIN_SERIAL_TX) && !defined(SERIAL_IS_NOT_HWSERIAL)
   if ((void *)this == (void *)&Serial) {
 #if defined(PIN_SERIAL_RX)
     setRx(PIN_SERIAL_RX);

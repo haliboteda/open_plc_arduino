@@ -10,6 +10,7 @@ menu.dbg=Debug symbols and core logs
 menu.rtlib=C Runtime Library
 menu.upload_method=Upload method
 menu.knxrole=KNX Role
+menu.downgrade=Downgrade policy
 
 ################################################################################
 # OPEN-pLC H7
@@ -17,7 +18,12 @@ OPEN-PLC.name=OPEN-PLC
 
 OPEN-PLC.build.core=arduino
 OPEN-PLC.build.board= GenH7
-OPEN-PLC.build.st_extra_flags=-DCORE_CM7 -D{build.product_line} {build.enable_usb} {build.xSerial} {build.knx_flags}
+# The one place this image's version is written. It reaches the firmware as
+# OPENPLC_FW_VERSION (the third field of the identity string) and, encoded as a
+# uint32 by the post-build hook, the <image>.version file the upload tool reads
+# for its downgrade check. Keep it dotted, each field 0-255.
+OPEN-PLC.build.fw_version=0.1.3
+OPEN-PLC.build.st_extra_flags=-DCORE_CM7 -D{build.product_line} {build.enable_usb} {build.xSerial} {build.knx_flags} '-DOPENPLC_FW_VERSION="{build.fw_version}"'
 # Default KNX role: KNXnet/IP device.  Overridden by menu.knxrole selection.
 OPEN-PLC.build.knx_flags=-DMASK_VERSION=0x5780
 OPEN-PLC.build.cmsis_lib_gcc=arm_cortexM7lfsp_math
@@ -109,6 +115,17 @@ OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.options=-g
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool=stm32CubeProg
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool.serial=stm32CubeProg
 OPEN-PLC.menu.upload_method.stm32progdfuMethod.upload.tool.network=stm32CubeProg
+
+# What the upload tool does when the image is older than the one already on the
+# board. "Ask" needs a console to answer on, which the IDE does not give an
+# upload tool, so from here it behaves as Refuse -- pick Allow to overwrite a
+# newer firmware with an older one.
+OPEN-PLC.menu.downgrade.refuse=Refuse downgrade
+OPEN-PLC.menu.downgrade.refuse.upload.iapflags=--downgrade=refuse
+OPEN-PLC.menu.downgrade.allow=Allow downgrade
+OPEN-PLC.menu.downgrade.allow.upload.iapflags=--downgrade=allow
+OPEN-PLC.menu.downgrade.ask=Ask (command line only)
+OPEN-PLC.menu.downgrade.ask.upload.iapflags=--downgrade=ask
 
 # OPEN-PLC.menu.upload_method.ethMethod=Ethernet (TCP)
 # OPEN-PLC.menu.upload_method.ethMethod.upload.protocol=0

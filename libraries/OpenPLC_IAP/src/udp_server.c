@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "stm32_def.h"   /* HAL_GetTick */
+
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
 #include "lwip/ip_addr.h"
@@ -13,6 +15,9 @@
 #include "iap_keyderive.h"
 
 extern struct netif gnetif;
+
+#define REBOOT_COOLDOWN_MS 10000U
+static uint32_t s_last_reboot_tick = 0u;
 
 static void (*udp_reboot_callback)(void) = NULL;
 static struct udp_pcb *udp_server_pcb = NULL;
@@ -83,11 +88,16 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
       (strcmp(recv_buf, "openplc_discover") == 0) ||
       (strcmp(recv_buf, "openplc_server_where_r_y") == 0) ||
       (strcmp(recv_buf, "ping") == 0)) {
+    /* Identity string contract, shared with the bootloader's
+     * iap_identity_string() (open_plc_cube_ide/IAPServer/IAP_server.c): the PC
+     * tool splits it on "_", so it is exactly four fields --
+     * name_uid_role_version -- and no field may contain an underscore. The two
+     * repositories cannot share the code, so changing one means changing both. */
     char uid_hex[IAP_MACHINE_ID_HEX_LEN + 1U] = {0};
     char reply_msg[96] = {0};
     iap_keyderive_get_machine_id_hex(uid_hex);
     (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s_%s",
-                   OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_CUSAPP_VERSION);
+                   OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_FW_VERSION);
     openplc_udp_reply(pcb, addr, port, reply_msg);
   } else if (strcmp(recv_buf, "openplc_server_reboot_challenge") == 0) {
     char nonce_hex[IAP_AUTH_NONCE_SIZE * 2U + 1U];
@@ -113,10 +123,19 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
       }
 
       if (decodedOk && iap_auth_verify_and_consume((const uint8_t *)"openplc_server_reboot", 21U, hmac_bytes)) {
-        if (udp_reboot_callback != NULL) {
-          udp_reboot_callback();
+        /* Even a valid credential must not be able to hold the PLC in a reboot
+         * loop; one accepted reboot per cooldown window is enough for any real
+         * update flow. */
+        uint32_t now = HAL_GetTick();
+        if ((s_last_reboot_tick != 0U) && ((now - s_last_reboot_tick) < REBOOT_COOLDOWN_MS)) {
+          printf("Reboot request ignored: still within cooldown\r\n");
         } else {
-          openplc_set_eth_flag_and_reset();
+          s_last_reboot_tick = now;
+          if (udp_reboot_callback != NULL) {
+            udp_reboot_callback();
+          } else {
+            openplc_set_eth_flag_and_reset();
+          }
         }
       } else {
         printf("Rejected unauthenticated openplc_server_reboot request\r\n");
