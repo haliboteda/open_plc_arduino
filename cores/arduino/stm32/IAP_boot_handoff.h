@@ -34,6 +34,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* First 32 bytes of SRAM4 (D3 domain). 32 bytes at 32-byte alignment is one
  * Cortex-M7 cache line, which is the granularity the maintenance calls in
  * IAP_boot_handoff.c work on. */
@@ -102,5 +106,9 @@ boot_req_t boot_handoff_take(void);
 
 /* Valid after boot_handoff_take(). */
 boot_handoff_status_t boot_handoff_last_status(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BOOT_HANDOFF_H_ */

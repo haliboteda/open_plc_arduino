@@ -17,6 +17,7 @@ const void *openplc_net_ip_addr(void);
 unsigned char openplc_net_link_up(void);
 unsigned char openplc_net_has_ip(void);
 unsigned char openplc_net_get_ipv4(unsigned char out[4]);
+unsigned char openplc_net_get_mac(unsigned char out[6]);
 unsigned char openplc_lwip_stats_enabled(void);
 unsigned long openplc_lwip_mem_avail(void);
 unsigned long openplc_lwip_mem_used(void);

@@ -29,6 +29,48 @@ static volatile uint32_t udp_server_last_rx_tick_ms = 0u;
 static volatile uint16_t udp_server_last_rx_port_value = 0u;
 static volatile uint16_t udp_server_last_rx_len_value = 0u;
 
+/* Ceiling on how much traffic a stranger can make this device emit, so a
+ * spoofed-source flood of discovery queries cannot turn it into a reflection
+ * tool against a third party on the LAN.
+ *
+ * Deliberately device-wide rather than per source: a per-source budget is
+ * shared by every program on one host, and the Arduino IDE's network_discovery
+ * polls every 30s from the same host an operator flashes from -- so our own two
+ * tools spent a day refusing each other. A legitimate load is ~2 replies/s,
+ * twenty-five times under this cap.
+ *
+ * Mirrored in the bootloader: open_plc_cube_ide/IAPServer/udp_server.c. Change
+ * one, change both. */
+#define DISCOVERY_MAX_REPLIES_PER_SEC 50U
+
+static bool discovery_reply_allowed(void)
+{
+  static uint32_t window_start;
+  static uint32_t replies_in_window;
+
+  uint32_t now = HAL_GetTick();
+
+  if ((now - window_start) >= 1000U) {
+    window_start = now;
+    replies_in_window = 0U;
+  }
+
+  if (replies_in_window >= DISCOVERY_MAX_REPLIES_PER_SEC) {
+    /* Only the first refusal of each window speaks: printing per dropped packet
+     * would let a flood keep the UART busy, which is a better denial of service
+     * than the flood it reports. */
+    if (replies_in_window == DISCOVERY_MAX_REPLIES_PER_SEC) {
+      replies_in_window++;
+      printf("[UDP] discovery capped at %u replies/s - something is flooding us\r\n",
+             (unsigned)DISCOVERY_MAX_REPLIES_PER_SEC);
+    }
+    return false;
+  }
+
+  replies_in_window++;
+  return true;
+}
+
 static void openplc_udp_reply(struct udp_pcb *pcb, const ip_addr_t *addr, u16_t port, const char *msg)
 {
   size_t len = strlen(msg);
@@ -95,6 +137,11 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
      * repositories cannot share the code, so changing one means changing both. */
     char uid_hex[IAP_MACHINE_ID_HEX_LEN + 1U] = {0};
     char reply_msg[96] = {0};
+
+    if (!discovery_reply_allowed()) {
+      return;
+    }
+
     iap_keyderive_get_machine_id_hex(uid_hex);
     (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s_%s",
                    OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_FW_VERSION);

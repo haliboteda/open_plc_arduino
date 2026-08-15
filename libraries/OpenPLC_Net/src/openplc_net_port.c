@@ -115,6 +115,17 @@ uint8_t openplc_net_get_ipv4(uint8_t out[4])
   return 1U;
 }
 
+uint8_t openplc_net_get_mac(uint8_t out[6])
+{
+  if ((out == NULL) || (!netInited)) {
+    return 0U;
+  }
+  for (uint8_t i = 0U; i < 6U; i++) {
+    out[i] = gnetif.hwaddr[i];
+  }
+  return 1U;
+}
+
 uint8_t openplc_lwip_stats_enabled(void)
 {
 #if LWIP_STATS

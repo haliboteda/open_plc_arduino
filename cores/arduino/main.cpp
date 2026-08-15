@@ -27,6 +27,7 @@ extern "C" {
   void openplc_net_process(void);
   void openplc_udp_server_start(void (*reboot_cb)(void));
   uint8_t openplc_net_get_ipv4(uint8_t out[4]);
+  uint8_t openplc_net_get_mac(uint8_t out[6]);
   uint8_t openplc_net_has_ip(void);
   uint32_t openplc_udp_server_start_count(void);
   uint32_t openplc_udp_server_recv_count(void);
@@ -37,24 +38,11 @@ extern "C" {
   uint16_t openplc_udp_server_last_rx_len(void);
 }
 HardwareSerial Serial_Test(PC_11, PC_10);
+#define OPENPLC_DIAG_PERIOD_MS 5000U
 bool g_ip_uart_done = false;
 bool g_diag_uart_ready = false;
 uint32_t g_last_diag_ms = 0;
 uint32_t g_boot_ms = 0;
-
-static const char *openplc_reset_cause()
-{
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDG1RST)) return "WWDG";
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST)) return "IWDG";
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) return "SOFT";
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) return "POR";
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) return "PIN";
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST)) return "BOR";
-#if defined(RCC_FLAG_D2RST)
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_D2RST)) return "D2RST";
-#endif
-  return "UNKNOWN";
-}
 
 static void openplc_diag_begin_uart()
 {
@@ -67,9 +55,9 @@ static void openplc_diag_begin_uart()
 static void openplc_diag_boot_banner()
 {
   openplc_diag_begin_uart();
-  Serial_Test.print("[BOOT] cause=");
-  Serial_Test.print(openplc_reset_cause());
-  Serial_Test.print(" millis=");
+  /* No reset cause here: the bootloader clears RCC->RSR before jumping to us,
+   * so it is the only image that can report it -- see its "** Reset cause:" line. */
+  Serial_Test.print("[BOOT] millis=");
   Serial_Test.println(millis());
 }
 
@@ -85,9 +73,22 @@ static void openplc_diag_print_ip()
   Serial_Test.print(ip[0]); Serial_Test.print(".");
   Serial_Test.print(ip[1]); Serial_Test.print(".");
   Serial_Test.print(ip[2]); Serial_Test.print(".");
-  Serial_Test.println(ip[3]);
+  Serial_Test.print(ip[3]);
+
+  uint8_t mac[6] = {0};
+  if (openplc_net_get_mac(mac)) {
+    Serial_Test.print(" mac=");
+    for (uint8_t i = 0; i < 6; i++) {
+      if (i) Serial_Test.print(":");
+      if (mac[i] < 0x10) Serial_Test.print("0");
+      Serial_Test.print(mac[i], HEX);
+    }
+  }
+  Serial_Test.println();
 }
 
+/* Off by default: build with -DOPENPLC_DIAG_HEARTBEAT to trace the UDP server. */
+#ifdef OPENPLC_DIAG_HEARTBEAT
 static void openplc_diag_heartbeat()
 {
   openplc_diag_begin_uart();
@@ -109,6 +110,23 @@ static void openplc_diag_heartbeat()
   Serial_Test.print(openplc_udp_server_last_rx_port());
   Serial_Test.print(" last_rx_len=");
   Serial_Test.println(openplc_udp_server_last_rx_len());
+}
+#endif
+
+/* Report address and MAC once they arrive. */
+static void openplc_diag_tick()
+{
+  if (!g_ip_uart_done && openplc_net_has_ip()) {
+    openplc_diag_print_ip();
+    g_ip_uart_done = true;
+  }
+
+#ifdef OPENPLC_DIAG_HEARTBEAT
+  if ((millis() - g_last_diag_ms) >= OPENPLC_DIAG_PERIOD_MS) {
+    g_last_diag_ms = millis();
+    openplc_diag_heartbeat();
+  }
+#endif
 }
 #endif
 
@@ -162,6 +180,7 @@ int main(void)
 
 #ifdef OPENPLC_UDP_SERVER_AUTOSTART
     openplc_net_process();
+    openplc_diag_tick();
 #endif
 
     loop();

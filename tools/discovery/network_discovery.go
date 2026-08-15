@@ -21,10 +21,15 @@ const (
 	discoveryPort     = 56865
 	broadcastMessage  = "openplc_server_where_r_y"
 	broadcastInterval = 30 * time.Second
-	rescanInterval    = 5 * time.Second
-	staleSweepPeriod  = 10 * time.Second
-	staleTimeout      = 90 * time.Second // ~3 missed broadcast cycles
-	readTimeout       = 500 * time.Millisecond
+
+	// Shared with IAPTool (IAPTranfer_Tool/uploadlock.go) -- both sides must
+	// agree on the name and on how long a leftover lock stays believable.
+	uploadLockName   = "openplc-iap-upload.lock"
+	uploadLockMaxAge = 90 * time.Second
+	rescanInterval   = 5 * time.Second
+	staleSweepPeriod = 10 * time.Second
+	staleTimeout     = 90 * time.Second // ~3 missed broadcast cycles
+	readTimeout      = 500 * time.Millisecond
 )
 
 type portInfo struct {
@@ -324,7 +329,28 @@ func syncPhysicalConns() {
 	}
 }
 
+// The board rate-limits discovery replies per source IP, so a broadcast sent
+// while IAPTool is flashing from this same host can consume the budget and make
+// the flashing tool's own query go unanswered. Standing aside costs one skipped
+// refresh; not standing aside costs a failed upload.
+func uploadInProgress() bool {
+	info, err := os.Stat(filepath.Join(os.TempDir(), uploadLockName))
+	if err != nil {
+		return false
+	}
+	// A lock left behind by a crashed upload must not silence discovery forever.
+	if time.Since(info.ModTime()) > uploadLockMaxAge {
+		return false
+	}
+	return true
+}
+
 func doBroadcast() {
+	if uploadInProgress() {
+		logf("broadcast skipped: an upload is in progress on this host")
+		return
+	}
+
 	connsMu.Lock()
 	defer connsMu.Unlock()
 	for _, ic := range activeConns {
