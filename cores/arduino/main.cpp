@@ -37,7 +37,21 @@ extern "C" {
   uint16_t openplc_udp_server_last_rx_port(void);
   uint16_t openplc_udp_server_last_rx_len(void);
 }
-HardwareSerial Serial_Test(PC_11, PC_10);
+/* The core's diagnostic port, on the RS232 terminals C05/C06.
+ *
+ * ALT1 is load-bearing: it selects USART3 (AF7) on these pins instead of UART4
+ * (AF8). Plain PC_11/PC_10 resolve to UART4 -- the same peripheral Serial4 uses
+ * on PH13/PH14 -- and uart_handlers[] holds one handler per peripheral, so
+ * whichever begin() ran last took the port and the other object went dead.
+ *
+ * Measured on hardware 2026-08-17, before this change: a sketch calling
+ * Serial4.begin(115200) after the core had started left Serial_Test unable to
+ * even finish printing its [BOOT] line. Requirement E7; case M5 in
+ * open_plc_cube_ide/docs/handover/Todo/, driven by TestTool/tools/run-m5.ps1.
+ *
+ * The wires do not change: both peripherals reach the same two pins, so the
+ * terminals and the bootloader's own UART4 log are unaffected. */
+HardwareSerial Serial_Test(PC_11_ALT1, PC_10_ALT1);
 #define OPENPLC_DIAG_PERIOD_MS 5000U
 bool g_ip_uart_done = false;
 bool g_diag_uart_ready = false;

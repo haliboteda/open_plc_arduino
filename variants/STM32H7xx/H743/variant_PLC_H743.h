@@ -274,6 +274,73 @@
 /*-------- DEBUG -----------------------------------------------------------*/
 #define DEBUG_TRIGGER_Pin  PC7  /* Logic-analyser trigger point             */
 
+/*-------- SDRAM (FMC) - DO NOT DRIVE THESE --------------------------------*/
+/* The 39 pins below are wired to the on-board AS4C32M16SB SDRAM (64 MB at
+ * 0xC0000000) and nothing else. They are listed here because this variant
+ * registers every MCU pin as an Arduino digital pin (NUM_DIGITAL_PINS 140),
+ * so digitalWrite(PE7, HIGH) compiles, runs, and pulls an SDRAM data line
+ * down. The symptom is memory that occasionally reads back garbage, with no
+ * hint connecting it to the line that caused it.
+ *
+ * These names do NOT block anything -- they exist so the pins are visible
+ * here rather than only in the bootloader's fmc.c. Driving one is still
+ * possible; it is just no longer accidental.
+ *
+ * Not a layout conflict: none of these collide with any external I/O of this
+ * board (DOUT/DIN/AIN/AOUT/RS232/RS485/CAN/KNX). It was a missing guard, not
+ * a wiring mistake.
+ *
+ * Source of truth: open_plc_cube_ide Core/Src/fmc.c, the FMC GPIO
+ * Configuration comment block in HAL_FMC_MspInit(). Keep in step with it.  */
+
+/* 16-bit data bus */
+#define FMC_RESERVED_D0    PD14
+#define FMC_RESERVED_D1    PD15
+#define FMC_RESERVED_D2    PD0
+#define FMC_RESERVED_D3    PD1
+#define FMC_RESERVED_D4    PE7
+#define FMC_RESERVED_D5    PE8
+#define FMC_RESERVED_D6    PE9
+#define FMC_RESERVED_D7    PE10
+#define FMC_RESERVED_D8    PE11
+#define FMC_RESERVED_D9    PE12
+#define FMC_RESERVED_D10   PE13
+#define FMC_RESERVED_D11   PE14
+#define FMC_RESERVED_D12   PE15
+#define FMC_RESERVED_D13   PD8
+#define FMC_RESERVED_D14   PD9
+#define FMC_RESERVED_D15   PD10
+
+/* 13-bit row/column address bus */
+#define FMC_RESERVED_A0    PF0
+#define FMC_RESERVED_A1    PF1
+#define FMC_RESERVED_A2    PF2
+#define FMC_RESERVED_A3    PF3
+#define FMC_RESERVED_A4    PF4
+#define FMC_RESERVED_A5    PF5
+#define FMC_RESERVED_A6    PF12
+#define FMC_RESERVED_A7    PF13
+#define FMC_RESERVED_A8    PF14
+#define FMC_RESERVED_A9    PF15
+#define FMC_RESERVED_A10   PG0
+#define FMC_RESERVED_A11   PG1
+#define FMC_RESERVED_A12   PG2
+
+/* Bank select, byte enables, clock and command strobes */
+#define FMC_RESERVED_BA0     PG4   /* bank address 0                        */
+#define FMC_RESERVED_BA1     PG5   /* bank address 1                        */
+#define FMC_RESERVED_NBL0    PE0   /* byte enable, low  byte                */
+#define FMC_RESERVED_NBL1    PE1   /* byte enable, high byte                */
+#define FMC_RESERVED_SDCLK   PG8   /* SDRAM clock (D1HCLK/2, 100 MHz)       */
+#define FMC_RESERVED_SDCKE0  PH2   /* clock enable, bank 1                  */
+#define FMC_RESERVED_SDNE0   PH3   /* chip select, bank 1                   */
+#define FMC_RESERVED_SDNRAS  PF11  /* row address strobe                    */
+#define FMC_RESERVED_SDNCAS  PG15  /* column address strobe                 */
+#define FMC_RESERVED_SDNWE   PC0   /* write enable                          */
+
+/* Count is asserted so a pin added to fmc.c without being mirrored here
+ * cannot pass unnoticed: 16 data + 13 address + 10 control = 39.           */
+#define FMC_RESERVED_PIN_COUNT  39
 
 
 // Alternate pins number
@@ -420,6 +487,12 @@
 #endif
 #if !defined(HAL_SD_MODULE_DISABLED)
   #define HAL_SD_MODULE_ENABLED
+#endif
+/* Needed by the OpenPLC_SDRAM library for the on-board 64 MB AS4C32M16SB.
+ * Without it that library still compiles, but every call fails closed -- see
+ * the #else branch at the bottom of OpenPLC_SDRAM.cpp. */
+#if !defined(HAL_SDRAM_MODULE_DISABLED)
+  #define HAL_SDRAM_MODULE_ENABLED
 #endif
 
 /*----------------------------------------------------------------------------

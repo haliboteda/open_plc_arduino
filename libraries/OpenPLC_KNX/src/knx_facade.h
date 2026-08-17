@@ -319,9 +319,19 @@ template <class P, class B> class KnxFacade : private SaveRestore
             return _bau.parameters().getFloat(addr, enc);
         }
 
-/* getGroupObject is only valid for application devices (TP or IP).
- * Bau091A (coupler) inherits BauSystemBCoupler which has no GroupObjectTable. */
-#if (MASK_VERSION == 0x07B0) || (MASK_VERSION == 0x57B0)
+/* getGroupObject is only valid for application devices (TP, IP, or both).
+ * Bau091A (coupler) inherits BauSystemBCoupler which has no GroupObjectTable.
+ *
+ * 0x5780 was missing from this list until 2026-08-17, and it is the DEFAULT
+ * knxrole (dual_device, "IP+TP Device"). Bau5780 derives from BauSystemBDevice
+ * exactly like Bau07B0 and Bau57B0 do, so it has a group object table and
+ * always did -- only this guard disagreed. The effect was that the default KNX
+ * configuration could not use group objects at all, which is most of what KNX
+ * application code does, and two of this library's own examples (KNX_Basic,
+ * KNX_IP_Test) did not compile with the default FQBN.
+ *
+ * Found by TestTool/host/examples_build, which builds every example. */
+#if (MASK_VERSION == 0x07B0) || (MASK_VERSION == 0x57B0) || (MASK_VERSION == 0x5780)
         GroupObject& getGroupObject(uint16_t goNr)
         {
             return _bau.groupObjectTable().get(goNr);

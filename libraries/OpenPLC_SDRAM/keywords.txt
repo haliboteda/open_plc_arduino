@@ -1,0 +1,28 @@
+#######################################
+# Syntax colouring for OpenPLC_SDRAM
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SDRAM	KEYWORD1
+OpenPLC_SDRAM_Class	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+ready	KEYWORD2
+alloc	KEYWORD2
+allocUninitialized	KEYWORD2
+available	KEYWORD2
+used	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BASE	LITERAL1
+CAPACITY	LITERAL1
