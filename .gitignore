@@ -1,6 +1,13 @@
 .settings/
 .vscode
-.claude
 .idea/
+
+# .claude/settings.json IS committed -- it is the shared, machine-independent
+# half: the permission allowlist and the plugin marketplace this project uses.
+# Only the local override is private. Ignoring the whole .claude directory, as
+# this line used to, made that impossible.
+# The trailing * also covers the .bak that init_machine.py keeps of the
+# first version it ever replaced.
+.claude/settings.local.json*
 
 Debug/
