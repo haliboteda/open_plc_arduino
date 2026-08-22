@@ -47,7 +47,7 @@ extern "C" {
  * Measured on hardware 2026-08-17, before this change: a sketch calling
  * Serial4.begin(115200) after the core had started left Serial_Test unable to
  * even finish printing its [BOOT] line. Requirement E7; case M5 in
- * open_plc_cube_ide/docs/handover/Todo/, driven by TestTool/tools/run-m5.ps1.
+ * open_plc_cube_ide/docs/work/, driven by TestTool/tools/run-m5.ps1.
  *
  * The wires do not change: both peripherals reach the same two pins, so the
  * terminals and the bootloader's own UART4 log are unaffected. */

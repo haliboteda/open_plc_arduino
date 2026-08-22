@@ -35,7 +35,7 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 没有共享构建系统，所以下面这些东西**在多个仓库里各有一份拷贝，只能靠注释交叉引用约束，机制上无法强制同步**。改一处必须改另一处，否则会**静默分叉** —— 不会编译报错，只会在运行时表现成别的症状。
 
-清单和 RTC 备份寄存器的分配表在 `open_plc_cube_ide/docs/ARCHITECTURE.md`，**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车，后果是 app 每次经过 bootloader 之后重复发放同一批 nonce）。
+清单和 RTC 备份寄存器的分配表在 `open_plc_cube_ide/docs/design/ARCHITECTURE.md`，**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车，后果是 app 每次经过 bootloader 之后重复发放同一批 nonce）。
 
 自动比对：`IAPTranfer_Tool/TestTool/tools/check-mirror-sync.ps1`（用例 **P2**，`selfcheck.ps1` 的 A8）。
 
@@ -53,7 +53,7 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 BUILD-AND-TEST.md> <sketch>
 ```
 
-`--config-file` 和 `--warnings all` **都必须带**，理由在 `open_plc_cube_ide/docs/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
+`--config-file` 和 `--warnings all` **都必须带**，理由在 `open_plc_cube_ide/docs/test/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
 
 例程能否全部编过：`IAPTranfer_Tool/TestTool/host/examples_build/build.ps1`。
 
