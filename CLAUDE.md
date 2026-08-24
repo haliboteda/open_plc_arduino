@@ -10,13 +10,13 @@
 
 ## ⚠️ 共享文档不在这个仓库里
 
-产品的需求、架构、硬件事实、设计决策、协作规矩，**全部在 `open_plc_cube_ide/docs/` 下**，那里是唯一出处。这份文件不抄，只指路。
+出处在 `open_plc_cube_ide`：
 
 ```
 git clone git@github.com:haliboteda/open_plc_cube_ide.git
 ```
 
-然后读它根目录的 `CLAUDE.md` —— **换机器要 clone 什么、装什么、配什么，那一份写全了**。
+读它根目录的 `CLAUDE.md`。
 
 ## ⚠️ 改动方向是单向的：live → repo
 
@@ -29,23 +29,17 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 - 反过来做没有意义 —— IDE 根本不看本仓库，改这边不生效
 - ⚠️ **验证通过后忘了拷回来，那段代码就只存在于一台机器上**，重装一次 IDE 就没了
-- 核对两边是否同步：`IAPTranfer_Tool/TestTool/tools/check-core-sync.ps1`（用例 **P3**，也是 `selfcheck.ps1` 的 A9）
+- 核对两边是否同步：`IAPTranfer_Tool/TestTool/tools/check-core-sync.ps1`（用例 **P3**）
 
 ## ⚠️ 有些代码在别的仓库里有一份镜像
 
-没有共享构建系统，所以下面这些东西**在多个仓库里各有一份拷贝，只能靠注释交叉引用约束，机制上无法强制同步**。改一处必须改另一处，否则会**静默分叉** —— 不会编译报错，只会在运行时表现成别的症状。
+清单、后果、以及 RTC 备份寄存器的分配表，都在 `open_plc_cube_ide/docs/design/ARCHITECTURE.md`。**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车）。
 
-清单和 RTC 备份寄存器的分配表在 `open_plc_cube_ide/docs/design/ARCHITECTURE.md`，**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车，后果是 app 每次经过 bootloader 之后重复发放同一批 nonce）。
-
-自动比对：`IAPTranfer_Tool/TestTool/tools/check-mirror-sync.ps1`（用例 **P2**，`selfcheck.ps1` 的 A8）。
+自动比对：`IAPTranfer_Tool/TestTool/tools/check-mirror-sync.ps1`（用例 **P2**）。
 
 ## 设计不能限制用户的 app
 
-**不论用户在 app 里怎么用这颗芯片，设计都必须依然正确。**
-
-不能依赖 app 恰好关掉了某个功能（缓存、MPU、某块 RAM、某个外设）。正确性靠**显式动作**保证，不靠"当前配置恰好如此"。发现设计可能和用户 app 的自由度冲突时，**必须主动提出来问**。
-
-> 已经吃过一次：DBP 位被前一步关掉导致以太网升级静默失败，而 CDC 路径只是恰好没踩到。
+**不论用户在 app 里怎么用这颗芯片，设计都必须依然正确。** 这条同时约束 bootloader 和板卡包，所以它只有一个家：`open_plc_cube_ide/docs/process/WORKING-AGREEMENTS.md`。
 
 ## 构建
 
