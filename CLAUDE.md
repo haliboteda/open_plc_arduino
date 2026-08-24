@@ -33,21 +33,21 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 ## ⚠️ 有些代码在别的仓库里有一份镜像
 
-清单、后果、以及 RTC 备份寄存器的分配表，都在 `open_plc_cube_ide/docs/design/ARCHITECTURE.md`。**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车）。
+清单、后果、以及 RTC 备份寄存器的分配表，都在 `$PROD/docs/design/ARCHITECTURE.md`。**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车）。
 
 自动比对：`IAPTranfer_Tool/TestCase/tools/check-mirror-sync.ps1`（用例 **P2**）。
 
 ## 设计不能限制用户的 app
 
-**不论用户在 app 里怎么用这颗芯片，设计都必须依然正确。** 这条同时约束 bootloader 和板卡包，所以它只有一个家：`open_plc_cube_ide/docs/process/WORKING-AGREEMENTS.md`。
+**不论用户在 app 里怎么用这颗芯片，设计都必须依然正确。** 这条同时约束 bootloader 和板卡包，所以它只有一个家：`$PROD/docs/design/CONSTRAINTS.md`。
 
 ## 构建
 
 ```
-arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 BUILD-AND-TEST.md> <sketch>
+arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 $PROD/docs/test/BUILD-AND-TEST.md> <sketch>
 ```
 
-`--config-file` 和 `--warnings all` **都必须带**，理由在 `open_plc_cube_ide/docs/test/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
+`--config-file` 和 `--warnings all` **都必须带**，理由在 `$PROD/docs/test/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
 
 例程能否全部编过：`IAPTranfer_Tool/TestCase/host/examples_build/build.ps1`。
 
