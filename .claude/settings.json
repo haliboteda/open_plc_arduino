@@ -11,16 +11,5 @@
       "Bash(pwsh --version)",
       "Bash(git check-ignore *)"
     ]
-  },
-  "extraKnownMarketplaces": {
-    "ai-skills": {
-      "source": {
-        "source": "github",
-        "repo": "haliboteda/AI-Skills"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "openplc@ai-skills": true
   }
 }

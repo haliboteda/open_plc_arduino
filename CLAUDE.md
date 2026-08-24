@@ -4,6 +4,8 @@
 
 这个仓库是给 Schaeffer AG OpenPLC 板子（STM32H743）定制的 **Arduino 板卡包**：用户的 PLC 程序用它编译。它同时持有 `cores/arduino/main.cpp`、变体头文件、引脚与外设映射，以及 `OpenPLC_IAP` / `OpenPLC_Net` / `OpenPLC_SDRAM` 三个库。
 
+> 产品全貌：`<AI-Skills>/OpenPLC/docs/OVERVIEW.md`（本机位置见 `SKILLS_REPO`）。
+
 ## ⚠️ 这是要分发给其他工程师的基础设施
 
 改这里**不是本地小修小补**。任何改动都会跟着板卡包发出去。
