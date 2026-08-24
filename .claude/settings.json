@@ -3,8 +3,6 @@
     "allow": [
       "Bash(python tools/init_machine.py --check)",
       "Bash(python3 tools/init_machine.py --check)",
-      "Bash(python tools/init_machine.py --prereqs)",
-      "Bash(python3 tools/init_machine.py --prereqs)",
       "Bash(python tools/common.py --probe)",
       "Bash(python3 tools/common.py --probe)",
       "Bash(python tools/test_init_machine.py)",
