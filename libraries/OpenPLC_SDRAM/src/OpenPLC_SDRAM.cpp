@@ -5,7 +5,7 @@
  * from the bootloader's Core/Src/fmc.c in open_plc_cube_ide, which drives this
  * same chip on this same board. ⚠️ They are a second copy: change one, change
  * the other. The pin list is compared automatically by case P2
- * (IAPTranfer_Tool/TestTool/tools/check-mirror-sync.ps1, anchor "FMC pin map"),
+ * (IAPTranfer_Tool/TestCase/tools/check-mirror-sync.ps1, anchor "FMC pin map"),
  * but the timings below are NOT -- those still have to be kept in step by hand.
  */
 

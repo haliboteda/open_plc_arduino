@@ -330,7 +330,7 @@ template <class P, class B> class KnxFacade : private SaveRestore
  * application code does, and two of this library's own examples (KNX_Basic,
  * KNX_IP_Test) did not compile with the default FQBN.
  *
- * Found by TestTool/host/examples_build, which builds every example. */
+ * Found by TestCase/host/examples_build, which builds every example. */
 #if (MASK_VERSION == 0x07B0) || (MASK_VERSION == 0x57B0) || (MASK_VERSION == 0x5780)
         GroupObject& getGroupObject(uint16_t goNr)
         {
