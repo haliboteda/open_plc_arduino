@@ -41,7 +41,7 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 ## 设计不能限制用户的 app
 
-**不论用户在 app 里怎么用这颗芯片，设计都必须依然正确。** 这条同时约束 bootloader 和板卡包，所以它只有一个家：`$PROD/docs/design/CONSTRAINTS.md`。
+**设计不能限制用户 app 怎么用这颗芯片** —— 这条同时约束 bootloader 和板卡包，原文在 `$PROD/docs/design/CONSTRAINTS.md`。
 
 ## 构建
 
