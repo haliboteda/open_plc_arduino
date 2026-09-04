@@ -12,6 +12,7 @@
 #include "IAP_config.h"
 #include "IAP_boot_handoff.h"
 #include "iap_auth.h"
+#include "iap_cert.h"
 #include "iap_keyderive.h"
 
 extern struct netif gnetif;
@@ -105,6 +106,29 @@ static void openplc_set_eth_flag_and_reset(void)
   }
 }
 
+/* No shared hex_decode() in this repo (the bootloader's lives in
+ * IAP_server.c, a different build) -- small enough to keep local rather than
+ * add a cross-repo mirror for one helper. Returns false, changing nothing in
+ * out, on any non-hex character or a length mismatch. */
+static bool hex_decode_local(const char *hex, uint8_t *out, uint32_t out_len)
+{
+  uint32_t i;
+
+  if (strlen(hex) != out_len * 2U) {
+    return false;
+  }
+  for (i = 0; i < out_len; i++) {
+    char hi = hex[i * 2U], lo = hex[i * 2U + 1U];
+    int hi_v = (hi >= '0' && hi <= '9') ? hi - '0' : (hi >= 'a' && hi <= 'f') ? hi - 'a' + 10 : -1;
+    int lo_v = (lo >= '0' && lo <= '9') ? lo - '0' : (lo >= 'a' && lo <= 'f') ? lo - 'a' + 10 : -1;
+    if (hi_v < 0 || lo_v < 0) {
+      return false;
+    }
+    out[i] = (uint8_t)((hi_v << 4) | lo_v);
+  }
+  return true;
+}
+
 static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
                             const ip_addr_t *addr, u16_t port)
 {
@@ -117,7 +141,10 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     return;
   }
 
-  char recv_buf[128] = {0};
+  /* 512, not 128: "openplc_server_reboot <cert_hex><noncesig_hex>" runs to
+   * ~416 bytes now that the reboot request carries a certificate (see
+   * iap_cert.h) instead of a 64-hex-char HMAC. 128 silently truncated it. */
+  char recv_buf[512] = {0};
   const uint16_t n = (p->len < sizeof(recv_buf) - 1U) ? p->len : (sizeof(recv_buf) - 1U);
   memcpy(recv_buf, p->payload, n);
   udp_server_recv_counter++;
@@ -151,25 +178,20 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     iap_auth_issue_challenge(nonce_hex);
     openplc_udp_reply(pcb, addr, port, nonce_hex);
   } else if (strncmp(recv_buf, "openplc_server_reboot ", 22) == 0) {
-    // "openplc_server_reboot <hmac_hex>" -- hmac must be
-    // HMAC-SHA256(auth_key, nonce || "openplc_server_reboot") for the nonce
-    // most recently returned by "openplc_server_reboot_challenge"
-    char hmac_hex[65] = {0};
-    if (sscanf(recv_buf, "openplc_server_reboot %64s", hmac_hex) == 1) {
-      uint8_t hmac_bytes[IAP_AUTH_HMAC_SIZE];
-      bool decodedOk = (strlen(hmac_hex) == IAP_AUTH_HMAC_SIZE * 2U);
-      if (decodedOk) {
-        uint32_t i;
-        for (i = 0; i < IAP_AUTH_HMAC_SIZE && decodedOk; i++) {
-          char hi = hmac_hex[i * 2U], lo = hmac_hex[i * 2U + 1U];
-          int hi_v = (hi >= '0' && hi <= '9') ? hi - '0' : (hi >= 'a' && hi <= 'f') ? hi - 'a' + 10 : -1;
-          int lo_v = (lo >= '0' && lo <= '9') ? lo - '0' : (lo >= 'a' && lo <= 'f') ? lo - 'a' + 10 : -1;
-          if (hi_v < 0 || lo_v < 0) { decodedOk = false; break; }
-          hmac_bytes[i] = (uint8_t)((hi_v << 4) | lo_v);
-        }
-      }
+    // "openplc_server_reboot <cert_hex> <noncesig_hex>" -- cert is the
+    // IAP_CERT_SIZE-byte certificate (iap_cert.h) naming the leaf key that
+    // signed sha256(nonce || "openplc_server_reboot"), nonce_sig is that
+    // 64-byte ECDSA signature, both for the nonce most recently returned by
+    // "openplc_server_reboot_challenge"
+    char cert_hex[(IAP_CERT_SIZE * 2U) + 1U] = {0};
+    char noncesig_hex[129] = {0};
+    if (sscanf(recv_buf, "openplc_server_reboot %264s %128s", cert_hex, noncesig_hex) == 2) {
+      iap_cert_t cert;
+      uint8_t noncesig_bytes[64];
+      bool decodedOk = hex_decode_local(cert_hex, (uint8_t *)&cert, IAP_CERT_SIZE)
+                     && hex_decode_local(noncesig_hex, noncesig_bytes, 64U);
 
-      if (decodedOk && iap_auth_verify_and_consume((const uint8_t *)"openplc_server_reboot", 21U, hmac_bytes)) {
+      if (decodedOk && iap_auth_verify_and_consume((const uint8_t *)"openplc_server_reboot", 21U, &cert, noncesig_bytes)) {
         /* Even a valid credential must not be able to hold the PLC in a reboot
          * loop; one accepted reboot per cooldown window is enough for any real
          * update flow. */

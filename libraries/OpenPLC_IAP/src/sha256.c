@@ -4,7 +4,7 @@
  * Standalone SHA-256 (FIPS 180-4) + HMAC-SHA256 (RFC 2104), no HAL/peripheral
  * dependency. Kept byte-for-byte identical in logic to
  * open_plc_cube_ide/IAPServer/sha256.c -- see that file's history for the
- * cross-check against Python's hashlib/hmac across hundreds of input
+ * cross-check against Python's hashlib across hundreds of input
  * lengths (including all padding boundary cases) plus known FIPS/RFC test
  * vectors. sha256_selftest() re-runs those vectors on every boot.
  */
@@ -146,39 +146,6 @@ void sha256(const uint8_t *data, uint32_t len, uint8_t digest[SHA256_DIGEST_SIZE
 	sha256_final(&ctx, digest);
 }
 
-void hmac_sha256(const uint8_t *key, uint32_t key_len,
-                  const uint8_t *msg, uint32_t msg_len,
-                  uint8_t out[SHA256_DIGEST_SIZE])
-{
-	uint8_t key_block[SHA256_BLOCK_SIZE];
-	uint8_t o_key_pad[SHA256_BLOCK_SIZE];
-	uint8_t i_key_pad[SHA256_BLOCK_SIZE];
-	uint8_t inner_digest[SHA256_DIGEST_SIZE];
-	sha256_ctx_t ctx;
-	uint32_t i;
-
-	memset(key_block, 0, sizeof(key_block));
-	if (key_len > SHA256_BLOCK_SIZE) {
-		sha256(key, key_len, key_block);
-	} else {
-		memcpy(key_block, key, key_len);
-	}
-
-	for (i = 0; i < SHA256_BLOCK_SIZE; i++) {
-		o_key_pad[i] = key_block[i] ^ 0x5cU;
-		i_key_pad[i] = key_block[i] ^ 0x36U;
-	}
-
-	sha256_init(&ctx);
-	sha256_update(&ctx, i_key_pad, SHA256_BLOCK_SIZE);
-	sha256_update(&ctx, msg, msg_len);
-	sha256_final(&ctx, inner_digest);
-
-	sha256_init(&ctx);
-	sha256_update(&ctx, o_key_pad, SHA256_BLOCK_SIZE);
-	sha256_update(&ctx, inner_digest, SHA256_DIGEST_SIZE);
-	sha256_final(&ctx, out);
-}
 
 static bool digest_matches_hex(const uint8_t digest[SHA256_DIGEST_SIZE], const char *hex)
 {
@@ -199,8 +166,6 @@ static bool digest_matches_hex(const uint8_t digest[SHA256_DIGEST_SIZE], const c
 bool sha256_selftest(void)
 {
 	uint8_t digest[SHA256_DIGEST_SIZE];
-	uint8_t hmac_key[20];
-	uint32_t i;
 
 	/* FIPS 180-4 vector: SHA-256("") */
 	sha256((const uint8_t *)"", 0, digest);
@@ -211,15 +176,6 @@ bool sha256_selftest(void)
 	/* FIPS 180-4 vector: SHA-256("abc") */
 	sha256((const uint8_t *)"abc", 3, digest);
 	if (!digest_matches_hex(digest, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")) {
-		return false;
-	}
-
-	/* RFC 4231 Test Case 1: HMAC-SHA256(key=0x0b*20, "Hi There") */
-	for (i = 0; i < sizeof(hmac_key); i++) {
-		hmac_key[i] = 0x0bU;
-	}
-	hmac_sha256(hmac_key, sizeof(hmac_key), (const uint8_t *)"Hi There", 8, digest);
-	if (!digest_matches_hex(digest, "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7")) {
 		return false;
 	}
 

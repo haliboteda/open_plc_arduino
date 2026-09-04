@@ -9,7 +9,9 @@
  */
 
 #include "iap_auth.h"
-#include "iap_keyderive.h"
+#include "iap_cert.h"
+#include "owner_root_ro.h"
+#include "fw_verify.h"
 #include "sha256.h"
 #include "Arduino.h"
 #include "stm32_def.h"
@@ -34,16 +36,6 @@ static uint32_t next_counter(void)
 	return v;
 }
 
-static bool constant_time_eq(const uint8_t *a, const uint8_t *b, uint32_t len)
-{
-	uint8_t diff = 0;
-	uint32_t i;
-	for (i = 0; i < len; i++) {
-		diff |= a[i] ^ b[i];
-	}
-	return diff == 0U;
-}
-
 void iap_auth_issue_challenge(char *out_hex)
 {
 	uint32_t counter = next_counter();
@@ -65,11 +57,12 @@ void iap_auth_issue_challenge(char *out_hex)
 	out_hex[IAP_AUTH_NONCE_SIZE * 2U] = '\0';
 }
 
-bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len, const uint8_t hmac[IAP_AUTH_HMAC_SIZE])
+bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len,
+		const iap_cert_t *cert, const uint8_t nonce_sig[64])
 {
 	uint8_t buf[IAP_AUTH_NONCE_SIZE + 256U];
-	uint8_t calc[IAP_AUTH_HMAC_SIZE];
-	uint8_t device_key[IAP_DEVICE_KEY_SIZE];
+	uint8_t digest[SHA256_DIGEST_SIZE];
+	uint8_t root[64];
 
 	if (!s_nonce_pending) {
 		return false;
@@ -84,11 +77,14 @@ bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len, const uin
 		return false;
 	}
 
+	owner_root_ro_get(root);
+	if (!iap_cert_verify(cert, root)) {
+		return false;
+	}
+
 	memcpy(buf, s_nonce, IAP_AUTH_NONCE_SIZE);
 	memcpy(buf + IAP_AUTH_NONCE_SIZE, msg, msg_len);
+	sha256(buf, IAP_AUTH_NONCE_SIZE + msg_len, digest);
 
-	iap_keyderive_get_device_key(device_key);
-	hmac_sha256(device_key, sizeof(device_key), buf, IAP_AUTH_NONCE_SIZE + msg_len, calc);
-
-	return constant_time_eq(calc, hmac, IAP_AUTH_HMAC_SIZE);
+	return fw_verify_signature_with_key(cert->leaf_pubkey, digest, nonce_sig);
 }

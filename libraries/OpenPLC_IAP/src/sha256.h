@@ -36,12 +36,8 @@ void sha256_final(sha256_ctx_t *ctx, uint8_t digest[SHA256_DIGEST_SIZE]);
 /* One-shot convenience wrapper. */
 void sha256(const uint8_t *data, uint32_t len, uint8_t digest[SHA256_DIGEST_SIZE]);
 
-/* HMAC-SHA256, RFC 2104. key_len/msg_len in bytes. */
-void hmac_sha256(const uint8_t *key, uint32_t key_len,
-                  const uint8_t *msg, uint32_t msg_len,
-                  uint8_t out[SHA256_DIGEST_SIZE]);
 
-/* Runs known FIPS 180-4 / RFC 4231 test vectors against sha256()/hmac_sha256().
+/* Runs known FIPS 180-4 test vectors against sha256().
  * Returns true if every vector matches. Meant to be called once at startup
  * so a hand-written crypto bug fails loudly on real hardware instead of
  * silently producing wrong verification results. */
