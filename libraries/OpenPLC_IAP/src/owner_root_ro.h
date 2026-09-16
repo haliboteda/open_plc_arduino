@@ -4,7 +4,7 @@
  * root this board currently trusts but has no business writing that area.
  *
  * Added 2026-09-04 alongside the session-auth switch to ECDSA-via-certificate
- * (see docs/design/OWNERSHIP.md): the app needs a trusted root to check a
+ * (see $PROD/docs/security/OWNERSHIP.md): the app needs a trusted root to check a
  * certificate against for `openplc_server_reboot`, and the only place that
  * answer lives is the owner-record area in the bootloader's own flash sector
  * -- there was no channel handing it to the app before this. The area is
