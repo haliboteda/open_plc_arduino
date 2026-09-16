@@ -4,7 +4,7 @@
 
 这个仓库是给 Schaeffer AG OpenPLC 板子（STM32H743）定制的 **Arduino 板卡包**：用户的 PLC 程序用它编译。它同时持有 `cores/arduino/main.cpp`、变体头文件、引脚与外设映射，以及 `OpenPLC_IAP` / `OpenPLC_Net` / `OpenPLC_SDRAM` 三个库。
 
-> 产品全貌：`<AI-Skills>/OpenPLC/docs/OVERVIEW.md`（本机位置见 `SKILLS_REPO`）。
+> 产品文档见 `$PROD/README.md`。
 
 ## ⚠️ 这是要分发给其他工程师的基础设施
 
@@ -35,21 +35,21 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 ## ⚠️ 有些代码在别的仓库里有一份镜像
 
-清单、后果、以及 RTC 备份寄存器的分配表，都在 `$PROD/docs/design/ARCHITECTURE.md`。**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车）。
+清单、后果、以及 RTC 备份寄存器的分配表，都在 `$PROD/docs/repo/ARCHITECTURE.md`。**认领任何一个备份寄存器之前先看那张表**（已经撞过一次车）。
 
 自动比对：`IAPTranfer_Tool/TestCase/tools/check_mirror_sync.py`（用例 **P2**）。
 
 ## 设计不能限制用户的 app
 
-**设计不能限制用户 app 怎么用这颗芯片** —— 这条同时约束 bootloader 和板卡包，原文在 `$PROD/docs/design/CONSTRAINTS.md`。
+**设计不能限制用户 app 怎么用这颗芯片** —— 这条同时约束 bootloader 和板卡包，原文在 `$PROD/docs/repo/CONSTRAINTS.md`。
 
 ## 构建
 
 ```
-arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 $PROD/docs/test/BUILD-AND-TEST.md> <sketch>
+arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 $PROD/docs/build/BUILD-AND-TEST.md> <sketch>
 ```
 
-`--config-file` 和 `--warnings all` **都必须带**，理由在 `$PROD/docs/test/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
+`--config-file` 和 `--warnings all` **都必须带**，理由在 `$PROD/docs/build/BUILD-AND-TEST.md`。IDE 自带的 `arduino-cli` 不在 PATH 上。
 
 例程能否全部编过：`IAPTranfer_Tool/TestCase/host/examples_build/build.py`。
 
