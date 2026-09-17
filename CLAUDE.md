@@ -41,7 +41,7 @@ git clone git@github.com:haliboteda/open_plc_cube_ide.git
 
 ## 设计不能限制用户的 app
 
-**设计不能限制用户 app 怎么用这颗芯片** —— 这条同时约束 bootloader 和板卡包，原文在 `$PROD/docs/repo/CONSTRAINTS.md`。
+**设计不能限制用户 app 怎么用这颗芯片** —— 这条同时约束 bootloader 和板卡包，原文在 `$PROD/docs/modules/M3/CONSTRAINTS.md`。
 
 ## 构建
 

@@ -15,7 +15,7 @@
  * there is no other channel that hands this app a trusted root.
  *
  * The app keeps no secret for this -- only public keys and certificates.
- * Why that shape was chosen: $PROD/docs/security/OWNERSHIP.md.
+ * Why that shape was chosen: $PROD/docs/modules/M2-ownership.md.
  */
 
 #ifndef OPENPLC_NET_IAP_AUTH_H_

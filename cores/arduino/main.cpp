@@ -47,7 +47,7 @@ extern "C" {
  * Measured on hardware 2026-08-17, before this change: a sketch calling
  * Serial4.begin(115200) after the core had started left Serial_Test unable to
  * even finish printing its [BOOT] line. Requirement E7; case M5 in
- * $PROD/docs/tables/TEST-CASES.md, driven by TestCase/tools/.
+ * $PROD/docs/engineering/HOW-TO-RUN-TESTS.md, driven by TestCase/tools/.
  *
  * The wires do not change: both peripherals reach the same two pins, so the
  * terminals and the bootloader's own UART4 log are unaffected. */

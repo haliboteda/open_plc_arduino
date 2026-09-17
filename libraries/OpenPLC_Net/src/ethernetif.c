@@ -165,7 +165,7 @@ static void openplc_make_mac_from_uid(uint8_t mac[6]);
 #if !defined(MAC_ADDR0) || !defined(MAC_ADDR1) || !defined(MAC_ADDR2) || !defined(MAC_ADDR3) || !defined(MAC_ADDR4) || !defined(MAC_ADDR5)
 /* Mirrors the USER CODE MACADDRESS block in the bootloader's
  * LWIP/Target/ethernetif.c. Why, and the derivation itself:
- * $PROD/docs/boot/BOOT-SEQUENCE.md "MAC 地址从芯片 UID 派生". */
+ * $PROD/docs/modules/M1/BOOT-SEQUENCE.md "MAC 地址从芯片 UID 派生". */
 static void openplc_make_mac_from_uid(uint8_t mac[6])
 {
   uint32_t u0 = HAL_GetUIDw0();
