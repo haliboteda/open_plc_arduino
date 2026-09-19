@@ -34,12 +34,15 @@ OPEN-PLC.upload.maximum_size=0
 OPEN-PLC.upload.maximum_data_size=0
 
 # PLC H743IIKx
-# upload.maximum_size is 128K (one Flash sector) short of the full 2MB:
-# the last sector is reserved by the bootloader for firmware metadata/event
-# log (see IAP_STATE_SECTOR_ADDR / IAP_APP_MAX_SIZE in the bootloader project)
-# and must never be linked into by the application.
+# upload.maximum_size must equal IAP_APP_MAX_SIZE in the bootloader project
+# (Core/Inc/usbd_cdc_flash.h: IAP_STATE_SECTOR_ADDR - IAP_APP_ADDRESS). The app
+# region starts after the bootloader's own first sector (0x08020000) and ends
+# before the last sector, reserved for firmware metadata/event log
+# (IAP_STATE_SECTOR_ADDR) -- both are off-limits to the application. 1966080
+# (2MB minus one sector) counted only the state sector and missed the
+# bootloader's own sector; see $PROD/docs/tables/DECISIONS.md.
 OPEN-PLC.menu.pnum.PLC_H743=PLC H743
-OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_size=1966080
+OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_size=1835008
 OPEN-PLC.menu.pnum.PLC_H743.upload.maximum_data_size=524288
 OPEN-PLC.menu.pnum.PLC_H743.build.board=PLC_H743
 OPEN-PLC.menu.pnum.PLC_H743.build.product_line=STM32H743xx
