@@ -470,6 +470,20 @@
   #define PIN_SERIAL_TX         PH13   /* UART4_TX on JunctionLink connector */
 #endif
 
+// printf / stdout console: USART3 (AF7) on PC10/PC11 -> MAX3221 -> RS232
+// terminals C05/C06. Deliberately NOT UART4: UART4 is the expansion port's
+// peripheral (PIN_SERIAL_TX/RX above) and a peripheral has one handle slot.
+// DEBUG_PINNAME_TX must stay explicit -- without it the core takes the first
+// USART3 TX row in PeripheralPins.c, which on this board is PB10 = RS232_EN.
+// Pinned by case P4 (TestCase/host/variant_check/uart_routing/).
+// Routing table: $PROD/docs/hardware/HARDWARE-FACTS.md, "UART4 与 USART3".
+#ifndef DEBUG_UART
+  #define DEBUG_UART            USART3
+#endif
+#ifndef DEBUG_PINNAME_TX
+  #define DEBUG_PINNAME_TX      PC_10_ALT1
+#endif
+
 // Extra HAL modules
 #if !defined(HAL_DAC_MODULE_DISABLED)
   #define HAL_DAC_MODULE_ENABLED
