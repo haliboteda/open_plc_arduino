@@ -209,3 +209,17 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
+
+/* The application's vector table sits at the start of FLASH, so VTOR's
+ * alignment requirement lands on LD_FLASH_OFFSET. Nothing else enforces it:
+ * .isr_vector is only ALIGN(4), so a wrong offset links, flashes and verifies,
+ * then faults on the jump -- recoverable only with BOOT0.
+ *
+ * 1024 = the vector table (664 bytes: 16 exceptions + 150 interrupts, x4)
+ * rounded up to a power of two, which the architecture requires. The hardware
+ * itself only forces 128 (TBLOFF is bit[31:7], measured on the part
+ * 2026-09-21); the larger number is the architectural rule, not the register.
+ * See $PROD/maps/app-header-replaces-journal/issues/HDR-04-what-is-the-real-vtor-alignment.md
+ */
+ASSERT((LD_FLASH_OFFSET & 1023) == 0,
+       "LD_FLASH_OFFSET must be a multiple of 1024: the application's vector table starts there and VTOR needs that alignment")
