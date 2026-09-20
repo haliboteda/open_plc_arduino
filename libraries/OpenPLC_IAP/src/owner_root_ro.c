@@ -12,7 +12,12 @@
 
 /* Must match open_plc_cube_ide/IAPServer/owner_slot.h exactly -- see the note
  * at the top of owner_root_ro.h. */
+/* Overridable only so a host test can point this at a RAM buffer instead of
+ * memory-mapped flash; the firmware build never defines it. See T2-21 in
+ * $PROD/docs/modules/M2-ownership.md. */
+#ifndef OWNER_SLOT_BASE
 #define OWNER_SLOT_BASE          0x0801E000UL
+#endif
 #define OWNER_RECORD_SIZE        160U
 #define OWNER_SLOT_MAX_RECORDS   51U
 #define OWNER_RECORD_TYPE        'O'
