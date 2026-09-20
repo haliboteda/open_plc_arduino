@@ -108,6 +108,7 @@ static void resolve_chain(void)
 {
 	const owner_record_t *current = NULL;
 	uint32_t last_gen = 0U;
+	uint32_t i;
 	bool first = true;
 	bool prev_cleared = false;
 	uint8_t my_uid[IAP_MACHINE_ID_SIZE];
@@ -116,18 +117,21 @@ static void resolve_chain(void)
 		return;
 	}
 	s_scanned = true;
-	s_revoke_count = 0U;
 
 	iap_keyderive_get_machine_id(my_uid);
 
 	for (;;) {
 		const owner_record_t *next = NULL;
-		uint32_t i;
 
 		for (i = 0U; i < OWNER_SLOT_MAX_RECORDS; i++) {
 			const owner_record_t *r = record_at(i);
 
 			if (!record_is_structurally_valid(r)) {
+				continue;
+			}
+			/* 'R' records are not links in the chain -- collected separately
+			 * below. Mirrors owner_slot.c. */
+			if (r->type == (uint8_t)OWNER_RECORD_TYPE_REVOKE) {
 				continue;
 			}
 			if (!first && (r->generation <= last_gen)) {
@@ -141,15 +145,14 @@ static void resolve_chain(void)
 			break;
 		}
 
-		bool is_revoke = (next->type == (uint8_t)OWNER_RECORD_TYPE_REVOKE);
-		bool cleared = !is_revoke && ((next->flags & OWNER_FLAG_CLEARED) != 0UL);
+		bool cleared = ((next->flags & OWNER_FLAG_CLEARED) != 0UL);
 
 		if (!cleared && (memcmp(next->uid, my_uid, sizeof(my_uid)) != 0)) {
 			break;
 		}
 
 		if (sig_is_absent(next)) {
-			if (is_revoke || (!first && !cleared && !prev_cleared)) {
+			if (!first && !cleared && !prev_cleared) {
 				break;
 			}
 		} else {
@@ -163,13 +166,7 @@ static void resolve_chain(void)
 			}
 		}
 
-		if (is_revoke) {
-			if (s_revoke_count < OWNER_SLOT_MAX_RECORDS) {
-				s_revoke_records[s_revoke_count++] = next;
-			}
-		} else {
-			current = next;
-		}
+		current = next;
 		last_gen = next->generation;
 		prev_cleared = cleared;
 		first = false;
@@ -177,6 +174,28 @@ static void resolve_chain(void)
 
 	s_effective = current;
 	s_effective_cleared = (current != NULL) && ((current->flags & OWNER_FLAG_CLEARED) != 0UL);
+
+	/* Revocations are a table, not a step in the ownership history: structure
+	 * and uid only, no signature and no generation. Mirrors owner_slot.c --
+	 * the two must agree or the app and the bootloader would disagree about
+	 * which leaves are still good. */
+	s_revoke_count = 0U;
+	for (i = 0U; i < OWNER_SLOT_MAX_RECORDS; i++) {
+		const owner_record_t *r = record_at(i);
+
+		if (!record_is_structurally_valid(r)) {
+			continue;
+		}
+		if (r->type != (uint8_t)OWNER_RECORD_TYPE_REVOKE) {
+			continue;
+		}
+		if (memcmp(r->uid, my_uid, sizeof(my_uid)) != 0) {
+			continue;
+		}
+		if (s_revoke_count < OWNER_SLOT_MAX_RECORDS) {
+			s_revoke_records[s_revoke_count++] = r;
+		}
+	}
 }
 
 void owner_root_ro_get(uint8_t out[64])
