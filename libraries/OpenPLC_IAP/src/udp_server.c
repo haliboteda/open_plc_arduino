@@ -185,7 +185,12 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     // "openplc_server_reboot_challenge"
     char cert_hex[(IAP_CERT_SIZE * 2U) + 1U] = {0};
     char noncesig_hex[129] = {0};
-    if (sscanf(recv_buf, "openplc_server_reboot %264s %128s", cert_hex, noncesig_hex) == 2) {
+    /* %256s is IAP_CERT_SIZE*2 written out: scanf field widths are literals,
+     * not something the preprocessor can substitute a macro into. Update this
+     * by hand if IAP_CERT_SIZE ever changes again -- it did once already
+     * (132 -> 128 bytes, 2026-09-20, when the certificate's `serial` field was
+     * dropped) and this number was found stale then. */
+    if (sscanf(recv_buf, "openplc_server_reboot %256s %128s", cert_hex, noncesig_hex) == 2) {
       iap_cert_t cert;
       uint8_t noncesig_bytes[64];
       bool decodedOk = hex_decode_local(cert_hex, (uint8_t *)&cert, IAP_CERT_SIZE)

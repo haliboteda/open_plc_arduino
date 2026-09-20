@@ -78,7 +78,7 @@ bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len,
 	}
 
 	owner_root_ro_get(root);
-	if (!iap_cert_verify(cert, root)) {
+	if (!iap_cert_verify(cert, root, owner_root_ro_is_revoked(cert->leaf_pubkey))) {
 		return false;
 	}
 

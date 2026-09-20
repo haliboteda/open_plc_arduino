@@ -28,6 +28,7 @@
 #define OPENPLC_IAP_OWNER_ROOT_RO_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,16 @@ extern "C" {
  * on-flash owner chain, or the compiled-in fw_public_key when the area is
  * empty or resolves to nothing valid. Writes 64 bytes to out. */
 void owner_root_ro_get(uint8_t out[64]);
+
+/*
+ * Has this leaf been revoked by a signed 'R' record in the trusted chain?
+ * Mirror of owner_slot_is_revoked() in open_plc_cube_ide/IAPServer/owner_slot.c
+ * -- same comparison (first 16 bytes only), same R4 exemption (an entry
+ * naming the root currently in force is skipped, never honoured). Added
+ * 2026-09-20 alongside the 'R' record type; see the file header above for why
+ * this module exists at all.
+ */
+bool owner_root_ro_is_revoked(const uint8_t leaf_pubkey[64]);
 
 #ifdef __cplusplus
 }

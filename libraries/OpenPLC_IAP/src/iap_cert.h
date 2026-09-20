@@ -13,22 +13,21 @@
 extern "C" {
 #endif
 
-#define IAP_CERT_SIZE       132U
-#define IAP_CERT_SIGNED_LEN  68U
+#define IAP_CERT_SIZE        128U
+#define IAP_CERT_SIGNED_LEN   64U
 
 typedef struct {
 	uint8_t  leaf_pubkey[64];
-	uint32_t serial;
 	uint8_t  root_sig[64];
 } iap_cert_t;
 
 _Static_assert(sizeof(iap_cert_t) == IAP_CERT_SIZE,
-		"iap_cert_t must be exactly 132 bytes (64 + 4 + 64, no padding)");
+		"iap_cert_t must be exactly 128 bytes (64 + 64, no padding)");
 
-bool iap_cert_verify(const iap_cert_t *cert, const uint8_t root[64]);
+bool iap_cert_verify(const iap_cert_t *cert, const uint8_t root[64], bool leaf_is_revoked);
 
 bool iap_cert_verify_image(const uint8_t hash[32], const uint8_t signature[64],
-		const iap_cert_t *cert, const uint8_t root[64]);
+		const iap_cert_t *cert, const uint8_t root[64], bool leaf_is_revoked);
 
 #ifdef __cplusplus
 }
