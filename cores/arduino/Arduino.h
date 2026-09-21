@@ -35,6 +35,10 @@
 
 #include "wiring.h"
 
+/* Declares openplc_app_version and the OPENPLC_APP_VERSION() macro the sketch
+ * must use. Included here so a sketch never has to include anything itself. */
+#include "openplc_app_version.h"
+
 /*
  * OpenPLC core networking lives under core/, but it depends on STM32duino_LwIP
  * symbols provided as an Arduino library. Make this dependency visible from the

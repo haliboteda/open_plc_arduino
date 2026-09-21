@@ -9,12 +9,16 @@ menu.opt=Optimize
 menu.dbg=Debug symbols and core logs
 menu.rtlib=C Runtime Library
 menu.upload_method=Upload method
+menu.forceflash=Force flash (allow older version)
 menu.knxrole=KNX Role
 
 ################################################################################
 # OPEN-pLC H7
 OPEN-PLC.name=OPEN-PLC
 
+# Default for the force-flash switch, so the upload patterns still resolve
+# when a menu that does not set it is selected (SWD / Serial).
+OPEN-PLC.upload.force_flag=
 OPEN-PLC.build.core=arduino
 OPEN-PLC.build.board= GenH7
 # The one place this release's version is written. It reaches the firmware as
@@ -82,6 +86,14 @@ OPEN-PLC.menu.xusb.HSFS.build.usb_speed=-DUSE_USB_HS -DUSE_USB_HS_IN_FS
 
 
 # Upload menu
+
+# One-shot on purpose: IAPTool writes a marker after a successful forced
+# flash and refuses the next one until an upload arrives without --force,
+# which is exactly what switching this back to "No" produces.
+OPEN-PLC.menu.forceflash.no=No
+OPEN-PLC.menu.forceflash.no.upload.force_flag=
+OPEN-PLC.menu.forceflash.yes=Yes
+OPEN-PLC.menu.forceflash.yes.upload.force_flag=--force
 
 OPEN-PLC.menu.upload_method.cdcMethod=CDC Transfer
 OPEN-PLC.menu.upload_method.cdcMethod.upload.protocol=

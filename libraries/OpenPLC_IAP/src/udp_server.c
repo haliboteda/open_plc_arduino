@@ -10,6 +10,7 @@
 #include "lwip/netif.h"
 
 #include "IAP_config.h"
+#include "openplc_app_version.h"   /* the sketch defines openplc_app_version */
 #include "IAP_boot_handoff.h"
 #include "iap_auth.h"
 #include "iap_cert.h"
@@ -159,9 +160,12 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
       (strcmp(recv_buf, "ping") == 0)) {
     /* Identity string contract, shared with the bootloader's
      * iap_identity_string() (open_plc_cube_ide/IAPServer/IAP_server.c): the PC
-     * tool splits it on "_", so it is exactly four fields --
-     * name_uid_role_version -- and no field may contain an underscore. The two
-     * repositories cannot share the code, so changing one means changing both. */
+     * tool splits it on "_", so it is exactly five fields --
+     * name_uid_role_pkgversion_appversion -- and no field may contain an
+     * underscore. The bootloader has nothing to report for the last one and
+     * sends "-" there. The two repositories cannot share the code, so changing
+     * one means changing both; the pair is tracked as a cross-repo mirror in
+     * $PROD/docs/repo/ARCHITECTURE.md. */
     char uid_hex[IAP_MACHINE_ID_HEX_LEN + 1U] = {0};
     char reply_msg[96] = {0};
 
@@ -170,8 +174,9 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     }
 
     iap_keyderive_get_machine_id_hex(uid_hex);
-    (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s_%s",
-                   OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_FW_VERSION);
+    (void)snprintf(reply_msg, sizeof(reply_msg), "%s_%s_%s_%s_%s",
+                   OPENPLC_DEVICE_NAME, uid_hex, UDP_SERVER_NAME, OPENPLC_FW_VERSION,
+                   openplc_app_version);
     openplc_udp_reply(pcb, addr, port, reply_msg);
   } else if (strcmp(recv_buf, "openplc_server_reboot_challenge") == 0) {
     char nonce_hex[IAP_AUTH_NONCE_SIZE * 2U + 1U];

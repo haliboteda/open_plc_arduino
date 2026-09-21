@@ -12,12 +12,22 @@
 #define OPENPLC_DEVICE_NAME "STM32H743"
 #endif
 
-/* This image's version, the fourth field of the identity string. Normally comes
- * from build.fw_version in boards.txt (-DOPENPLC_FW_VERSION), which is also what
- * the build encodes into the <image>.version file the upload tool compares
- * against the device. This fallback only applies to builds that do not set it. */
+/* The board package's release version -- the FOURTH field of the identity
+ * string. It comes from build.fw_version in boards.txt (-DOPENPLC_FW_VERSION)
+ * and is the same for every sketch built with this package.
+ *
+ * Not the sketch's own version. That is openplc_app_version, the fifth field,
+ * which the sketch declares with OPENPLC_APP_VERSION() and postbuild.sh reads
+ * back out of the ELF into <image>.version for the upload tool to compare.
+ * See cores/arduino/openplc_app_version.h.
+ *
+ * No fallback on purpose. The only build path that fails to set this is
+ * tools/platformio/platformio-build.py, which is upstream STM32duino code this
+ * project has never maintained and does not support; a silent "0.0.0" there
+ * would look like a real version in the identity string rather than a missing
+ * one. Failing the build says so instead. */
 #ifndef OPENPLC_FW_VERSION
-#define OPENPLC_FW_VERSION "0.0.0"
+#error "OPENPLC_FW_VERSION is not set - it comes from build.fw_version in boards.txt. The PlatformIO build path does not set it and is not supported."
 #endif
 
 /* Role, the third field of the identity string. The bootloader defines this as
