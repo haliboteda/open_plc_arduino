@@ -1,5 +1,9 @@
 /*
- * iap_cert.c -- mirrors open_plc_cube_ide/IAPServer/iap_cert.c byte-for-byte.
+ * iap_cert.c -- see iap_cert.h.
+ *
+ * Byte-identical in the bootloader (IAPServer/) and the Arduino library
+ * (libraries/OpenPLC_IAP/src/). Separate builds, so nothing links them --
+ * case P2 compares the two files byte for byte instead.
  */
 
 #include "iap_cert.h"

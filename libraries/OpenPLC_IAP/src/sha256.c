@@ -2,11 +2,14 @@
  * sha256.c
  *
  * Standalone SHA-256 (FIPS 180-4) + HMAC-SHA256 (RFC 2104), no HAL/peripheral
- * dependency. Kept byte-for-byte identical in logic to
- * open_plc_cube_ide/IAPServer/sha256.c -- see that file's history for the
- * cross-check against Python's hashlib across hundreds of input
- * lengths (including all padding boundary cases) plus known FIPS/RFC test
- * vectors. sha256_selftest() re-runs those vectors on every boot.
+ * dependency. Deliberately self-contained (no malloc, no other project
+ * headers) so it can be reviewed as a single small unit. See sha256_selftest()
+ * for known-vector verification; it runs on every boot.
+ *
+ * Byte-identical in the bootloader (IAPServer/) and the Arduino library
+ * (libraries/OpenPLC_IAP/src/): the app-side reboot-trigger auth needs the
+ * same HMAC-SHA256 the bootloader uses. Separate builds, so nothing links
+ * them -- case P2 compares the two files byte for byte instead.
  */
 
 #include "sha256.h"
