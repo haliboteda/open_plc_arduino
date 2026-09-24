@@ -7,6 +7,10 @@
 
 */
 
+// Every sketch declares its own version. The upload tool compares it with
+// the one on the board and refuses to flash an older one over a newer one.
+OPENPLC_APP_VERSION(1, 0, 0);
+
 #include <Servo.h>
 
 Servo fs90r;  // create servo object to control a servo

@@ -12,6 +12,10 @@ Updated 14 August 2017
 This example code is in the public domain.
 */
 
+// Every sketch declares its own version. The upload tool compares it with
+// the one on the board and refuses to flash an older one over a newer one.
+OPENPLC_APP_VERSION(1, 0, 0);
+
 #include <Wire.h>
 
 #define I2C_ADDR  2

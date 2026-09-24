@@ -1,4 +1,5 @@
 #include "ethernetif.h"
+#include "openplc_rng.h"
 #include "Arduino.h"
 
 #include "lwip/init.h"
@@ -37,6 +38,9 @@ void openplc_net_init(void)
   ip4_addr_t netmask = {0};
   ip4_addr_t gw = {0};
 
+  /* Before lwip_init(): LWIP_RAND() is rand(), and lwip_init() already draws the
+   * randomized initial local ports from it. */
+  openplc_rng_seed_rand();
   lwip_init();
   netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &ethernet_input);
   netif_set_default(&gnetif);

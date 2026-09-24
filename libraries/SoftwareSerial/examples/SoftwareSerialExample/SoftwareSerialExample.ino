@@ -16,6 +16,10 @@
  This example code is in the public domain.
 
  */
+
+// Every sketch declares its own version. The upload tool compares it with
+// the one on the board and refuses to flash an older one over a newer one.
+OPENPLC_APP_VERSION(1, 0, 0);
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(10, 11); // RX, TX

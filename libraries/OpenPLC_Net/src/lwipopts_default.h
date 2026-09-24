@@ -103,6 +103,18 @@ a lot of data that needs to be copied, this should be set high. */
 #define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS  1   /* Prevent the same port to be used after reset.
                                                    Otherwise, the remote host may be confused if the port was not explicitly closed before the reset. */
 
+/* TCP initial sequence numbers from the RNG; lwIP's default counts up from a
+ * fixed 6510. See openplc_rng.h. */
+#include <stdint.h>
+#ifdef __cplusplus
+extern "C" uint32_t openplc_rng_tcp_isn(void);
+#else
+uint32_t openplc_rng_tcp_isn(void);
+#endif
+/* The (void) casts keep tcp_next_iss() from warning that `pcb` is unused. */
+#define LWIP_HOOK_TCP_ISN(local_ip, local_port, remote_ip, remote_port) \
+  ((void)(local_ip), (void)(local_port), (void)(remote_ip), (void)(remote_port), openplc_rng_tcp_isn())
+
 
 /* ---------- ICMP options ---------- */
 #define LWIP_ICMP                       1

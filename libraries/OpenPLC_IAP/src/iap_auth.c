@@ -11,6 +11,7 @@
 #include "owner_root_ro.h"
 #include "fw_verify.h"
 #include "sha256.h"
+#include "openplc_rng.h"
 #include "Arduino.h"
 #include "stm32_def.h"
 #include <string.h>
@@ -20,44 +21,12 @@ static uint8_t  s_nonce[IAP_AUTH_NONCE_SIZE];
 static bool     s_nonce_pending;
 static uint32_t s_nonce_issue_tick;
 
-/* The Arduino core brings up no RNG of its own, so this file owns the handle and
- * the clock, and initialises both on first use. The kernel clock is HSI48, which
- * SystemClock_Config() already turns on for USB (variants/STM32H7xx/H743/
- * generic_clock.c) -- a sketch that replaces that WEAK function has to keep it.
- *
+/* The RNG handle lives in OpenPLC_Net, which lwIP draws from too (decision 67).
  * Deliberately different from the bootloader copy, which uses the handle CubeMX
  * generates. Only iap_auth_issue_challenge() is compared across the repositories. */
-static RNG_HandleTypeDef s_hrng;
-static bool s_rng_ready;
-
 static bool rng_words(uint32_t *words, uint32_t n)
 {
-	uint32_t i;
-
-	if (!s_rng_ready) {
-		RCC_PeriphCLKInitTypeDef clk = {0};
-
-		clk.PeriphClockSelection = RCC_PERIPHCLK_RNG;
-		clk.RngClockSelection = RCC_RNGCLKSOURCE_HSI48;
-		if (HAL_RCCEx_PeriphCLKConfig(&clk) != HAL_OK) {
-			return false;
-		}
-		__HAL_RCC_RNG_CLK_ENABLE();
-
-		s_hrng.Instance = RNG;
-		s_hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
-		if (HAL_RNG_Init(&s_hrng) != HAL_OK) {
-			return false;
-		}
-		s_rng_ready = true;
-	}
-
-	for (i = 0; i < n; i++) {
-		if (HAL_RNG_GenerateRandomNumber(&s_hrng, &words[i]) != HAL_OK) {
-			return false;
-		}
-	}
-	return true;
+	return openplc_rng_words(words, n);
 }
 
 bool iap_auth_issue_challenge(char *out_hex)

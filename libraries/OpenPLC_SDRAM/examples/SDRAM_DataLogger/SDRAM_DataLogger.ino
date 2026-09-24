@@ -15,6 +15,10 @@
  * on the SD card.
  */
 
+// Every sketch declares its own version. The upload tool compares it with
+// the one on the board and refuses to flash an older one over a newer one.
+OPENPLC_APP_VERSION(1, 0, 0);
+
 #include <OpenPLC_SDRAM.h>
 
 const size_t SAMPLE_COUNT = 8UL * 1000UL * 1000UL;   // 16 MB as uint16_t

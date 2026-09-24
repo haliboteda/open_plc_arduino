@@ -26,6 +26,10 @@
  *   GO index 2  DPT-1.001 (1-bit switch) - controls relay channel 1 (PE5)
  */
 
+// Every sketch declares its own version. The upload tool compares it with
+// the one on the board and refuses to flash an older one over a newer one.
+OPENPLC_APP_VERSION(1, 0, 0);
+
 #include <OpenPLC_KNX.h>
 
 /* -------------------------------------------------------------------------
