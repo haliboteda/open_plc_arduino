@@ -502,6 +502,15 @@
 #if !defined(HAL_SD_MODULE_DISABLED)
   #define HAL_SD_MODULE_ENABLED
 #endif
+/* The microSD socket wires only D0 (see PinMap_SD), so the STM32SD library
+ * must stay on a 1-bit bus. */
+#if !defined(SD_BUS_WIDE)
+  #define SD_BUS_WIDE           SDMMC_BUS_WIDE_1B
+#endif
+/* Needed by the OpenPLC_Ports CAN wrapper (FDCAN1 on PB9 / PI9). */
+#if !defined(HAL_FDCAN_MODULE_DISABLED)
+  #define HAL_FDCAN_MODULE_ENABLED
+#endif
 /* Needed by the OpenPLC_SDRAM library for the on-board 64 MB AS4C32M16SB.
  * Without it that library still compiles, but every call fails closed -- see
  * the #else branch at the bottom of OpenPLC_SDRAM.cpp. */
