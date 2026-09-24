@@ -26,7 +26,10 @@ OPEN-PLC.build.board= GenH7
 # discovery with. It says which release built the firmware; it is not a version
 # for the sketch, and nothing compares it. Keep it dotted, each field 0-255.
 OPEN-PLC.build.fw_version=0.1.3
-OPEN-PLC.build.st_extra_flags=-DCORE_CM7 -D{build.product_line} {build.enable_usb} {build.xSerial} {build.knx_flags} '-DOPENPLC_FW_VERSION="{build.fw_version}"'
+# HAL_RNG_MODULE_ENABLED: the challenge nonce comes from the RNG peripheral
+# (libraries/OpenPLC_IAP/src/iap_auth.c, decision 66). RNG is not in the opt-in
+# list in cores/arduino/stm32/stm32yyxx_hal_conf.h, so it has to be defined here.
+OPEN-PLC.build.st_extra_flags=-DCORE_CM7 -DHAL_RNG_MODULE_ENABLED -D{build.product_line} {build.enable_usb} {build.xSerial} {build.knx_flags} '-DOPENPLC_FW_VERSION="{build.fw_version}"'
 # Default KNX role: KNXnet/IP device.  Overridden by menu.knxrole selection.
 OPEN-PLC.build.knx_flags=-DMASK_VERSION=0x5780
 OPEN-PLC.build.cmsis_lib_gcc=arm_cortexM7lfsp_math

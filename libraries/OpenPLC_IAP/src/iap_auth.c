@@ -1,11 +1,9 @@
 /*
  * iap_auth.c
  *
- * See iap_auth.h. Mirrors open_plc_cube_ide/IAPServer/iap_auth.c; uses a
- * different RTC backup register (DR2 vs the bootloader's DR1) purely to
- * keep the two counters visually separate in a debugger -- the bootloader
- * and this app image never run at the same time, so there's no real
- * collision risk either way.
+ * See iap_auth.h. Mirrors open_plc_cube_ide/IAPServer/iap_auth.c. The nonce is
+ * 16 bytes straight from the RNG peripheral -- no backup register, nothing that
+ * has to survive a power cycle. See $PROD/docs/tables/DECISIONS.md, decision 66.
  */
 
 #include "iap_auth.h"
@@ -15,46 +13,75 @@
 #include "sha256.h"
 #include "Arduino.h"
 #include "stm32_def.h"
-#include "rtc.h"
 #include <string.h>
 #include <stdio.h>
-
-#ifndef IAP_AUTH_COUNTER_BKP_REG
-#define IAP_AUTH_COUNTER_BKP_REG RTC_BKP_DR2
-#endif
 
 static uint8_t  s_nonce[IAP_AUTH_NONCE_SIZE];
 static bool     s_nonce_pending;
 static uint32_t s_nonce_issue_tick;
 
-static uint32_t next_counter(void)
-{
-	uint32_t v = HAL_RTCEx_BKUPRead(&hrtc, IAP_AUTH_COUNTER_BKP_REG) + 1U;
-	HAL_PWR_EnableBkUpAccess();
-	HAL_RTCEx_BKUPWrite(&hrtc, IAP_AUTH_COUNTER_BKP_REG, v);
-	HAL_PWR_DisableBkUpAccess();
-	return v;
-}
+/* The Arduino core brings up no RNG of its own, so this file owns the handle and
+ * the clock, and initialises both on first use. The kernel clock is HSI48, which
+ * SystemClock_Config() already turns on for USB (variants/STM32H7xx/H743/
+ * generic_clock.c) -- a sketch that replaces that WEAK function has to keep it.
+ *
+ * Deliberately different from the bootloader copy, which uses the handle CubeMX
+ * generates. Only iap_auth_issue_challenge() is compared across the repositories. */
+static RNG_HandleTypeDef s_hrng;
+static bool s_rng_ready;
 
-void iap_auth_issue_challenge(char *out_hex)
+static bool rng_words(uint32_t *words, uint32_t n)
 {
-	uint32_t counter = next_counter();
-	uint32_t uid0 = HAL_GetUIDw0();
-	uint32_t tick = HAL_GetTick();
 	uint32_t i;
 
-	memcpy(s_nonce, &counter, 4U);
-	memcpy(s_nonce + 4, &uid0, 4U);
-	memcpy(s_nonce + 8, &tick, 4U);
-	memset(s_nonce + 12, 0, 4U);
+	if (!s_rng_ready) {
+		RCC_PeriphCLKInitTypeDef clk = {0};
+
+		clk.PeriphClockSelection = RCC_PERIPHCLK_RNG;
+		clk.RngClockSelection = RCC_RNGCLKSOURCE_HSI48;
+		if (HAL_RCCEx_PeriphCLKConfig(&clk) != HAL_OK) {
+			return false;
+		}
+		__HAL_RCC_RNG_CLK_ENABLE();
+
+		s_hrng.Instance = RNG;
+		s_hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
+		if (HAL_RNG_Init(&s_hrng) != HAL_OK) {
+			return false;
+		}
+		s_rng_ready = true;
+	}
+
+	for (i = 0; i < n; i++) {
+		if (HAL_RNG_GenerateRandomNumber(&s_hrng, &words[i]) != HAL_OK) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool iap_auth_issue_challenge(char *out_hex)
+{
+	uint32_t words[IAP_AUTH_NONCE_SIZE / 4U];
+	uint32_t i;
+
+	/* Dropped before the RNG is asked: a failed attempt must not leave the
+	 * previous nonce accepting answers. */
+	s_nonce_pending = false;
+
+	if (!rng_words(words, IAP_AUTH_NONCE_SIZE / 4U)) {
+		return false;
+	}
+	memcpy(s_nonce, words, IAP_AUTH_NONCE_SIZE);
 
 	s_nonce_pending = true;
-	s_nonce_issue_tick = tick;
+	s_nonce_issue_tick = HAL_GetTick();
 
 	for (i = 0; i < IAP_AUTH_NONCE_SIZE; i++) {
 		sprintf(out_hex + i * 2U, "%02x", s_nonce[i]);
 	}
 	out_hex[IAP_AUTH_NONCE_SIZE * 2U] = '\0';
+	return true;
 }
 
 bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len,

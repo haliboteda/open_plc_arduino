@@ -180,8 +180,11 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
     openplc_udp_reply(pcb, addr, port, reply_msg);
   } else if (strcmp(recv_buf, "openplc_server_reboot_challenge") == 0) {
     char nonce_hex[IAP_AUTH_NONCE_SIZE * 2U + 1U];
-    iap_auth_issue_challenge(nonce_hex);
-    openplc_udp_reply(pcb, addr, port, nonce_hex);
+    /* Silence rather than a predictable nonce: without a challenge the caller
+     * cannot authorize a reboot at all, which is the safe end. */
+    if (iap_auth_issue_challenge(nonce_hex)) {
+      openplc_udp_reply(pcb, addr, port, nonce_hex);
+    }
   } else if (strncmp(recv_buf, "openplc_server_reboot ", 22) == 0) {
     // "openplc_server_reboot <cert_hex> <noncesig_hex>" -- cert is the
     // IAP_CERT_SIZE-byte certificate (iap_cert.h) naming the leaf key that

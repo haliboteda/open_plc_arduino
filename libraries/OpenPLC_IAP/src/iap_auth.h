@@ -32,7 +32,9 @@ extern "C" {
 #define IAP_AUTH_NONCE_SIZE   16U
 #define IAP_AUTH_NONCE_TTL_MS 30000U
 
-void iap_auth_issue_challenge(char *out_hex);
+/* False means the RNG did not deliver and no nonce was issued -- answer nothing
+ * rather than hand out a predictable one. Also clears any nonce still pending. */
+bool iap_auth_issue_challenge(char *out_hex);
 
 bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len,
 		const iap_cert_t *cert, const uint8_t nonce_sig[64]);
