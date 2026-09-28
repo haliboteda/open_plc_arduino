@@ -170,6 +170,24 @@ __attribute__((constructor(101))) void premain()
   MX_RTC_Init();
 }
 
+#ifdef OPENPLC_UDP_SERVER_AUTOSTART
+static bool s_net_started;
+
+/* delay() spins on yield(); service the network there too, or the board is
+ * deaf for as long as the sketch waits. See OpenPLC_Docs
+ * docs/modules/M3-app-runtime.md, R3-07. */
+extern "C" void yield(void)
+{
+  static bool busy;
+  if (!s_net_started || busy) {
+    return;
+  }
+  busy = true;
+  openplc_net_process();
+  busy = false;
+}
+#endif
+
 /*
  * \brief Main entry point of Arduino application
  */
@@ -182,7 +200,8 @@ int main(void)
   openplc_diag_boot_banner();
   openplc_net_init();
   openplc_udp_server_start(NULL);
-  pinMode(RS232_EN_Pin, OUTPUT); 
+  s_net_started = true;
+  pinMode(RS232_EN_Pin, OUTPUT);
 #endif
 
   setup();
