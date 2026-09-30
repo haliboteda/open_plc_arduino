@@ -1,7 +1,6 @@
 # just a trampoline to avoid overwhelming the main CMakeLists.txt
 
 add_subdirectory(CMSIS_DSP)
-add_subdirectory(EEPROM)
 add_subdirectory(IWatchdog)
 add_subdirectory(Keyboard)
 add_subdirectory(Mouse)

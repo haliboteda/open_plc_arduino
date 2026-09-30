@@ -39,7 +39,6 @@ build_sketch(TARGET "BareMinimum"
   BareMinimum.ino
   DEPENDS
   CMSIS_DSP
-  EEPROM
   IWatchdog
   Servo
   SoftwareSerial

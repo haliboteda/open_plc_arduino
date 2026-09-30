@@ -81,25 +81,26 @@
 #endif
 
 /* -----------------------------------------------------------------------
- * Flash NVM layout (STM32H743, dual-bank, 128 KB / sector)
+ * Flash NVM layout: both blocks share Bank 2 Sector 6 (0x081C0000), the last
+ * sector of the application area. Sector 7 belongs to the bootloader and must
+ * never be written from an application.
  *
- *   Bank 2, Sector 6  0x081C0000  KNX stack NVM (reference library ETS data)
- *   Bank 2, Sector 7  0x081E0000  Application NVM (KnxNvmConfig)
+ *   +0                  KNX stack NVM (reference library ETS data), KNX_FLASH_SIZE
+ *   +KNX_FLASH_SIZE     Application NVM (KnxNvmConfig)
+ *
+ * One erase covers both, so every save rewrites both (knx_nvm_sector_write).
+ * A sketch linking this library must therefore end below 0x081C0000; the
+ * board package's postbuild step enforces it.
  * --------------------------------------------------------------------- */
-#ifndef KNX_STACK_NVM_FLASH_ADDR
-#  define KNX_STACK_NVM_FLASH_ADDR    0x081C0000U
-#  define KNX_STACK_NVM_FLASH_BANK    FLASH_BANK_2
-#  define KNX_STACK_NVM_FLASH_SECTOR  FLASH_SECTOR_6
-#endif
-#ifndef KNX_APP_NVM_FLASH_ADDR
-#  define KNX_APP_NVM_FLASH_ADDR      0x081E0000U
-#  define KNX_APP_NVM_FLASH_BANK      FLASH_BANK_2
-#  define KNX_APP_NVM_FLASH_SECTOR    FLASH_SECTOR_7
-#endif
 /* Reference library NVM size in bytes (must be multiple of 32 for H7 programming) */
 #ifndef KNX_FLASH_SIZE
 #  define KNX_FLASH_SIZE              4096u
 #endif
+#define KNX_NVM_FLASH_ADDR            0x081C0000U
+#define KNX_NVM_FLASH_BANK            FLASH_BANK_2
+#define KNX_NVM_FLASH_SECTOR          FLASH_SECTOR_6
+#define KNX_STACK_NVM_FLASH_ADDR      KNX_NVM_FLASH_ADDR
+#define KNX_APP_NVM_FLASH_ADDR        (KNX_NVM_FLASH_ADDR + KNX_FLASH_SIZE)
 
 /* -----------------------------------------------------------------------
  * UART receive ring buffer

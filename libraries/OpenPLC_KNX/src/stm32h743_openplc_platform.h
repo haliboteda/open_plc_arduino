@@ -114,10 +114,6 @@ private:
     uint8_t *_eepromBuf;
     uint32_t _eepromSize;
 
-    /* HAL Flash helpers */
-    bool _flashEraseSector(uint32_t bank, uint32_t sector);
-    bool _flashWriteBuffer(uint32_t addr, const uint8_t* data, size_t size);
-
     /* LwIP receive callback (static → routes to instance) */
     static void _udpRecvCb(void* arg, struct udp_pcb* pcb, struct pbuf* p,
                            const ip_addr_t* addr, u16_t port);

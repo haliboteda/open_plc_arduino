@@ -4,7 +4,6 @@
  * and can not be executed.
  */
 
-#include <EEPROM.h>
 #ifndef STM32MP1xx
 #include <IWatchdog.h>
 #endif
@@ -89,10 +88,6 @@ void setup() {
     }
   }
   swSerial.end();
-
-  // EEPROM
-  byte value = EEPROM.read(0x01);
-  EEPROM.write(EEPROM.length()-1, value);
 
 #ifndef STM32MP1xx
   // IWDG

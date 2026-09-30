@@ -47,9 +47,10 @@ void setup()
     delay(500);
     Serial_Test.println("=== KNX TP Transmit Test (MASK 0x5780 - IP+TP dual) ===");
 
-    /* Erase KNX stack NVM (Flash Bank2 Sector6, 0x081C0000) before setup().
+    /* Erase the KNX sector (Flash Bank2 Sector6, 0x081C0000) before setup().
      * Required after a MASK_VERSION change: old table data causes a crash
-     * inside KNXHelper.setup() during restoration. */
+     * inside KNXHelper.setup() during restoration. This also clears the
+     * application NVM stored in the same sector; setup() restores defaults. */
     {
         Serial_Test.print("Erasing stack NVM (Sector 6)... ");
         FLASH_EraseInitTypeDef e;

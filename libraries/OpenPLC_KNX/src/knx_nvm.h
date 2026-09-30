@@ -11,10 +11,9 @@
  *
  * KNX stack internals (individual address, group address table, etc.) are
  * stored separately by the reference library via the Platform NVM interface
- * (see stm32h743_openplc_platform.cpp, KNX_STACK_NVM_* constants).
+ * (see stm32h743_openplc_platform.cpp).
  *
- * Storage: STM32H743 internal Flash, Bank 2 Sector 7 (0x081E0000, 128 KB).
- * Only the first sizeof(KnxNvmConfig) bytes of that sector are used.
+ * Storage: Bank 2 Sector 6, right after the stack block; layout in knx_config.h.
  */
 
 #define KNX_NVM_MAGIC              0x4F504B58u  /* "OPKX" */
@@ -62,6 +61,11 @@ void knx_nvm_set_defaults(KnxNvmConfig *config, uint16_t default_addr);
 bool knx_nvm_load(KnxNvmConfig *config);
 bool knx_nvm_save(KnxNvmConfig *config);
 bool knx_nvm_is_valid(const KnxNvmConfig *config);
+
+/* Erases the KNX sector and writes both blocks back. NULL keeps what is in
+ * flash for that block. stack_len must not exceed KNX_FLASH_SIZE. */
+bool knx_nvm_sector_write(const uint8_t *stack, uint32_t stack_len,
+                          const KnxNvmConfig *app);
 
 #ifdef __cplusplus
 }

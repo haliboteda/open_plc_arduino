@@ -1,4 +1,5 @@
 #include "stm32h743_openplc_platform.h"
+#include "knx_nvm.h"
 #include "uart.h"       /* STM32duino low-level UART API (uart_init, etc.) */
 #include "PinNames.h"   /* PA_10_ALT1, PB_14 */
 #include <string.h>
@@ -355,46 +356,11 @@ bool Stm32H743OpenPLCPlatform::sendBytesUniCast(uint32_t addr, uint16_t port,
 }
 
 /* =========================================================================
- * NVM - Eeprom type, backed by Flash Bank 2 Sector 6
+ * NVM - Eeprom type, backed by the KNX sector (layout in knx_config.h)
  *
  * getEepromBuffer: allocate RAM buffer, load from Flash on first call
- * commitToEeprom:  erase sector, write buffer back in 32-byte chunks
+ * commitToEeprom:  rewrite the sector, keeping the application NVM block
  * ======================================================================= */
-
-bool Stm32H743OpenPLCPlatform::_flashEraseSector(uint32_t bank, uint32_t sector)
-{
-    FLASH_EraseInitTypeDef eraseInit;
-    eraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-    eraseInit.Banks     = bank;
-    eraseInit.Sector    = sector;
-    eraseInit.NbSectors = 1u;
-
-    uint32_t sectorError = 0u;
-    return (HAL_FLASHEx_Erase(&eraseInit, &sectorError) == HAL_OK);
-}
-
-bool Stm32H743OpenPLCPlatform::_flashWriteBuffer(uint32_t       addr,
-                                                   const uint8_t* data,
-                                                   size_t         size)
-{
-    uint8_t buf[32u] __attribute__((aligned(32u)));
-    size_t  offset = 0u;
-
-    while (offset < size) {
-        memset(buf, 0xFFu, 32u);
-        size_t chunk = ((size - offset) > 32u) ? 32u : (size - offset);
-        memcpy(buf, data + offset, chunk);
-
-        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD,
-                              addr + offset,
-                              (uint32_t)(uintptr_t)buf) != HAL_OK) {
-            return false;
-        }
-        /* Round up to next 32-byte boundary */
-        offset += 32u;
-    }
-    return true;
-}
 
 uint8_t* Stm32H743OpenPLCPlatform::getEepromBuffer(uint32_t size)
 {
@@ -415,15 +381,6 @@ void Stm32H743OpenPLCPlatform::commitToEeprom()
 {
     if (_eepromBuf == nullptr || _eepromSize == 0u) return;
 
-    HAL_FLASH_Unlock();
-
-    bool ok = _flashEraseSector(KNX_STACK_NVM_FLASH_BANK,
-                                 KNX_STACK_NVM_FLASH_SECTOR);
-    if (ok) {
-        ok = _flashWriteBuffer(KNX_STACK_NVM_FLASH_ADDR,
-                                _eepromBuf, _eepromSize);
-    }
-
-    HAL_FLASH_Lock();
-    (void)ok; /* caller (Platform base) doesn't check return value */
+    /* caller (Platform base) doesn't check the return value */
+    (void)knx_nvm_sector_write(_eepromBuf, _eepromSize, NULL);
 }

@@ -51,7 +51,9 @@ MEMORY
      convention. Keep this identical to the bootloader's
      open_plc_cube_ide/STM32H743IIKX_FLASH.ld. */
   RAM_D3    (xrw)    : ORIGIN = 0x38000020,   LENGTH = 64K - 32
-  FLASH    (rx)    : ORIGIN = 0x8000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE - LD_FLASH_OFFSET
+  /* LD_MAX_SIZE is already the app's own size (upload.maximum_size ==
+     IAP_APP_MAX_SIZE), so the offset must not be subtracted again. */
+  FLASH    (rx)    : ORIGIN = 0x8000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE
 }
 
 /* Define output sections */

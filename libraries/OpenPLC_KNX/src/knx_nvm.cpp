@@ -3,15 +3,9 @@
 #include <string.h>
 
 /*
- * Application NVM stored in STM32H743 internal Flash:
- *   Bank 2, Sector 7 - 0x081E0000, 128 KB sector
- *
- * The STM32H743 requires 256-bit (32-byte) aligned writes.
- * On read, the Flash is directly memory-mapped so we just memcpy.
- * On write, we erase the whole sector then reprogram in 32-byte chunks.
- *
- * KNX stack NVM (ETS programming data) lives in Bank 2 Sector 6 (0x081C0000)
- * and is managed independently by stm32h743_openplc_platform.cpp.
+ * Application NVM and the KNX stack NVM share one flash sector (layout in
+ * knx_config.h). The STM32H743 programs 256-bit (32-byte) flash words; reads
+ * are memory-mapped, so a load is a memcpy.
  */
 
 /* -------------------------------------------------------------------------
@@ -85,53 +79,70 @@ bool knx_nvm_load(KnxNvmConfig *config)
 }
 
 /* -------------------------------------------------------------------------
- * Save - erase sector, write 32-byte aligned chunks
+ * Save - both blocks share one erase unit, so every save rewrites both
  * ---------------------------------------------------------------------- */
+
+/* Programs 32-byte flash words; words that are all 0xFF are left erased. */
+static bool knx_flash_write(uint32_t addr, const uint8_t *data, uint32_t size)
+{
+    /* Aligned buffer; must stay valid until HAL_FLASH_Program returns */
+    uint8_t buf[32u] __attribute__((aligned(32u)));
+    uint8_t erased[32u];
+    memset(erased, 0xFFu, sizeof(erased));
+
+    for (uint32_t offset = 0u; offset < size; offset += 32u) {
+        uint32_t chunk = (size - offset > 32u) ? 32u : (size - offset);
+        memset(buf, 0xFFu, sizeof(buf));
+        memcpy(buf, data + offset, chunk);
+        if (memcmp(buf, erased, sizeof(buf)) == 0) continue;
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, addr + offset,
+                              (uint32_t)(uintptr_t)buf) != HAL_OK) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool knx_nvm_sector_write(const uint8_t *stack, uint32_t stack_len,
+                          const KnxNvmConfig *app)
+{
+    /* Copies of the block the caller is not changing, taken before the erase. */
+    static uint8_t      s_stack[KNX_FLASH_SIZE];
+    static KnxNvmConfig s_app;
+
+    if (stack == NULL) {
+        memcpy(s_stack, (const void *)KNX_STACK_NVM_FLASH_ADDR, sizeof(s_stack));
+        stack     = s_stack;
+        stack_len = sizeof(s_stack);
+    }
+    if (stack_len > KNX_FLASH_SIZE) return false;
+    if (app == NULL) {
+        memcpy(&s_app, (const void *)KNX_APP_NVM_FLASH_ADDR, sizeof(s_app));
+        app = &s_app;
+    }
+
+    HAL_FLASH_Unlock();
+
+    FLASH_EraseInitTypeDef eraseInit;
+    eraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+    eraseInit.Banks     = KNX_NVM_FLASH_BANK;
+    eraseInit.Sector    = KNX_NVM_FLASH_SECTOR;
+    eraseInit.NbSectors = 1u;
+
+    uint32_t sectorError = 0u;
+    bool ok = (HAL_FLASHEx_Erase(&eraseInit, &sectorError) == HAL_OK)
+           && knx_flash_write(KNX_STACK_NVM_FLASH_ADDR, stack, stack_len)
+           && knx_flash_write(KNX_APP_NVM_FLASH_ADDR, (const uint8_t *)app,
+                              sizeof(KnxNvmConfig));
+
+    HAL_FLASH_Lock();
+    return ok;
+}
 
 bool knx_nvm_save(KnxNvmConfig *config)
 {
     if (config == NULL) return false;
 
     config->checksum = knx_nvm_checksum(config);
-
-    HAL_FLASH_Unlock();
-
-    /* Erase Bank 2 Sector 7 */
-    FLASH_EraseInitTypeDef eraseInit;
-    eraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-    eraseInit.Banks     = KNX_APP_NVM_FLASH_BANK;
-    eraseInit.Sector    = KNX_APP_NVM_FLASH_SECTOR;
-    eraseInit.NbSectors = 1u;
-
-    uint32_t sectorError = 0u;
-    if (HAL_FLASHEx_Erase(&eraseInit, &sectorError) != HAL_OK) {
-        HAL_FLASH_Lock();
-        return false;
-    }
-
-    /* Write in 32-byte (256-bit) aligned chunks */
-    const uint8_t *src    = (const uint8_t *)config;
-    uint32_t       addr   = KNX_APP_NVM_FLASH_ADDR;
-    size_t         total  = sizeof(KnxNvmConfig);
-    size_t         offset = 0u;
-
-    /* Aligned buffer on stack; must stay valid until HAL_FLASH_Program returns */
-    uint8_t buf[32u] __attribute__((aligned(32u)));
-
-    while (offset < total) {
-        memset(buf, 0xFFu, sizeof(buf));
-        size_t chunk = (total - offset > 32u) ? 32u : (total - offset);
-        memcpy(buf, src + offset, chunk);
-
-        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD,
-                              addr + offset,
-                              (uint32_t)(uintptr_t)buf) != HAL_OK) {
-            HAL_FLASH_Lock();
-            return false;
-        }
-        offset += 32u;
-    }
-
-    HAL_FLASH_Lock();
-    return true;
+    return knx_nvm_sector_write(NULL, 0u, config);
 }
