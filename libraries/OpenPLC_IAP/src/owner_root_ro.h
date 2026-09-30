@@ -6,8 +6,8 @@
  * Added 2026-09-04 alongside the session-auth switch to ECDSA-via-certificate
  * (see $PROD/docs/modules/M2-ownership.md): the app needs a trusted root to check a
  * certificate against for `openplc_server_reboot`, and the only place that
- * answer lives is the owner-record area in the bootloader's own flash sector
- * -- there was no channel handing it to the app before this. The area is
+ * answer lives is the root area in sector 15 -- there was no channel handing
+ * it to the app before this. The area is
  * memory-mapped flash on the same chip the app is running on (no WRP/RDP), so
  * this reads it directly rather than inventing a new communication path.
  *
@@ -35,9 +35,9 @@ extern "C" {
 #endif
 
 /* The root this board currently trusts: the last verified link in the
- * on-flash owner chain, or the compiled-in fw_public_key when the area is
- * empty or resolves to nothing valid. Writes 64 bytes to out. */
-void owner_root_ro_get(uint8_t out[64]);
+ * on-flash owner chain. Writes 64 bytes to out and returns true; returns
+ * false when the board has no root (decision 72), and nothing verifies. */
+bool owner_root_ro_get(uint8_t out[64]);
 
 /*
  * Has this leaf been revoked by a signed 'R' record in the trusted chain?

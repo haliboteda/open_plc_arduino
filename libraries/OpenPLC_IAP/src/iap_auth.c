@@ -73,7 +73,9 @@ bool iap_auth_verify_and_consume(const uint8_t *msg, uint32_t msg_len,
 		return false;
 	}
 
-	owner_root_ro_get(root);
+	if (!owner_root_ro_get(root)) {
+		return false;   /* no root: nothing can authorise a session */
+	}
 	if (!iap_cert_verify(cert, root, owner_root_ro_is_revoked(cert->leaf_pubkey))) {
 		return false;
 	}

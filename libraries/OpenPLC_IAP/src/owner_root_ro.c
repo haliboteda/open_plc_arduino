@@ -3,7 +3,6 @@
  */
 
 #include "owner_root_ro.h"
-#include "fw_pubkey.h"
 #include "fw_verify.h"
 #include "iap_keyderive.h"
 #include "sha256.h"
@@ -16,7 +15,7 @@
  * memory-mapped flash; the firmware build never defines it. See T2-21 in
  * $PROD/docs/modules/M2-ownership.md. */
 #ifndef OWNER_SLOT_BASE
-#define OWNER_SLOT_BASE          0x0801E000UL
+#define OWNER_SLOT_BASE          0x081E2000UL
 #endif
 #define OWNER_RECORD_SIZE        160U
 #define OWNER_SLOT_MAX_RECORDS   32U
@@ -169,11 +168,14 @@ static void resolve_chain(void)
 			}
 		} else {
 			uint8_t digest[SHA256_DIGEST_SIZE];
-			const uint8_t *signer = ((current != NULL) && !prev_cleared)
-					? current->root_pubkey : fw_public_key;
 
+			/* No root in force before it: nothing to verify against. */
+			if ((current == NULL) || prev_cleared) {
+				break;
+			}
 			sha256((const uint8_t *)next, OWNER_SIGNED_PREFIX_LEN, digest);
-			if (!fw_verify_signature_with_key(signer, digest, next->prev_sig)) {
+			if (!fw_verify_signature_with_key(current->root_pubkey, digest,
+					next->prev_sig)) {
 				break;
 			}
 		}
@@ -205,15 +207,15 @@ static void resolve_chain(void)
 	}
 }
 
-void owner_root_ro_get(uint8_t out[64])
+bool owner_root_ro_get(uint8_t out[64])
 {
 	resolve_chain();
 
-	if ((s_effective != NULL) && !s_effective_cleared) {
-		memcpy(out, s_effective->root_pubkey, 64U);
-	} else {
-		memcpy(out, fw_public_key, 64U);
+	if ((s_effective == NULL) || s_effective_cleared) {
+		return false;
 	}
+	memcpy(out, s_effective->root_pubkey, 64U);
+	return true;
 }
 
 bool owner_root_ro_is_revoked(const uint8_t leaf_pubkey[64])
@@ -221,8 +223,9 @@ bool owner_root_ro_is_revoked(const uint8_t leaf_pubkey[64])
 	uint8_t root[64];
 	uint32_t i;
 
-	resolve_chain();
-	owner_root_ro_get(root);
+	if (!owner_root_ro_get(root)) {
+		return false;
+	}
 
 	for (i = 0U; i < s_revoke_count; i++) {
 		const uint8_t *entry = s_revoke_records[i]->leaf_prefix;
