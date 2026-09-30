@@ -1,5 +1,7 @@
 # OpenPLC_SDRAM
 
+中文：[README.zh-CN.md](README.zh-CN.md)
+
 Use the board's 64 MB external SDRAM (AS4C32M16SB, on the FMC bus at
 `0xC0000000`) from an application.
 

@@ -1,5 +1,7 @@
 # OpenPLC_Ports
 
+中文：[README.zh-CN.md](README.zh-CN.md)
+
 One example per port of the OpenPLC board. Open one from
 **File ▸ Examples ▸ OpenPLC_Ports**, upload it, and open the Serial Monitor.
 
