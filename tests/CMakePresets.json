@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "host",
+      "displayName": "Host compiler (set it in CMakeUserPresets.json, which is gitignored)",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

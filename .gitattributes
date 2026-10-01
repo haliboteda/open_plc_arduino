@@ -1,0 +1,4 @@
+# The tests never ship: the board package release is GitHub's tag archive
+# of this repo, which honours export-ignore.
+tests/ export-ignore
+CLAUDE.md export-ignore

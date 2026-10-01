@@ -11,3 +11,7 @@
 .claude/settings.local.json*
 
 Debug/
+# Host test build output and this machine's compiler preset (tests/).
+tests/build/
+tests/CMakeUserPresets.json
+__pycache__/
