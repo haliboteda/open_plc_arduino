@@ -37,3 +37,16 @@ KNX 和外部 SDRAM 有各自的库 `OpenPLC_KNX` 和 `OpenPLC_SDRAM`，例程�
 
 板子没有外部电压基准。`openplcEnableVref()` 打开芯片内部的 2.5 V 基准；
 模拟量和温度的例程都先调用它。不开的话，所有模拟量读数都没有意义。
+
+## 用 mV、mA 读写模拟量，并套用这块板的校准值
+
+| 函数 | 给什么 |
+|---|---|
+| `openplcReadAI1_mV()` | AI1 的电压，mV（0–10 V 输入） |
+| `openplcReadAI2_mA()` | AI2 的电流，mA（0–20 mA 输入） |
+| `openplcWriteAO_mA(channel, mA)` | 把 AO1（`channel` 取 1）或 AO2（`channel` 取 2）设成一个电流，单位 mA，超出 0–20 mA 截到边界 |
+| `openplcCalibrationStatus()` | 这块板的校准值是否有效：`CALIB_OK`，或 `CALIB_BLANK` / `CALIB_CORRUPT` / `CALIB_OTHER_BOARD` |
+
+每块板都在产线工装上校准过，这几个函数会套用那份修正值。没有有效校准值的板子退回标称换算，
+并在诊断串口打一行说明。它们自己打开内部基准，并把 ADC、DAC 的分辨率留在 12 位。
+`analogRead()` / `analogWrite()` 不变，仍是原始值。

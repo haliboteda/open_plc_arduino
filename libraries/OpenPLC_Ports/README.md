@@ -43,3 +43,18 @@ KNX and the external SDRAM have their own libraries, `OpenPLC_KNX` and
 The board has no external voltage reference. `openplcEnableVref()` turns on the
 chip's internal 2.5 V reference; the analog and temperature examples call it
 first. Without it every analog reading is meaningless.
+
+## Analog values in mV and mA, with this board's calibration
+
+| Function | What it gives |
+|---|---|
+| `openplcReadAI1_mV()` | AI1 voltage in mV (0–10 V input) |
+| `openplcReadAI2_mA()` | AI2 current in mA (0–20 mA input) |
+| `openplcWriteAO_mA(channel, mA)` | sets AO1 (`channel` 1) or AO2 (`channel` 2) to a current in mA, clamped to 0–20 mA |
+| `openplcCalibrationStatus()` | whether this board's calibration is valid: `CALIB_OK`, or `CALIB_BLANK` / `CALIB_CORRUPT` / `CALIB_OTHER_BOARD` |
+
+Each board is calibrated on the production fixture; these functions apply that
+correction. A board without valid calibration falls back to the nominal
+conversion and prints one line saying so on the diagnostic serial port. They
+turn on the internal reference themselves and leave the ADC and DAC at 12-bit
+resolution. `analogRead()` / `analogWrite()` are unchanged and stay raw.

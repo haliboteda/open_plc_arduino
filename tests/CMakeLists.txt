@@ -25,3 +25,16 @@ target_include_directories(owner_revoke_test PRIVATE owner_revoke/stubs ${IAP})
 target_compile_options(owner_revoke_test PRIVATE
   -include ${CMAKE_CURRENT_SOURCE_DIR}/owner_revoke/stubs/fake_owner_area.h)
 add_test(NAME T2-21 COMMAND owner_revoke_test)
+
+# --- T3-07: AI / AO in mV and mA apply the calibration, or fall back ---------
+set(PORTS "${CORE_ROOT}/libraries/OpenPLC_Ports/src")
+add_executable(calib_test
+  ${PORTS}/openplc_calib.c ${PORTS}/openplc_analog.c calibrated_analog/test_main.c)
+target_include_directories(calib_test PRIVATE calibrated_analog/stubs ${PORTS})
+# test_hooks.h redirects the calibration area and the log line to the test.
+target_compile_options(calib_test PRIVATE
+  -include ${CMAKE_CURRENT_SOURCE_DIR}/calibrated_analog/stubs/test_hooks.h)
+target_link_libraries(calib_test PRIVATE m)
+foreach(c ok blank corrupt other)
+  add_test(NAME T3-07.${c} COMMAND calib_test ${c})
+endforeach()

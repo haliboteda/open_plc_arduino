@@ -58,7 +58,7 @@ arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 
 本仓自己的测试都在 `tests/`，只测板卡包，不需要别的仓（决策 78）。**不进发布包**：`.gitattributes` 里 `tests/ export-ignore`，GitHub 按 tag 打的发布包不含它。
 
 ```
-python tests/selfcheck.py          # P3、P19、P4、P15、T2-21，几分钟
+python tests/selfcheck.py          # P3、P19、P4、P15、T2-21、T3-07，几分钟
 python tests/selfcheck.py --full   # 再加 P5（全部例程能编过），约 45 分钟
 ```
 
@@ -70,8 +70,9 @@ python tests/selfcheck.py --full   # 再加 P5（全部例程能编过），约 
 | P15 | app 起始地址保持 1024 对齐 | `tests/vector_alignment/` |
 | P5 | 全部例程能编过 | `tests/examples_build/` |
 | T2-21 | 当前生效的根撤不掉自己（编真的 `owner_root_ro.c`） | `tests/owner_revoke/`，CMake/CTest |
+| T3-07 | 带单位 AI / AO 套用校准值，无效时退回标称且只打一次日志（编真的 `openplc_calib.c`、`openplc_analog.c`） | `tests/calibrated_analog/`，CMake/CTest |
 
-**不用本机配置文件**，路径全从环境变量来，缺什么就报 SKIP 并点名：`ARDUINO_CLI`（IDE 自带的那个不在 PATH 上）、`ARDUINO_CLI_CONFIG`、`CMAKE`（不在 PATH 上时）；`ARDUINO15` / `CORE_LIVE` 一般不用设，按平台默认位置找。T2-21 的本机编译器写在 `tests/CMakeUserPresets.json`（gitignored，preset 名 `local`，继承 `tests/CMakePresets.json` 的 `host`）。
+**不用本机配置文件**，路径全从环境变量来，缺什么就报 SKIP 并点名：`ARDUINO_CLI`（IDE 自带的那个不在 PATH 上）、`ARDUINO_CLI_CONFIG`、`CMAKE`（不在 PATH 上时）；`ARDUINO15` / `CORE_LIVE` 一般不用设，按平台默认位置找。T2-21、T3-07 的本机编译器写在 `tests/CMakeUserPresets.json`（gitignored，preset 名 `local`，继承 `tests/CMakePresets.json` 的 `host`）。
 
 ⚠️ **P4、P5、P15 编的是 `$CORE_LIVE`，不是本仓。** arduino-cli 不肯把本仓当板卡包加载：`platform.txt` 的 `version=0.1.0rc0` 不是合法版本号，放进 sketchbook 的 `hardware/` 时报 `invalid patch version separator 'r'`（2026-10-02 实测）。P3 保证两份一致，所以先过 P3 再看这三项。
 

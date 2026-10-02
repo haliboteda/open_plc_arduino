@@ -1,11 +1,11 @@
 """Every board-package test that needs no board. Run it after every change.
 
-    python tests/selfcheck.py          P3, P19, P4, P15, T2-21
+    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07
     python tests/selfcheck.py --full   the same, plus P5 (about 45 minutes)
 
 Needs: arduino-cli (PATH or ARDUINO_CLI, plus ARDUINO_CLI_CONFIG for the IDE's
 bundled one), the board package installed in the IDE, cmake and a host C
-compiler for T2-21. A missing tool is reported as SKIP by name, never as PASS.
+compiler for T2-21 and T3-07. A missing tool is reported as SKIP by name, never as PASS.
 Paths and variables: tests/_common.py.
 
 Exit 0 = nothing failed, 1 = something failed.
@@ -40,24 +40,33 @@ def run_py(step, what, script, needs_cli):
     results.append((step, what, "PASS" if rc == 0 else "FAIL (exit %d)" % rc, ""))
 
 
+CTESTS = [
+    ("T2-21", "the root in force cannot revoke itself (real owner_root_ro.c, CTest)", "^T2-21$"),
+    ("T3-07", "AI / AO in mV and mA apply the calibration, or fall back (CTest)", "^T3-07[.]"),
+]
+
+
 def run_ctest():
-    step, what = "T2-21", "the root in force cannot revoke itself (real owner_root_ro.c, CTest)"
-    Section("%s  %s" % (step, what))
     cmake = os.environ.get("CMAKE") or shutil.which("cmake")
     if not cmake:
-        results.append((step, what, "SKIP", "cmake not found (PATH or CMAKE)"))
+        for step, what, _ in CTESTS:
+            results.append((step, what, "SKIP", "cmake not found (PATH or CMAKE)"))
         return
     ctest = str(Path(cmake).with_name("ctest" + Path(cmake).suffix))
     # A gitignored CMakeUserPresets.json names this machine's compiler.
     preset = "local" if (TESTS / "CMakeUserPresets.json").exists() else "host"
-    for argv in ([cmake, "--preset", preset],
-                 [cmake, "--build", str(TESTS / "build")],
-                 [ctest, "--test-dir", str(TESTS / "build"), "--output-on-failure"]):
+    Section("build the host tests")
+    for argv in ([cmake, "--preset", preset], [cmake, "--build", str(TESTS / "build")]):
         rc = subprocess.call(argv, cwd=str(TESTS))
         if rc != 0:
-            results.append((step, what, "FAIL (exit %d)" % rc, Path(argv[0]).stem))
+            for step, what, _ in CTESTS:
+                results.append((step, what, "FAIL (exit %d)" % rc, Path(argv[0]).stem))
             return
-    results.append((step, what, "PASS", ""))
+    for step, what, regex in CTESTS:
+        Section("%s  %s" % (step, what))
+        rc = subprocess.call([ctest, "--test-dir", str(TESTS / "build"), "--output-on-failure", "-R", regex],
+                             cwd=str(TESTS))
+        results.append((step, what, "PASS" if rc == 0 else "FAIL (exit %d)" % rc, ""))
 
 
 def main():

@@ -16,4 +16,16 @@
  * the reference did not come up within 10 ms. */
 bool openplcEnableVref(void);
 
+#include "openplc_calib.h"
+
+/* AI / AO in mV and mA with this board's calibration; nominal conversion and
+ * one log line when the calibration is not valid. They enable the reference
+ * themselves and leave the ADC and DAC at 12 bits. See
+ * $PROD/docs/modules/M3/CALIBRATED-ANALOG.md. */
+float openplcReadAI1_mV(void);
+float openplcReadAI2_mA(void);
+/* channel 1 = AO1, 2 = AO2; mA is clamped to 0..20. */
+void openplcWriteAO_mA(uint8_t channel, float mA);
+calib_status_t openplcCalibrationStatus(void);
+
 #endif /* OPENPLC_PORTS_H_ */

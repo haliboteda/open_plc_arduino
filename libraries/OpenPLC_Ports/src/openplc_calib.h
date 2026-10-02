@@ -15,7 +15,10 @@
 extern "C" {
 #endif
 
+/* Overridable so the host test (T3-07) can point it at a RAM buffer. */
+#ifndef CALIB_AREA_ADDR
 #define CALIB_AREA_ADDR   0x081E0000UL
+#endif
 #define CALIB_AREA_SIZE   (8U * 1024U)
 
 #define CALIB_MAGIC       0x4C41434FUL   /* "OCAL" */
@@ -56,6 +59,11 @@ typedef enum {
 /* Copies the area into *out when it is valid for this board. On anything but
  * CALIB_OK, *out holds gain 1 / offset 0 for every channel, i.e. nominal. */
 calib_status_t openplc_calib_load(calib_area_t *out);
+
+/* The same checks on an area already in memory, against the given chip UID
+ * (w0 w1 w2). openplc_calib_load() is this applied to the flash copy. */
+calib_status_t openplc_calib_check(const calib_area_t *a, const uint32_t uid[3],
+                                   calib_area_t *out);
 
 #ifdef __cplusplus
 }

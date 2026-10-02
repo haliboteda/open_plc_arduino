@@ -1,37 +1,36 @@
 /*
  * AI_Inputs -- the two analog inputs: AI1 measures voltage, AI2 current.
  *
- * What it does: prints AI1 in millivolts and AI2 in microamps once a second.
+ * What it does: prints AI1 in millivolts and AI2 in milliamps once a second,
+ *   corrected with this board's calibration from the production fixture.
  * Connect: a 0..10 V source on AI1, a 0..20 mA source on AI2.
  *   Both need their solder jumpers closed on the board, or they read about 0.
- * Expect: the printed value follows the source (full scale 10 V and 20 mA).
+ * Expect: first a line saying whether the board is calibrated, then the
+ *   printed values follow the source (full scale 10000 mV and 20 mA). An
+ *   uncalibrated board still reads, with the nominal conversion.
  * Serial Monitor: the board's USB port, 115200 baud.
  */
 
 #include <OpenPLC_Ports.h>
 
-OPENPLC_APP_VERSION(1, 0, 0);
+OPENPLC_APP_VERSION(1, 1, 0);
 
 void setup() {
   Serial.begin(115200);
   while (!Serial && millis() < 3000) {}
-  if (!openplcEnableVref()) {
-    Serial.println("AI_Inputs: the internal reference did not start; readings are meaningless.");
+  if (openplcCalibrationStatus() == CALIB_OK) {
+    Serial.println("AI_Inputs: this board is calibrated.");
+  } else {
+    Serial.println("AI_Inputs: no valid calibration, nominal conversion.");
   }
-  analogReadResolution(12);
-  Serial.println("AI_Inputs: AI1 in mV, AI2 in uA, once a second.");
+  Serial.println("AI_Inputs: AI1 in mV, AI2 in mA, once a second.");
 }
 
 void loop() {
-  uint32_t pin1 = analogRead(AIN_1) * OPENPLC_VREF_MV / 4095;
-  uint32_t pin2 = analogRead(AIN_2) * OPENPLC_VREF_MV / 4095;
-  uint32_t ai1_mv = pin1 * 40089 / 10000;  // 22.6k / 90.6k divider
-  uint32_t ai2_ua = pin2 * 1000 / 124;     // 124 R shunt
-
   Serial.print("AI1 = ");
-  Serial.print(ai1_mv);
+  Serial.print(openplcReadAI1_mV(), 0);
   Serial.print(" mV   AI2 = ");
-  Serial.print(ai2_ua);
-  Serial.println(" uA");
+  Serial.print(openplcReadAI2_mA(), 3);
+  Serial.println(" mA");
   delay(1000);
 }
