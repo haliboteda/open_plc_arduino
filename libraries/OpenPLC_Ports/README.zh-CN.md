@@ -50,3 +50,34 @@ KNX 和外部 SDRAM 有各自的库 `OpenPLC_KNX` 和 `OpenPLC_SDRAM`，例程�
 每块板都在产线工装上校准过，这几个函数会套用那份修正值。没有有效校准值的板子退回标称换算，
 并在诊断串口打一行说明。它们自己打开内部基准，并把 ADC、DAC 的分辨率留在 12 位。
 `analogRead()` / `analogWrite()` 不变，仍是原始值。
+
+## 上电、复位、掉电时输出的状态
+
+在你的 sketch 第一次写某个输出之前，板子让所有输出保持为 0。
+
+| 输出 | 上电、复位后 bootloader 跑起来之前 | bootloader 运行时，以及 sketch 第一次写之前 | 掉电 |
+|---|---|---|---|
+| 继电器 RY1–RY6 | 断开 | 断开 | 断开 |
+| 数字输出 DO1–DO8 | 断开 | 断开（bootloader 主动拉低） | 断开 |
+| 模拟输出 AO1/AO2 | **不确定**，几毫秒 | 0 mA（bootloader 把输入拉低） | **不确定**，几毫秒 |
+
+两个「不确定」的窗口还没实测，之后用示波器量。
+
+3.3 V 电源掉到 2.7 V 以下时，芯片自己复位（欠压复位），输出回到上面的状态。
+2.7 V 这个门限在出厂时设好；没设好的话，开机日志里会提示。
+
+## 看门狗和报警输出由你自己实现
+
+IEC 61131-2 要求 PLC 监视用户程序（看门狗），固定安装时还要有报警输出。板卡包不替你打开这两样：
+什么算故障、用哪一路输出报警，由你决定。
+
+- **看门狗**：用板卡包自带的 `IWatchdog` 库，在 `setup()` 里 `IWatchdog.begin(超时微秒数)`，
+  在 `loop()` 里 `IWatchdog.reload()`。程序卡在某处不再喂狗，板子就会复位。
+- **上次是不是看门狗复位的**：在 `setup()` 开头调 `openplcResetCause()`，返回
+  `OPENPLC_RESET_WATCHDOG`、`OPENPLC_RESET_POWER_ON`、`OPENPLC_RESET_PIN`、
+  `OPENPLC_RESET_SOFTWARE`、`OPENPLC_RESET_BROWNOUT` 或 `OPENPLC_RESET_UNKNOWN`。
+  不要用 `IWatchdog.isReset()`：它读的那个标志 bootloader 已经清掉了，在本板上永远是 false。
+- **每次都卡死的程序会每次都复位**，它控制的输出也跟着反复断开、接通。反复被看门狗复位之后怎么办，
+  在你的 sketch 里决定。
+- **报警输出**：选一路继电器或数字输出，设备正常时让它吸合，要报警时断开。这样掉电、复位、
+  卡死时它没人驱动、自己断开，报警自然就发出去了。

@@ -58,3 +58,43 @@ correction. A board without valid calibration falls back to the nominal
 conversion and prints one line saying so on the diagnostic serial port. They
 turn on the internal reference themselves and leave the ADC and DAC at 12-bit
 resolution. `analogRead()` / `analogWrite()` are unchanged and stay raw.
+
+## Outputs at power-up, reset and power loss
+
+Until your sketch first writes an output, the board keeps every output at 0.
+
+| Output | Power-up and reset, before the bootloader runs | Bootloader, and your sketch until its first write | Power loss |
+|---|---|---|---|
+| Relays RY1-RY6 | off | off | off |
+| Digital outputs DO1-DO8 | off | off (the bootloader drives them low) | off |
+| Analog outputs AO1/AO2 | **not defined** for a few milliseconds | 0 mA (the bootloader drives the input low) | **not defined** for a few milliseconds |
+
+The two "not defined" windows have not been measured yet; they will be checked
+with an oscilloscope.
+
+When the 3.3 V supply falls below 2.7 V the chip resets itself (brown-out
+reset), so the outputs return to the states above. The 2.7 V level is set once
+at production; if it is not, the boot log says so.
+
+## Watchdog and alarm output are yours to build
+
+IEC 61131-2 asks a PLC to watch the user program (a watchdog) and, when
+permanently installed, to drive an alarm output. The board package turns neither
+on for you: what counts as a fault and which output raises the alarm are your
+decisions.
+
+- **Watchdog**: use the `IWatchdog` library that ships with the board package,
+  `IWatchdog.begin(timeout_us)` in `setup()` and `IWatchdog.reload()` in
+  `loop()`. If your program then hangs in a loop, the board resets.
+- **Was the last reset a watchdog?** Call `openplcResetCause()` at the top of
+  `setup()`. It returns `OPENPLC_RESET_WATCHDOG`, `OPENPLC_RESET_POWER_ON`,
+  `OPENPLC_RESET_PIN`, `OPENPLC_RESET_SOFTWARE`, `OPENPLC_RESET_BROWNOUT` or
+  `OPENPLC_RESET_UNKNOWN`. Do not use `IWatchdog.isReset()`: the bootloader has
+  already cleared the flag it reads, so it is always false on this board.
+- **A program that hangs every time resets every time**, and the outputs it
+  drives go off and on again with it. Decide in your sketch what to do after
+  repeated watchdog resets.
+- **Alarm output**: pick a relay or a digital output and drive it on while the
+  machine is healthy; switch it off to raise the alarm. A power loss, a reset or
+  a hang then raises the alarm by themselves, because the output drops when
+  nothing drives it.

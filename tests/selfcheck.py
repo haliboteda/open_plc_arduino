@@ -1,11 +1,11 @@
 """Every board-package test that needs no board. Run it after every change.
 
-    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07
+    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07, T3-08
     python tests/selfcheck.py --full   the same, plus P5 (about 45 minutes)
 
 Needs: arduino-cli (PATH or ARDUINO_CLI, plus ARDUINO_CLI_CONFIG for the IDE's
 bundled one), the board package installed in the IDE, cmake and a host C
-compiler for T2-21 and T3-07. A missing tool is reported as SKIP by name, never as PASS.
+compiler for T2-21, T3-07 and T3-08. A missing tool is reported as SKIP by name, never as PASS.
 Paths and variables: tests/_common.py.
 
 Exit 0 = nothing failed, 1 = something failed.
@@ -43,6 +43,7 @@ def run_py(step, what, script, needs_cli):
 CTESTS = [
     ("T2-21", "the root in force cannot revoke itself (real owner_root_ro.c, CTest)", "^T2-21$"),
     ("T3-07", "AI / AO in mV and mA apply the calibration, or fall back (CTest)", "^T3-07[.]"),
+    ("T3-08", "the reset cause the bootloader publishes reaches the sketch (CTest)", "^T3-08[.]"),
 ]
 
 

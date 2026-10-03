@@ -64,3 +64,8 @@ bool openplcEnableVref(void)
   }
   return true;
 }
+
+openplc_reset_cause_t openplcResetCause(void)
+{
+  return openplc_reset_cause();
+}

@@ -28,4 +28,13 @@ float openplcReadAI2_mA(void);
 void openplcWriteAO_mA(uint8_t channel, float mA);
 calib_status_t openplcCalibrationStatus(void);
 
+#include "openplc_reset.h"
+
+/* Why the board last reset: watchdog, power-on, reset button, software. Use it
+ * at the top of setup() to decide what to do after a watchdog reset; the board
+ * package decides nothing on its own (decision 80). Upstream
+ * IWatchdog::isReset() always reads false on this board: the bootloader has
+ * already cleared the flag it looks at. */
+openplc_reset_cause_t openplcResetCause(void);
+
 #endif /* OPENPLC_PORTS_H_ */

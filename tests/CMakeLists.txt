@@ -38,3 +38,15 @@ target_link_libraries(calib_test PRIVATE m)
 foreach(c ok blank corrupt other)
   add_test(NAME T3-07.${c} COMMAND calib_test ${c})
 endforeach()
+
+# --- T3-08: the reset cause the bootloader publishes reaches the sketch -------
+add_executable(reset_cause_test
+  ${CORE_ROOT}/cores/arduino/stm32/IAP_boot_handoff.c ${PORTS}/openplc_reset.c
+  reset_cause/test_main.c)
+target_include_directories(reset_cause_test PRIVATE
+  reset_cause/stubs ${PORTS} ${CORE_ROOT}/cores/arduino/stm32)
+target_compile_options(reset_cause_test PRIVATE
+  -include ${CMAKE_CURRENT_SOURCE_DIR}/reset_cause/stubs/test_hooks.h)
+foreach(c watchdog poweron software pin corrupt blank)
+  add_test(NAME T3-08.${c} COMMAND reset_cause_test ${c})
+endforeach()
