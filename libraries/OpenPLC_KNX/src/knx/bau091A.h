@@ -22,10 +22,9 @@ class Bau091A : public BauSystemBCoupler, public ITpUartCallBacks, public DataLi
 
         IpDataLinkLayer* getPrimaryDataLinkLayer();
         StknxDataLinkLayer* getSecondaryDataLinkLayer();
-    protected:
         InterfaceObject* getInterfaceObject(uint8_t idx);
         InterfaceObject* getInterfaceObject(ObjectType objectType, uint16_t objectInstance);
-
+    protected:
         // For TP1 only
         TPAckType isAckRequired(uint16_t address, bool isGrpAddr) override;
 

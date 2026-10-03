@@ -28,6 +28,14 @@
 #define FRAME_GAP_MAX_US   (17u * BIT)
 #define FRAME_STALL_BITS   20u
 #define CTRL_NOT_REPEATED  0x20u
+#define CTRL_PRIO_NORMAL   0x04u   /* set in normal (01) and low (11) priority */
+
+/* Idle bits before a frame's first send. Repeats wait only the base 50. */
+static uint16_t first_send_idle(const stknx_link_t *l)
+{
+    return (uint16_t)(STKNX_IDLE_BEFORE_TX_BITS
+                      + ((l->tx[0] & CTRL_PRIO_NORMAL) ? STKNX_LOW_PRIORITY_EXTRA : 0u));
+}
 
 enum { TX_NONE = 0, TX_PENDING, TX_SENDING, TX_WAIT_ACK, TX_DONE_OK, TX_DONE_FAIL };
 enum { ACK_NONE = 0, ACK_DUE, ACK_SENDING };
@@ -324,7 +332,7 @@ uint8_t stknx_link_pulse(stknx_link_t *l, uint16_t t_us)
         if (++l->tx_losses > STKNX_ARB_LOSSES_MAX) {
             tx_finish(l, 0u);
         } else {
-            l->tx_need_idle = STKNX_IDLE_BEFORE_TX_BITS;
+            l->tx_need_idle = first_send_idle(l);
             l->tx_state     = TX_PENDING;
         }
         silence = 1u;
@@ -434,7 +442,7 @@ int stknx_link_send(stknx_link_t *l, const uint8_t *f, uint16_t n)
     l->tx_len       = n;
     l->tx_repeats   = 0u;
     l->tx_losses    = 0u;
-    l->tx_need_idle = STKNX_IDLE_BEFORE_TX_BITS;
+    l->tx_need_idle = first_send_idle(l);
     STKNX_BARRIER();
     l->tx_state = TX_PENDING;
     return 1;

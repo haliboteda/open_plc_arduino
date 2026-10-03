@@ -272,6 +272,29 @@ static int tx_frames(uint8_t frames[][16], uint32_t *starts, int cap)
 	return (k % 9 == 0) ? nf : -1;
 }
 
+/* First send waits 50 idle bits, plus 3 for normal and low priority. */
+static void t_tx_priority(void)
+{
+	uint8_t f[16];
+	int n = group_write(f, 0x0801, 1);   /* control 0xBC: low priority */
+	stknx_link_send(&L, f, (uint16_t)n);
+	run_until(now + 80 * BIT);
+	uint32_t low = ndut ? dut[0] : 0;
+	check(low >= 1000 + (STKNX_IDLE_BEFORE_TX_BITS + STKNX_LOW_PRIORITY_EXTRA) * BIT,
+	      "a low-priority frame waits 53 idle bit periods");
+
+	sim_reset();
+	n = group_write(f, 0x0801, 1);
+	f[0] = 0xB0;                           /* system priority */
+	f[8] = stknx_checksum(f, 8);
+	stknx_link_send(&L, f, (uint16_t)n);
+	run_until(now + 80 * BIT);
+	uint32_t sys = ndut ? dut[0] : 0;
+	check(sys >= 1000 + STKNX_IDLE_BEFORE_TX_BITS * BIT
+	      && sys < 1000 + (STKNX_IDLE_BEFORE_TX_BITS + STKNX_LOW_PRIORITY_EXTRA) * BIT,
+	      "a system-priority frame waits 50 idle bit periods, not 53");
+}
+
 static void t_tx_ack(void)
 {
 	uint8_t f[16], got[4][16];
@@ -387,6 +410,7 @@ int main(int argc, char **argv)
 	else if (strcmp(s, "rx_nak") == 0)    { t_rx_nak(); }
 	else if (strcmp(s, "rx_busy") == 0)   { t_rx_busy(); }
 	else if (strcmp(s, "tx_ack") == 0)    { t_tx_ack(); }
+	else if (strcmp(s, "tx_priority") == 0) { t_tx_priority(); }
 	else if (strcmp(s, "tx_noack") == 0)  { t_tx_noack(); }
 	else if (strcmp(s, "tx_busy") == 0)   { t_tx_busy(); }
 	else if (strcmp(s, "collision") == 0) { t_collision(); }

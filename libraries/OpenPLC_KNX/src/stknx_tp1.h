@@ -30,6 +30,7 @@ extern "C" {
 #define STKNX_BUSY                 0xC0u
 
 #define STKNX_IDLE_BEFORE_TX_BITS    50u
+#define STKNX_LOW_PRIORITY_EXTRA      3u   /* normal / low priority, first send only */
 #define STKNX_IDLE_AFTER_BUSY_BITS  150u
 #define STKNX_ACK_GAP_BITS           15u   /* end of a frame to its acknowledge */
 #define STKNX_ACK_WAIT_BITS          40u   /* after our frame, give up on an acknowledge */
