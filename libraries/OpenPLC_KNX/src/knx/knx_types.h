@@ -22,7 +22,7 @@ enum AckType
 
 enum TPAckType
 {
-    // see U_ACK_REQ defines in tpuart_data_link_layer.cpp
+    // see StknxDataLinkLayer (stknx_data_link_layer.h)
     AckReqNack = 0x04,
     AckReqBusy = 0x02,
     AckReqAck = 0x01,

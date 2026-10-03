@@ -6,7 +6,7 @@
  * All pin references use STM32 HAL GPIO port/pin constants.
  * No Arduino.h dependency - safe to include from pure-HAL translation units.
  *
- * Override any macro via compiler flag (e.g. -DKNX_USART_BAUD=19200)
+ * Override any macro via compiler flag (e.g. -DKNX_TP_IRQ_PRIORITY=3)
  * before this header is processed.
  */
 
@@ -32,29 +32,6 @@
 /* Both timer interrupts share one priority so they never preempt each other. */
 #ifndef KNX_TP_IRQ_PRIORITY
 #  define KNX_TP_IRQ_PRIORITY   2u
-#endif
-
-/* USART1 on the same two pins: only the Platform UART methods in
- * stm32h743_openplc_platform.cpp use these, and nothing calls those since the
- * TP-UART data link layer was replaced - the STKNX is not a UART device. */
-#ifndef KNX_USART_INSTANCE
-#  define KNX_USART_INSTANCE    USART1
-#endif
-#ifndef KNX_USART_IRQn
-#  define KNX_USART_IRQn        USART1_IRQn
-#endif
-#ifndef KNX_USART_BAUD
-#  define KNX_USART_BAUD        19200u
-#endif
-#ifndef KNX_USART_TX_PORT
-#  define KNX_USART_TX_PORT     GPIOB
-#  define KNX_USART_TX_PIN      GPIO_PIN_14
-#  define KNX_USART_TX_AF       GPIO_AF4_USART1
-#endif
-#ifndef KNX_USART_RX_PORT
-#  define KNX_USART_RX_PORT     GPIOA
-#  define KNX_USART_RX_PIN      GPIO_PIN_10
-#  define KNX_USART_RX_AF       GPIO_AF7_USART1
 #endif
 
 /* STKNX status GPIO */
@@ -126,26 +103,10 @@
 #define KNX_APP_NVM_FLASH_ADDR        (KNX_NVM_FLASH_ADDR + KNX_FLASH_SIZE)
 
 /* -----------------------------------------------------------------------
- * UART receive ring buffer (Platform UART methods only, see above)
- * --------------------------------------------------------------------- */
-#ifndef KNX_UART_RXBUF_SIZE
-#  define KNX_UART_RXBUF_SIZE         256u
-#endif
-
-/* -----------------------------------------------------------------------
  * IP receive staging buffer (one UDP datagram at a time)
  * --------------------------------------------------------------------- */
 #ifndef KNX_IP_RXBUF_SIZE
 #  define KNX_IP_RXBUF_SIZE           512u
-#endif
-
-/* -----------------------------------------------------------------------
- * NVIC interrupt priority for USART1 (Platform UART methods only; lower
- * number = higher priority).
- * Must be >= configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY if FreeRTOS is used.
- * --------------------------------------------------------------------- */
-#ifndef KNX_UART_IRQ_PRIORITY
-#  define KNX_UART_IRQ_PRIORITY       5u
 #endif
 
 /* -----------------------------------------------------------------------

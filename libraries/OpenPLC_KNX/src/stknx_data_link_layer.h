@@ -12,8 +12,17 @@
 #ifdef USE_TP
 
 #include "knx/data_link_layer.h"
-#include "knx/tpuart_data_link_layer.h"   /* ITpUartCallBacks, TpFrame */
+#include "knx/tp_frame.h"
 #include "stknx_tp1.h"
+
+/* Asks the stack whether a frame on the bus is ours to acknowledge. The name
+ * is the upstream stack's, kept so the BAU classes need no change. */
+class ITpUartCallBacks
+{
+    public:
+        virtual ~ITpUartCallBacks() = default;
+        virtual TPAckType isAckRequired(uint16_t address, bool isGrpAddr) = 0;
+};
 
 #ifndef STKNX_TX_QUEUE
 #  define STKNX_TX_QUEUE  8u

@@ -1,63 +1,26 @@
 #include "stm32h743_openplc_platform.h"
 #include "knx_nvm.h"
-#include "uart.h"       /* STM32duino low-level UART API (uart_init, etc.) */
-#include "PinNames.h"   /* PA_10_ALT1, PB_14 */
 #include <string.h>
 #include <stdlib.h>
-
-/* =========================================================================
- * USART1 plumbing via the STM32duino serial_t API
- *
- * Using uart_init() / uart_attach_rx_callback() registers our handle in the
- * SrcWrapper's uart_handlers[] table, so SrcWrapper's USART1_IRQHandler
- * (uart.c) correctly calls HAL_UART_IRQHandler on our handle - no custom
- * ISR needed here.
- *
- * TX: blocking HAL_UART_Transmit (acceptable at 19200 bps).
- * RX: interrupt-driven via HAL_UART_Receive_IT (1 byte at a time); the
- *     HAL_UART_RxCpltCallback in uart.c dispatches to _serialRxCb().
- * ======================================================================= */
-
-static Stm32H743OpenPLCPlatform *s_platform = nullptr;
-static serial_t                   s_serial;   /* registered with SrcWrapper */
-
-static void _serialRxCb(serial_t *obj)
-{
-    if (s_platform != nullptr) {
-        s_platform->_uartRxByteISR(obj->recv);
-    }
-    /* Re-arm for the next byte (mirrors the uart_getc() pattern) */
-    HAL_UART_Receive_IT(&obj->handle, &obj->recv, 1u);
-}
-
-/* USART1_IRQHandler is provided by SrcWrapper (uart.c).
- * It calls HAL_UART_IRQHandler(uart_handlers[UART1_INDEX]) which dispatches
- * to HAL_UART_RxCpltCallback → _serialRxCb() above. */
 
 /* =========================================================================
  * Constructor / destructor
  * ======================================================================= */
 
 Stm32H743OpenPLCPlatform::Stm32H743OpenPLCPlatform()
-    : _uartRxHead(0u), _uartRxTail(0u), _uartOverflow(false)
-    , _udpPcb(nullptr), _mcastPort(0u)
+    : _udpPcb(nullptr), _mcastPort(0u)
     , _lastSrcAddr(0u), _lastSrcPort(0u)
     , _ipRxLen(0u)
     , _eepromBuf(nullptr), _eepromSize(0u)
 {
-    memset(&s_serial,   0, sizeof(s_serial));
     memset(&_mcastAddr, 0, sizeof(_mcastAddr));
-    memset(_uartRxBuf,  0, sizeof(_uartRxBuf));
     memset(_ipRxBuf,    0, sizeof(_ipRxBuf));
-    s_platform  = this;
 }
 
 Stm32H743OpenPLCPlatform::~Stm32H743OpenPLCPlatform()
 {
-    closeUart();
     closeMultiCast();
     free(_eepromBuf);
-    s_platform = nullptr;
 }
 
 /* =========================================================================
@@ -113,111 +76,6 @@ void Stm32H743OpenPLCPlatform::macAddress(uint8_t* data)
 {
     if (netif_default != nullptr && data != nullptr)
         memcpy(data, netif_default->hwaddr, 6u);
-}
-
-/* =========================================================================
- * UART - USART1, 19200 8E1, interrupt-driven RX ring buffer
- * ======================================================================= */
-
-void Stm32H743OpenPLCPlatform::setupUart()
-{
-    /* Use the STM32duino serial_t API so uart_handlers[UART1_INDEX] is
-     * populated and SrcWrapper's USART1_IRQHandler works correctly.
-     * uart_init() handles clocks, GPIO alternate-function config, HAL init,
-     * NVIC enable, and registration in the SrcWrapper handler table. */
-    s_serial.pin_tx = PB_14;       /* USART1 TX: PB14 / AF4 */
-    s_serial.pin_rx = PA_10_ALT1;  /* USART1 RX: PA10 / AF7 (ALT1 = USART1) */
-    s_serial.pin_rts = NC;
-    s_serial.pin_cts = NC;
-
-    /* KNX TP is 8E1: 8 data bits + 1 even-parity bit.  On STM32, enabling
-     * parity steals one bit from the frame, so the word-length field must
-     * count the parity bit too → WORDLENGTH_9B = 8 data + 1 parity = 9 total. */
-    uart_init(&s_serial,
-              KNX_USART_BAUD,
-              UART_WORDLENGTH_9B,
-              UART_PARITY_EVEN,
-              UART_STOPBITS_1);
-
-    /* Override the default UART_IRQ_PRIO (1) with our configured priority.
-     * Must be done after uart_init() which sets the NVIC priority. */
-    HAL_NVIC_SetPriority(KNX_USART_IRQn, KNX_UART_IRQ_PRIORITY, 0u);
-
-    /* Arm interrupt-driven RX (1 byte at a time) via SrcWrapper callback */
-    uart_attach_rx_callback(&s_serial, _serialRxCb);
-}
-
-void Stm32H743OpenPLCPlatform::closeUart()
-{
-    HAL_NVIC_DisableIRQ(KNX_USART_IRQn);
-    HAL_UART_DeInit(&s_serial.handle);
-    _uartRxHead = 0u;
-    _uartRxTail = 0u;
-    _uartOverflow = false;
-}
-
-void Stm32H743OpenPLCPlatform::_uartRxByteISR(uint8_t byte)
-{
-    uint16_t next = (_uartRxHead + 1u) & (KNX_UART_RXBUF_SIZE - 1u);
-    if (next == _uartRxTail) {
-        /* Buffer full: drop the incoming byte (drop-newest policy).
-         * KNX TP retransmission handles the lost frame at protocol level. */
-        _uartOverflow = true;
-        return;
-    }
-    _uartRxBuf[_uartRxHead] = byte;
-    _uartRxHead = next;
-}
-
-int Stm32H743OpenPLCPlatform::uartAvailable()
-{
-    return (int)((_uartRxHead - _uartRxTail) & (KNX_UART_RXBUF_SIZE - 1u));
-}
-
-int Stm32H743OpenPLCPlatform::readUart()
-{
-    if (_uartRxHead == _uartRxTail) return -1;
-    uint8_t byte = _uartRxBuf[_uartRxTail];
-    _uartRxTail  = (_uartRxTail + 1u) & (KNX_UART_RXBUF_SIZE - 1u);
-    return (int)byte;
-}
-
-size_t Stm32H743OpenPLCPlatform::readBytesUart(uint8_t* buffer, size_t length)
-{
-    size_t n = 0u;
-    while (n < length) {
-        int b = readUart();
-        if (b < 0) break;
-        buffer[n++] = (uint8_t)b;
-    }
-    return n;
-}
-
-size_t Stm32H743OpenPLCPlatform::writeUart(const uint8_t data)
-{
-    HAL_UART_Transmit(&s_serial.handle, const_cast<uint8_t*>(&data), 1u, 10u);
-    return 1u;
-}
-
-size_t Stm32H743OpenPLCPlatform::writeUart(const uint8_t* buffer, size_t size)
-{
-    HAL_UART_Transmit(&s_serial.handle, const_cast<uint8_t*>(buffer),
-                      (uint16_t)size, (uint32_t)(size * 2u + 5u));
-    return size;
-}
-
-bool Stm32H743OpenPLCPlatform::overflowUart()
-{
-    bool v = _uartOverflow;
-    _uartOverflow = false;
-    return v;
-}
-
-void Stm32H743OpenPLCPlatform::flushUart()
-{
-    _uartRxHead = 0u;
-    _uartRxTail = 0u;
-    _uartOverflow = false;
 }
 
 /* =========================================================================

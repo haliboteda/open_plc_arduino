@@ -27,11 +27,7 @@ from _common import FQBN, Fail, Ok, Section, Warn, compile_argv, need_cli_and_co
 OWN_LIBRARIES = ("OpenPLC_Ports", "OpenPLC_SDRAM", "OpenPLC_IAP", "OpenPLC_Net", "OpenPLC_KNX")
 
 # (library, example) -> why it cannot build for this board.
-EXCLUDED = {
-    ("Keyboard", "KeyboardMessage"): "needs USB HID; this board's USB menu offers CDC only",
-    ("Mouse", "ButtonMouseControl"): "needs USB HID; this board's USB menu offers CDC only",
-    ("SubGhz", "ReadRegister"): "needs the SubGhz radio, which only STM32WL parts have",
-}
+EXCLUDED = {}
 
 # (library, example) -> the KNX Role it is written for, when not the default.
 # These refuse to compile for any other role.

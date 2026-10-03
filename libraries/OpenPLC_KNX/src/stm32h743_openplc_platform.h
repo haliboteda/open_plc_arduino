@@ -7,8 +7,6 @@
  * Inherits directly from Platform (not ArduinoPlatform) - pure HAL + LwIP.
  *
  * Responsibilities:
- *   UART   - USART1 interrupt-driven RX ring-buffer; unused - the STKNX is
- *            not a UART device, TP goes through StknxDataLinkLayer
  *   IP     - LwIP UDP multicast (KNXnet/IP routing)
  *   NVM    - HAL Flash erase/program (Bank 2 Sector 6, reference library data)
  *   System - HAL_GetUID, NVIC_SystemReset, netif_default
@@ -66,17 +64,6 @@ public:
     uint32_t currentDefaultGateway() override;
     void     macAddress(uint8_t* data) override;
 
-    /* --- UART (USART1, interrupt-driven; unused, see top of file) ------- */
-    void   setupUart()                                     override;
-    void   closeUart()                                     override;
-    int    uartAvailable()                                 override;
-    size_t writeUart(const uint8_t data)                   override;
-    size_t writeUart(const uint8_t* buffer, size_t size)   override;
-    int    readUart()                                      override;
-    size_t readBytesUart(uint8_t* buffer, size_t length)   override;
-    bool   overflowUart()                                  override;
-    void   flushUart()                                     override;
-
     /* --- IP multicast (LwIP UDP) --------------------------------------- */
     void setupMultiCast(uint32_t addr, uint16_t port)              override;
     void closeMultiCast()                                          override;
@@ -91,17 +78,7 @@ public:
     uint8_t* getEepromBuffer(uint32_t size) override;
     void     commitToEeprom()               override;
 
-    /* Called from USART1_IRQHandler - do not call from application code */
-    void _uartRxByteISR(uint8_t byte);
-
 private:
-    /* UART */
-    UART_HandleTypeDef  _huart;
-    uint8_t             _uartRxBuf[KNX_UART_RXBUF_SIZE];
-    volatile uint16_t   _uartRxHead;  /* write index (ISR) */
-    volatile uint16_t   _uartRxTail;  /* read index (main) */
-    volatile bool       _uartOverflow;
-
     /* LwIP UDP multicast */
     struct udp_pcb *_udpPcb;
     ip4_addr_t      _mcastAddr;
