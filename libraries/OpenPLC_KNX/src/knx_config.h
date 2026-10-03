@@ -68,7 +68,8 @@
 #endif
 
 /* Programming button: pressed = high, external 10k pull-down; the net is
- * also BOOT0. Programming LED line: no LED is fitted on this board.
+ * also BOOT0. Programming-mode indicator: the system LED on PE2 (high = on),
+ * since the KNX_Prog_LED line (PG11) has no LED fitted.
  * $PROD/docs/hardware/HARDWARE-FACTS.md "PG9 就是 BOOT0 网", "KNX 接口" */
 #ifndef KNX_PROG_KEY_PORT
 #  define KNX_PROG_KEY_PORT     GPIOG
@@ -76,8 +77,8 @@
 #  define KNX_PROG_KEY_IRQn     EXTI9_5_IRQn
 #endif
 #ifndef KNX_PROG_LED_PORT
-#  define KNX_PROG_LED_PORT     GPIOG
-#  define KNX_PROG_LED_PIN      GPIO_PIN_11
+#  define KNX_PROG_LED_PORT     GPIOE
+#  define KNX_PROG_LED_PIN      GPIO_PIN_2
 #endif
 
 /* -----------------------------------------------------------------------

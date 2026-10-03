@@ -40,17 +40,19 @@ void OpenPLC_KNX_Class::_progButtonISR()
 }
 
 /* -------------------------------------------------------------------------
- * Prog-LED callbacks - use HAL GPIO (not Arduino digitalWrite)
+ * Prog-LED callbacks - use HAL GPIO (not Arduino digitalWrite). Run from
+ * KNX.loop(), so printing is safe. The line goes to USB so a person, or a
+ * test script, sees the mode change without the RS232 port.
  * ---------------------------------------------------------------------- */
 static void progLedOn()
 {
-    println("[LED] ON");
+    Serial.println("KNX: programming mode on");
     HAL_GPIO_WritePin(KNX_PROG_LED_PORT, KNX_PROG_LED_PIN, GPIO_PIN_SET);
 }
 
 static void progLedOff()
 {
-    println("[LED] OFF");
+    Serial.println("KNX: programming mode off");
     HAL_GPIO_WritePin(KNX_PROG_LED_PORT, KNX_PROG_LED_PIN, GPIO_PIN_RESET);
 }
 
@@ -69,7 +71,8 @@ void OpenPLC_KNX_Class::setup(const char* serial, uint16_t mfr_id)
     }
 
     /* Enable GPIO clocks before any HAL_GPIO_Init calls */
-    __HAL_RCC_GPIOG_CLK_ENABLE();   /* PG9  = prog-button, PG11 = prog-LED line */
+    __HAL_RCC_GPIOG_CLK_ENABLE();   /* PG9  = prog-button                 */
+    __HAL_RCC_GPIOE_CLK_ENABLE();   /* PE2  = system LED, prog-mode       */
     __HAL_RCC_GPIOD_CLK_ENABLE();   /* PD7  = KNX_TP_OK                   */
     __HAL_RCC_GPIOH_CLK_ENABLE();   /* PH12 = KNX_TP_VCC_OK               */
 

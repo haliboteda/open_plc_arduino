@@ -16,7 +16,7 @@
  *
  * Default wiring:
  *   Prog button : PG9    (EXTI9_5, pressed = high)
- *   Prog LED    : PG11   (line only - no LED is fitted on this board)
+ *   Prog LED    : PE2    (the system LED, on in programming mode)
  *   Relay 0     : PI8    (relay 1, Lower Deck, coil energised = GPIO_PIN_SET)
  *   Relay 1     : PI10   (relay 2, Lower Deck, coil energised = GPIO_PIN_SET)
  *   KNX TP TX   : PB14   (TIM12_CH1)
@@ -59,7 +59,7 @@ static void onRelay1(GroupObject &go)
 void setup()
 {
     /* 1. Initialise KNX stack: loads Flash NVM, drives KNX_TX low, configures
-     *    the prog-LED line PG11 and prog-button EXTI on PG9, sets serial
+     *    the prog-mode LED (system LED, PE2) and prog-button EXTI on PG9, sets serial
      *    number visible in ETS. */
     KNXHelper.setup("OPENPLC000001");
 

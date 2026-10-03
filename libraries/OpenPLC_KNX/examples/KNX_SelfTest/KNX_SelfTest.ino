@@ -43,7 +43,7 @@ void setup()
     Serial.println("=== OpenPLC KNX self-test ===");
 
     /* ------------------------------------------------------------------
-     * 1. Setup: loads NVM, inits prog-LED line (PG11) and prog-button (PG9).
+     * 1. Setup: loads NVM, inits prog-mode LED (system LED, PE2) and prog-button (PG9).
      * ------------------------------------------------------------------ */
     KNXHelper.setup("OPENPLCST0001");
 

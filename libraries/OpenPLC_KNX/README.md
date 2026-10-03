@@ -36,8 +36,8 @@ PB14 makes the transceiver draw current from the bus.
 
 | Signal | Pin | Note |
 |---|---|---|
-| Programming button | PG9 | Pressed = high (external 10k pull-down). Same net as BOOT0 — the library only reads it |
-| `KNX_Prog_LED` | PG11 | **No LED is fitted on this line.** The library still drives it; read programming mode with `KNXHelper.progMode()` |
+| Programming button | PG9 | Pressed = high (external 10k pull-down). Same net as BOOT0 — the library only reads it. Press once while the sketch runs to toggle programming mode; **do not hold it while powering up or resetting**, which enters the bootloader's upload mode |
+| Programming-mode indicator | PE2 | The system LED: on while in programming mode, and the USB serial port prints `KNX: programming mode on` / `off`. A sketch using this library leaves the system LED to it. (The schematic's `KNX_Prog_LED` line, PG11, has no LED fitted.) |
 | Bus voltage present | PH12 | High when the bus powers the transceiver |
 | `KNX_OK` | PD7 | Reads low on this board whatever the bus does; do not use it to detect the bus |
 | Relays 1 / 2 | PI8 / PI10 | High = coil energised (Lower Deck, terminals B01–B04) |

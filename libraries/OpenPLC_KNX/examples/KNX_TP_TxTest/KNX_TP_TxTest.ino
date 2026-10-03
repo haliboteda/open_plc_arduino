@@ -67,7 +67,7 @@ void setup()
         Serial_Test.println(err == 0xFFFFFFFFu ? "OK" : "FAILED");
     }
 
-    /* 1. Core init: NVM load, KNX_TX low, prog-LED line (PG11), prog-button EXTI (PG9). */
+    /* 1. Core init: NVM load, KNX_TX low, prog-mode LED (system LED, PE2), prog-button EXTI (PG9). */
     KNXHelper.setup("OPENPLCTXTEST1");
 
     /* 2. Relay GPIO init (required by selfProgram2CH internally). */

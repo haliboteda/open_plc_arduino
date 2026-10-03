@@ -88,9 +88,9 @@ public:
 
     /* Call once in setup().
      *   serial     - 12-char device serial number shown in ETS (e.g. "OPENPLC000001")
-     *   mfr_id     - KNX manufacturer ID (default 0x00FA = Weinzierl Engineering)
+     *   mfr_id     - KNX manufacturer ID (default 0x00FA: listed in ETS as "KNX Association", the shared test ID)
      * Drives KNX_TX (PB14) low, configures the prog-button interrupt on PG9
-     * and the prog-LED line PG11 (no LED is fitted on this board).
+     * and the prog-mode LED (the system LED, PE2).
      * Does NOT start the stack - call start() after registering group objects. */
     void setup(const char* serial = "OPENPLC000001",
                uint16_t    mfr_id = 0x00FAu);
