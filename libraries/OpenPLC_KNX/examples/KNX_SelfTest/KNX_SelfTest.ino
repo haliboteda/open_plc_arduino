@@ -2,12 +2,12 @@
  * KNX_SelfTest - Board-level self-test for OpenPLC_KNX on STM32H743.
  *
  * Does NOT require a connected KNX bus or ETS.  Reports results on Serial
- * (UART4 at 115200, routed to the debug connector).
+ * (the USB CDC port at 115200).
  *
  * Tests performed:
  *   1. Relay 2-channel profile init (GPIO configuration)
  *   2. Relay channel on/off control and state read-back
- *   3. Application NVM save and reload (Flash Bank2 Sector7)
+ *   3. Application NVM save and reload (Flash Bank2 Sector6)
  *   4. TP bus-OK and VCC-OK status GPIO reads (passive - checks pin logic)
  *   5. KNX individual address set/get round-trip
  *
@@ -43,7 +43,7 @@ void setup()
     Serial.println("=== OpenPLC KNX self-test ===");
 
     /* ------------------------------------------------------------------
-     * 1. Setup: loads NVM, inits prog-LED (PG11) and prog-button (PG9).
+     * 1. Setup: loads NVM, inits prog-LED line (PG11) and prog-button (PG9).
      * ------------------------------------------------------------------ */
     KNXHelper.setup("OPENPLCST0001");
 

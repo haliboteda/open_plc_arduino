@@ -182,7 +182,7 @@ void Bau091A::loop()
 
 TPAckType Bau091A::isAckRequired(uint16_t address, bool isGrpAddr)
 {
-    //only called from TpUartDataLinkLayer
+    //only called from the TP data link layer
     TPAckType ack = TPAckType::AckReqNone;
 
     uint8_t lcconfig = LCCONFIG::PHYS_FRAME_ROUT | LCCONFIG::PHYS_REPEAT | LCCONFIG::BROADCAST_REPEAT | LCCONFIG::GROUP_IACK_ROUT | LCCONFIG::PHYS_IACK_NORMAL; // default value from spec. in case prop is not availible.
@@ -262,8 +262,8 @@ IpDataLinkLayer* Bau091A::getPrimaryDataLinkLayer()
     return (IpDataLinkLayer*)&_dlLayerPrimary;
 }
 
-TpUartDataLinkLayer* Bau091A::getSecondaryDataLinkLayer()
+StknxDataLinkLayer* Bau091A::getSecondaryDataLinkLayer()
 {
-    return (TpUartDataLinkLayer*)&_dlLayerSecondary;
+    return (StknxDataLinkLayer*)&_dlLayerSecondary;
 }
 #endif

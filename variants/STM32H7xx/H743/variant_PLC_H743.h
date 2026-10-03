@@ -228,10 +228,11 @@
 #define TEMP_SCPROT  PA0  /* Short-circuit protection NTC - ADC1_INP16      */
 #define TEMP_HSSW    PA3  /* High-side FET temperature NTC - ADC1_INP15     */
 
-/*-------- KNX PROGRAMMING INTERFACE - Upper Deck --------------------------*/
-/* KNX TP UART (USART1, PB14=TX AF4, PA10=RX AF7) defined in knx_config.h  */
-#define KNX_PROG_KEY    PG9    /* Programming button (active-low, EXTI9_5)  */
-#define KNX_PROG_LED    PG11   /* Programming LED    (active-high)          */
+/*-------- KNX PROGRAMMING INTERFACE --------------------------------------*/
+/* KNX TP: STKNX on PB14 / PA10, bits made by TIM12 / TIM1 (knx_config.h).  */
+/* Facts: $PROD/docs/hardware/HARDWARE-FACTS.md "KNX 接口", "PG9 就是 BOOT0 网" */
+#define KNX_PROG_KEY    PG9    /* Programming button, pressed = high; BOOT0 net */
+#define KNX_PROG_LED    PG11   /* Programming LED line - no LED fitted     */
 #define KNX_TP_OK       PD7    /* KNX bus status: HIGH = bus operational    */
 #define KNX_TP_VCC_OK   PH12   /* KNX transceiver VCC OK                   */
 

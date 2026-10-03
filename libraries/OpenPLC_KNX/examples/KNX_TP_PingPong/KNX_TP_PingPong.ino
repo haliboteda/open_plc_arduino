@@ -1,24 +1,25 @@
 /*
- * KNX_TP_Sender - Continuous KNX TP transmit test.
+ * KNX_TP_PingPong - Continuous KNX TP transmit test.
  *
  * Sends an incrementing 1-byte counter on GA 0/0/1 (GO #1) every
  * SEND_INTERVAL_MS milliseconds.  Counter wraps 0-255 continuously.
  *
- * Compatible with ping_pong.py in mode 2 (ping-pong): the PC script
- * listens on KNX_RX_GA=0/0/1 and prints every telegram it receives.
+ * It only sends; watch the telegrams in the ETS group monitor (or any KNX
+ * interface listening on GA 0/0/1).
  *
  * Individual addresses do NOT matter for group communication:
  *   OpenPLC  1.1.1  sends  GroupValueWrite -> GA 0/0/1
  *   KNX/USB  15.15.15 receives it - no coupler / no filter needed
  * as long as both are on the same TP bus segment.
  *
- * MASK: 0x07B0 (TP-only)
+ * Role: any role with TP (Tools -> KNX Role); "KNX TP Device" leaves the IP
+ * stack out. A #define MASK_VERSION in the sketch does not work: the library
+ * is built with the menu's value, and the two would disagree about KNX.
  */
 
 // Every sketch declares its own version. The upload tool compares it with
 // the one on the board and refuses to flash an older one over a newer one.
 OPENPLC_APP_VERSION(1, 0, 0);
-#define MASK_VERSION 0x07B0u
 #include <OpenPLC_KNX.h>
 #include "knx/table_object.h"
 #include "knx/interface_object.h"
@@ -108,6 +109,10 @@ static uint32_t s_lastStatus = 0u;
 
 void setup()
 {
+    // The RS232 transceiver is off after reset; turn it on or nothing reaches
+    // terminals C05 / C06.
+    pinMode(RS232_EN_Pin, OUTPUT);
+    digitalWrite(RS232_EN_Pin, HIGH);
     Serial_Test.begin(115200);
     delay(500);
     Serial_Test.println("=== KNX TP Continuous Sender ===");
@@ -115,8 +120,10 @@ void setup()
     KNXHelper.setup("OPENPLC_SENDER");
     KNXHelper.initRelayProfile2CH();
 
-    Serial_Test.print("TP bus-OK : ");
-    Serial_Test.println(KNXHelper.tpBusOk() ? "YES - bus detected" : "NO  - check wiring");
+    /* PD7 reads LOW on this board whatever the bus does; PH12 below is the
+     * one that follows bus power. */
+    Serial_Test.print("TP KNX_OK  : ");
+    Serial_Test.println(KNXHelper.tpBusOk() ? "HIGH" : "LOW");
     Serial_Test.print("TP VCC-OK : ");
     Serial_Test.println(KNXHelper.tpVccOk() ? "YES - bus powered"  : "NO  - check PSU");
 
@@ -127,9 +134,9 @@ void setup()
     KNXHelper.start();
 
     bool conn = KNX.bau().enabled();
-    Serial_Test.print("STKNX IC   : ");
-    Serial_Test.println(conn ? "CONNECTED - telegrams will be sent"
-                              : "DISCONNECTED - telegrams dropped, check UART/bus wiring");
+    Serial_Test.print("TP link    : ");
+    Serial_Test.println(conn ? "RUNNING - telegrams will be sent"
+                              : "STOPPED - telegrams dropped");
     s_prevConn = conn;
 
     Serial_Test.print("Individual address: 0x");
@@ -153,24 +160,24 @@ void loop()
     if (prog != s_prevProg) {
         s_prevProg = prog;
         if (prog) {
-            Serial_Test.println(">>> PROG MODE ON  - IA 1.1.1 visible to ETS, LED ON");
+            Serial_Test.println(">>> PROG MODE ON  - IA 1.1.1 visible to ETS");
         } else {
-            Serial_Test.println(">>> PROG MODE OFF - normal operation, LED OFF");
+            Serial_Test.println(">>> PROG MODE OFF - normal operation");
         }
     }
 
     /* Print connection state changes immediately */
     bool conn = KNX.bau().enabled();
     if (conn != s_prevConn) {
-        Serial_Test.println(conn ? ">>> STKNX IC connected  - TX active"
-                                 : ">>> STKNX IC disconnected - TX dropped");
+        Serial_Test.println(conn ? ">>> TP link running - TX active"
+                                 : ">>> TP link stopped - TX dropped");
         s_prevConn = conn;
     }
 
     /* Periodic status line every 5 s when disconnected so the user knows */
     if (!conn && (millis() - s_lastStatus) >= 5000u) {
         s_lastStatus = millis();
-        Serial_Test.print("[STATUS] STKNX disconnected, dropped=");
+        Serial_Test.print("[STATUS] TP link stopped, dropped=");
         Serial_Test.print(s_dropCount);
         Serial_Test.println("  - check TP+/TP- wiring and bus power supply (29 V)");
     }
@@ -180,7 +187,7 @@ void loop()
 
         if (!conn) {
             s_dropCount++;
-            return;   /* no point sending while IC is disconnected */
+            return;   /* no point sending while the link is stopped */
         }
 
         s_txCount++;

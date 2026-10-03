@@ -1,5 +1,6 @@
 #include "OpenPLC_KNX.h"
 #include "knx_config.h"
+#include "stknx_phy.h"
 #include "stm32/interrupt.h"
 #include "knx/table_object.h"
 #include "knx/interface_object.h"
@@ -7,7 +8,7 @@
 #include <string.h>
 
 /* =========================================================================
- * Global KNX instance (mask selected by MASK_VERSION, default Bau57B0)
+ * Global KNX instance (mask selected by MASK_VERSION, default Bau5780)
  *
  * MASK_VERSION and KNX_NO_AUTOMATIC_GLOBAL_INSTANCE are defined in
  * stm32h743_openplc_platform.h (included transitively via OpenPLC_KNX.h),
@@ -23,10 +24,10 @@ OpenPLC_KNX_Class KNXHelper;
 /* -------------------------------------------------------------------------
  * Prog-button EXTI interrupt service routine
  *
- * Called on both edges of PG9.  The KnxFacade debounces internally via
- * the PROG_BTN_PRESS_MIN/MAX_MILLIS window (50–500 ms) only when
- * setButtonISRFunction is used.  Here we use toggleProgMode() directly
- * and rely on a 200 ms debounce guard.
+ * Called on the rising edge of PG9 (the button pulls it high). The
+ * KnxFacade debounces internally via the PROG_BTN_PRESS_MIN/MAX_MILLIS
+ * window (50–500 ms) only when setButtonISRFunction is used.  Here we use
+ * toggleProgMode() directly and rely on a 200 ms debounce guard.
  * ---------------------------------------------------------------------- */
 void OpenPLC_KNX_Class::_progButtonISR()
 {
@@ -58,13 +59,17 @@ static void progLedOff()
  * ---------------------------------------------------------------------- */
 void OpenPLC_KNX_Class::setup(const char* serial, uint16_t mfr_id)
 {
+    /* First, whatever the role: a floating KNX_TX makes the transceiver draw
+     * current from the bus. */
+    stknx_phy_park();
+
     /* Load application NVM; fall back to defaults if sector is blank */
     if (!knx_nvm_load(&_config)) {
         knx_nvm_set_defaults(&_config, KNX_DEFAULT_INDIVIDUAL_ADDR);
     }
 
     /* Enable GPIO clocks before any HAL_GPIO_Init calls */
-    __HAL_RCC_GPIOG_CLK_ENABLE();   /* PG9  = prog-button, PG11 = prog-LED */
+    __HAL_RCC_GPIOG_CLK_ENABLE();   /* PG9  = prog-button, PG11 = prog-LED line */
     __HAL_RCC_GPIOD_CLK_ENABLE();   /* PD7  = KNX_TP_OK                   */
     __HAL_RCC_GPIOH_CLK_ENABLE();   /* PH12 = KNX_TP_VCC_OK               */
 
@@ -79,13 +84,15 @@ void OpenPLC_KNX_Class::setup(const char* serial, uint16_t mfr_id)
     }
     progLedOff();
 
-    /* Configure prog-button pull-up first (stm32_interrupt_enable reads
-     * the current PUPDR register to preserve it during GPIO re-init) */
+    /* Configure the prog-button pull first (stm32_interrupt_enable reads
+     * the current PUPDR register to preserve it during GPIO re-init). None:
+     * the board pulls PG9 down and the button pulls it up - an internal
+     * pull-up would fight the 10k pull-down. */
     {
         GPIO_InitTypeDef init = {0};
         init.Pin   = KNX_PROG_KEY_PIN;
         init.Mode  = GPIO_MODE_INPUT;
-        init.Pull  = GPIO_PULLUP;
+        init.Pull  = GPIO_NOPULL;
         init.Speed = GPIO_SPEED_FREQ_LOW;
         HAL_GPIO_Init(KNX_PROG_KEY_PORT, &init);
     }
@@ -93,7 +100,7 @@ void OpenPLC_KNX_Class::setup(const char* serial, uint16_t mfr_id)
      * not conflict with SrcWrapper's EXTI9_5_IRQHandler definition. */
     stm32_interrupt_enable(KNX_PROG_KEY_PORT, KNX_PROG_KEY_PIN,
                            OpenPLC_KNX_Class::_progButtonISR,
-                           GPIO_MODE_IT_FALLING);
+                           GPIO_MODE_IT_RISING);
 
     /* Configure TP bus-OK and VCC-OK status inputs */
     {

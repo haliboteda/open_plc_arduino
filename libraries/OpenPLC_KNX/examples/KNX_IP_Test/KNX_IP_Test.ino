@@ -11,7 +11,7 @@
  * REQUIRED BUILD SETTINGS (Arduino IDE)
  *   Board : OPEN-PLC → PLC H743
  *   KNX Role : IP+TP Device (both transports, MASK 0x5780)  [DEFAULT - no change needed]
- *   USB  : CDC (generic 'Serial' supersede U(S)ART)          ← for Serial output
+ *   Output goes to Serial_Test: RS232, terminals C05 / C06, 115200 baud
  *
  * HARDWARE NEEDED
  *   - OpenPLC Bridge board with STM32H743
@@ -31,18 +31,21 @@
  *     [NET] Ethernet init...
  *     [NET] Waiting for DHCP...
  *     [NET] IP address: 192.168.x.x
- *     [KNX] Stack started (MASK 0x57B0)
- *     [KNX] Not yet configured by ETS - waiting...
- *     ...after ETS programs the device...
- *     [KNX] Configured! Individual address: 1.1.1
+ *     [KNX] selfProgram2CH: tables ready (firmware or ETS).
+ *     [KNX] Stack started (MASK 0x5780 - IP+TP dual device)
+ *     [KNX] Already configured by ETS:
+ *     [KNX] Individual address: 1.1.1
+ *   (selfProgram2CH() loads the tables itself on first boot, so the
+ *   "Not yet configured" branch only shows if it fails.)
  *   ETS:
  *     Device visible in "Network Interfaces" or direct IP search
- *     Individual address can be assigned (prog LED on PG11 lights during prog mode)
+ *     Individual address can be assigned (press PG9; this board has no prog
+ *     LED, the [STATUS] line shows Prog mode=ON)
  *     Application downloads without error
  *   After download:
- *     Send switch ON to 0/0/1 → relay on PE6 closes, Serial prints "Relay 0 ON"
- *     Send switch OFF to 0/0/1 → relay on PE6 opens, Serial prints "Relay 0 OFF"
- *     Same for 0/0/2 → relay on PE5
+ *     Send switch ON to 0/0/1 → relay on PI8 closes, prints "[KNX] Relay 0 ON"
+ *     Send switch OFF to 0/0/1 → relay on PI8 opens, prints "[KNX] Relay 0 OFF"
+ *     Same for 0/0/2 → relay on PI10
  */
 
 // Every sketch declares its own version. The upload tool compares it with
@@ -135,6 +138,10 @@ static void printLwipDiag(void)
  * ---------------------------------------------------------------------- */
 void setup()
 {
+    // The RS232 transceiver is off after reset; turn it on or nothing reaches
+    // terminals C05 / C06.
+    pinMode(RS232_EN_Pin, OUTPUT);
+    digitalWrite(RS232_EN_Pin, HIGH);
     Serial_Test.begin(115200);
     delay(400);
     Serial_Test.println("[NET] Ethernet init...");
@@ -168,8 +175,8 @@ void setup()
     /* 3. Initialise KNX stack.
      *    KNXHelper.setup() loads the KNX ETS NVM (individual address,
      *    address tables) and configures the prog-button/LED GPIOs.
-     *    The role (MASK_VERSION 0x57B0 = IP device) is set by the board
-     *    variant selected in Arduino IDE. */
+     *    The role (MASK_VERSION, default 0x5780 = IP+TP device) comes from
+     *    Tools -> KNX Role in the Arduino IDE. */
     KNXHelper.setup("OPENPLC000001");
 
     /* 4. Initialise 2-channel relay profile (PI8 and PI10). */

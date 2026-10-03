@@ -6,12 +6,12 @@
 #include "bau_systemB_device.h"
 #include "ip_parameter_object.h"
 #include "ip_data_link_layer.h"
-#include "tpuart_data_link_layer.h"
+#include "../stknx_data_link_layer.h"   /* OpenPLC: STKNX, not a TP-UART */
 #include "cemi_server_object.h"
 
 /*
  * Thin wrappers that expose sendFrame() (now protected after the change in
- * ip_data_link_layer.h / tpuart_data_link_layer.h) as a public forwarder.
+ * ip_data_link_layer.h) as a public forwarder.
  * Required because DataLinkLayer::sendFrame() cannot be called across
  * unrelated instances - each class may only call sendFrame() on *itself*.
  */
@@ -22,10 +22,10 @@ public:
     bool sendFrameEx(CemiFrame& f) { return sendFrame(f); }
 };
 
-class _Bau5780TpDLL : public TpUartDataLinkLayer
+class _Bau5780TpDLL : public StknxDataLinkLayer
 {
 public:
-    using TpUartDataLinkLayer::TpUartDataLinkLayer;
+    using StknxDataLinkLayer::StknxDataLinkLayer;
     bool sendFrameEx(CemiFrame& f) { return sendFrame(f); }
 };
 

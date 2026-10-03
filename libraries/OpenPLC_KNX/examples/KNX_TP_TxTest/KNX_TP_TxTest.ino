@@ -1,9 +1,8 @@
 /*
  * KNX_TP_TxTest - Periodic TP bus transmit test for oscilloscope verification.
  *
- * Default MASK_VERSION is 0x5780 (IP+TP dual device) - both Ethernet and TP
- * bus are active.  The TP bus signal is visible on an oscilloscope at TP+/TP-.
- * ETS can also observe the group telegrams on the IP side simultaneously.
+ * The TP bus signal is visible on an oscilloscope at TP+/TP-. The sketch does
+ * not start Ethernet (no openplc_net_init()), so nothing goes out over IP.
  *
  * Does NOT require ETS or any other KNX device on the bus.
  * Uses selfProgram2CH() to assign default group addresses without ETS:
@@ -17,20 +16,17 @@
  *   Coupling  : DC
  *   Trigger   : Edge, CH1, Falling, Normal, level ~15 V
  *
- * Serial_Test output (115200 baud) confirms each telegram sent.
- * TP bus-OK and VCC-OK GPIO states are printed on startup.
+ * Serial_Test output (RS232, terminals C05 / C06, 115200 baud) confirms each
+ * telegram sent. The KNX_OK and VCC-OK GPIO states are printed on startup.
  *
- * NOTE: MASK_VERSION is overridden to 0x07B0 (TP-only) here because this
- * sketch tests the TP bus signal with an oscilloscope and does not need
- * Ethernet/IP.  The 0x57B0/0x5780 IP stack adds ~49 KB of static RAM
- * (LwIP buffers) that would leave <17 KB free and trigger stability warnings.
- * Remove the override and add openplc_net_init() when IP is also needed.
+ * Role: any role with TP (Tools -> KNX Role); "KNX TP Device" leaves the IP
+ * stack out. A #define MASK_VERSION in the sketch does not work: the library
+ * is built with the menu's value, and the two would disagree about KNX.
  */
 
 // Every sketch declares its own version. The upload tool compares it with
 // the one on the board and refuses to flash an older one over a newer one.
 OPENPLC_APP_VERSION(1, 0, 0);
-#define MASK_VERSION 0x07B0u   /* TP-only for this oscilloscope test */
 #include <OpenPLC_KNX.h>
 
 #define TX_INTERVAL_MS  2000u   /* send every 2 seconds */
@@ -43,9 +39,15 @@ static bool     s_state  = false;
  * ---------------------------------------------------------------------- */
 void setup()
 {
+    // The RS232 transceiver is off after reset; turn it on or nothing reaches
+    // terminals C05 / C06.
+    pinMode(RS232_EN_Pin, OUTPUT);
+    digitalWrite(RS232_EN_Pin, HIGH);
     Serial_Test.begin(115200);
     delay(500);
-    Serial_Test.println("=== KNX TP Transmit Test (MASK 0x5780 - IP+TP dual) ===");
+    Serial_Test.print("=== KNX TP Transmit Test (MASK 0x");
+    Serial_Test.print(MASK_VERSION, HEX);
+    Serial_Test.println(") ===");
 
     /* Erase the KNX sector (Flash Bank2 Sector6, 0x081C0000) before setup().
      * Required after a MASK_VERSION change: old table data causes a crash
@@ -65,15 +67,17 @@ void setup()
         Serial_Test.println(err == 0xFFFFFFFFu ? "OK" : "FAILED");
     }
 
-    /* 1. Core init: NVM load, prog-LED (PG11), prog-button EXTI (PG9). */
+    /* 1. Core init: NVM load, KNX_TX low, prog-LED line (PG11), prog-button EXTI (PG9). */
     KNXHelper.setup("OPENPLCTXTEST1");
 
     /* 2. Relay GPIO init (required by selfProgram2CH internally). */
     KNXHelper.initRelayProfile2CH();
 
     /* 3. Check bus hardware before starting the stack. */
-    Serial_Test.print("TP bus-OK  (PD7) : ");
-    Serial_Test.println(KNXHelper.tpBusOk()  ? "HIGH - bus detected"  : "LOW  - no bus signal");
+    /* PD7 reads LOW on this board whatever the bus does; PH12 is the one
+     * that follows bus power. */
+    Serial_Test.print("TP KNX_OK  (PD7) : ");
+    Serial_Test.println(KNXHelper.tpBusOk()  ? "HIGH" : "LOW");
     Serial_Test.print("TP VCC-OK (PH12) : ");
     Serial_Test.println(KNXHelper.tpVccOk() ? "HIGH - bus powered"   : "LOW  - no bus power");
 
@@ -93,7 +97,7 @@ void setup()
     Serial_Test.println();
     Serial_Test.print("Sending GO1/GO2 toggle every ");
     Serial_Test.print(TX_INTERVAL_MS);
-    Serial_Test.println(" ms on BOTH TP bus and IP multicast.  Trigger scope now.");
+    Serial_Test.println(" ms on the TP bus.  Trigger scope now.");
     Serial_Test.println("--------------------------------------------------");
 }
 

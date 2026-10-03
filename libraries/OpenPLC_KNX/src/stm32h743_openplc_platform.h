@@ -7,7 +7,8 @@
  * Inherits directly from Platform (not ArduinoPlatform) - pure HAL + LwIP.
  *
  * Responsibilities:
- *   UART   - USART1 interrupt-driven RX ring-buffer (STKNX TP transceiver)
+ *   UART   - USART1 interrupt-driven RX ring-buffer; unused - the STKNX is
+ *            not a UART device, TP goes through StknxDataLinkLayer
  *   IP     - LwIP UDP multicast (KNXnet/IP routing)
  *   NVM    - HAL Flash erase/program (Bank 2 Sector 6, reference library data)
  *   System - HAL_GetUID, NVIC_SystemReset, netif_default
@@ -65,7 +66,7 @@ public:
     uint32_t currentDefaultGateway() override;
     void     macAddress(uint8_t* data) override;
 
-    /* --- UART (STKNX via USART1, interrupt-driven) --------------------- */
+    /* --- UART (USART1, interrupt-driven; unused, see top of file) ------- */
     void   setupUart()                                     override;
     void   closeUart()                                     override;
     int    uartAvailable()                                 override;

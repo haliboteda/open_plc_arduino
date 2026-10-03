@@ -50,3 +50,11 @@ target_compile_options(reset_cause_test PRIVATE
 foreach(c watchdog poweron software pin corrupt blank)
   add_test(NAME T3-08.${c} COMMAND reset_cause_test ${c})
 endforeach()
+
+# --- T3-09: the KNX TP1 data link engine on a simulated bus --------------------
+set(KNX "${CORE_ROOT}/libraries/OpenPLC_KNX/src")
+add_executable(knx_tp1_test ${KNX}/stknx_tp1.c knx_tp1/test_main.c)
+target_include_directories(knx_tp1_test PRIVATE ${KNX})
+foreach(c codec rx_ack rx_other rx_nak rx_busy tx_ack tx_noack tx_busy collision)
+  add_test(NAME T3-09.${c} COMMAND knx_tp1_test ${c})
+endforeach()

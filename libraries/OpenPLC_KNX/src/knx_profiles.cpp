@@ -5,8 +5,8 @@
  * Built-in 2-channel relay profile.
  *
  * Physical outputs:
- *   Channel 0 → PE6 (REL_1 on Bridge MPU schematic)
- *   Channel 1 → PE5 (REL_2 on Bridge MPU schematic)
+ *   Channel 0 → PI8  (relay 1, Lower Deck)
+ *   Channel 1 → PI10 (relay 2, Lower Deck)
  *
  * Default group addresses are factory defaults; ETS overwrites these
  * via the standard KNX commissioning flow.

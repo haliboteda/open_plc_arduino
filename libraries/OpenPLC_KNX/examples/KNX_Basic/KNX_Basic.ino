@@ -7,23 +7,24 @@
  * (e.g. go.objectWritten()) are broadcast on both IP and TP.
  *
  * Before first use, program the device with ETS:
- *   1. Press the button on PG9 to enter programming mode (LED on PG11 lights).
+ *   1. Press the button on PG9 to enter programming mode. This board has no
+ *      programming LED; KNXHelper.progMode() tells whether it is on.
  *   2. In ETS, assign the individual address and download the application
  *      (ETS connects over KNXnet/IP on the Ethernet port).
  *   3. ETS maps group addresses to group objects - the indices used below
  *      must match the group object table in your ETS application design.
  *
- * Default wiring (Bridge MPU schematic):
- *   Prog button : PG9    (EXTI9_5, pull-up, active-low)
- *   Prog LED    : PG11   (active-high)
- *   Relay 0     : PE6    (REL_1, coil energised = GPIO_PIN_SET)
- *   Relay 1     : PE5    (REL_2, coil energised = GPIO_PIN_SET)
- *   KNX TP TX   : PB14   (USART1 AF4)
- *   KNX TP RX   : PA10   (USART1 AF7)
+ * Default wiring:
+ *   Prog button : PG9    (EXTI9_5, pressed = high)
+ *   Prog LED    : PG11   (line only - no LED is fitted on this board)
+ *   Relay 0     : PI8    (relay 1, Lower Deck, coil energised = GPIO_PIN_SET)
+ *   Relay 1     : PI10   (relay 2, Lower Deck, coil energised = GPIO_PIN_SET)
+ *   KNX TP TX   : PB14   (TIM12_CH1)
+ *   KNX TP RX   : PA10   (TIM1_CH3)
  *
  * Group object table (configure the same layout in ETS):
- *   GO index 1  DPT-1.001 (1-bit switch) - controls relay channel 0 (PE6)
- *   GO index 2  DPT-1.001 (1-bit switch) - controls relay channel 1 (PE5)
+ *   GO index 1  DPT-1.001 (1-bit switch) - controls relay channel 0 (PI8)
+ *   GO index 2  DPT-1.001 (1-bit switch) - controls relay channel 1 (PI10)
  */
 
 // Every sketch declares its own version. The upload tool compares it with
@@ -57,11 +58,12 @@ static void onRelay1(GroupObject &go)
  * ---------------------------------------------------------------------- */
 void setup()
 {
-    /* 1. Initialise KNX stack: loads Flash NVM, configures prog-LED on PG11
-     *    and prog-button EXTI on PG9, sets serial number visible in ETS. */
+    /* 1. Initialise KNX stack: loads Flash NVM, drives KNX_TX low, configures
+     *    the prog-LED line PG11 and prog-button EXTI on PG9, sets serial
+     *    number visible in ETS. */
     KNXHelper.setup("OPENPLC000001");
 
-    /* 2. Initialise 2-channel relay profile: configures PE6 / PE5 as GPIO
+    /* 2. Initialise 2-channel relay profile: configures PI8 / PI10 as GPIO
      *    outputs and restores the last relay states from NVM. */
     KNXHelper.initRelayProfile2CH();
 

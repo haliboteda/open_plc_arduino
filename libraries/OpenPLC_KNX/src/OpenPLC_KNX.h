@@ -4,9 +4,9 @@
  * OpenPLC_KNX.h - Public API for KNX communication on OpenPLC STM32H743 boards.
  *
  * This is a thin facade over the thelsing/knx reference library.
- * By default it uses KnxFacade<Stm32H743OpenPLCPlatform, Bau57B0>
- * (mask version 0x57B0: KNXnet/IP device). The sketch/build may override
- * MASK_VERSION when TP-only or IP/TP coupler behaviour is required.
+ * By default it uses KnxFacade<Stm32H743OpenPLCPlatform, Bau5780>
+ * (mask version 0x5780: IP+TP device). The Tools -> KNX Role menu selects
+ * another mask.
  *
  * Usage (Arduino sketch):
  *
@@ -89,7 +89,8 @@ public:
     /* Call once in setup().
      *   serial     - 12-char device serial number shown in ETS (e.g. "OPENPLC000001")
      *   mfr_id     - KNX manufacturer ID (default 0x00FA = Weinzierl Engineering)
-     * Configures prog-button interrupt on PG9 and prog-LED on PG11.
+     * Drives KNX_TX (PB14) low, configures the prog-button interrupt on PG9
+     * and the prog-LED line PG11 (no LED is fitted on this board).
      * Does NOT start the stack - call start() after registering group objects. */
     void setup(const char* serial = "OPENPLC000001",
                uint16_t    mfr_id = 0x00FAu);

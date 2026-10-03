@@ -7,7 +7,8 @@
  * LibreTiny …) have been removed.  The only supported configuration is:
  *
  *   Platform : Stm32H743OpenPLCPlatform   (inherits Platform directly)
- *   BAU      : Bau07B0  (MASK_VERSION 0x07B0, TP device)
+ *   BAU      : Bau5780  (MASK_VERSION 0x5780, IP+TP device, default)
+ *           or Bau07B0  (MASK_VERSION 0x07B0, TP device)
  *           or Bau57B0  (MASK_VERSION 0x57B0, IP device)
  *           or Bau091A  (MASK_VERSION 0x091A, IP/TP1 coupler)
  *

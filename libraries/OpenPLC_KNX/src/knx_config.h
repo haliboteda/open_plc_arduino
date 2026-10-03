@@ -13,10 +13,30 @@
 #include <stm32h7xx_hal.h>
 
 /* -----------------------------------------------------------------------
- * KNX TP - STKNX transceiver via USART1
- *   TX = PB14  (AF4)   → STKNX via TLP2362 optocoupler
- *   RX = PA10  (AF7)   ← STKNX via TLP2362 optocoupler
+ * KNX TP - STKNX bare TP1 transceiver; the bits are made by two timers
+ * (stknx_phy.cpp). Pins and polarity: $PROD/docs/hardware/HARDWARE-FACTS.md
+ * "KNX 接口"; design: $PROD/docs/modules/M3/KNX-TP-DATA-LINK.md
  * --------------------------------------------------------------------- */
+#ifndef KNX_TP_TX_TIM
+#  define KNX_TP_TX_TIM         TIM12     /* CH1 drives KNX_TX */
+#  define KNX_TP_TX_PORT        GPIOB
+#  define KNX_TP_TX_PIN         GPIO_PIN_14
+#  define KNX_TP_TX_AF          GPIO_AF2_TIM12
+#endif
+#ifndef KNX_TP_RX_TIM
+#  define KNX_TP_RX_TIM         TIM1      /* CH3 captures KNX_RX */
+#  define KNX_TP_RX_PORT        GPIOA
+#  define KNX_TP_RX_PIN         GPIO_PIN_10
+#  define KNX_TP_RX_AF          GPIO_AF1_TIM1
+#endif
+/* Both timer interrupts share one priority so they never preempt each other. */
+#ifndef KNX_TP_IRQ_PRIORITY
+#  define KNX_TP_IRQ_PRIORITY   2u
+#endif
+
+/* USART1 on the same two pins: only the Platform UART methods in
+ * stm32h743_openplc_platform.cpp use these, and nothing calls those since the
+ * TP-UART data link layer was replaced - the STKNX is not a UART device. */
 #ifndef KNX_USART_INSTANCE
 #  define KNX_USART_INSTANCE    USART1
 #endif
@@ -47,7 +67,9 @@
 #  define KNX_TP_VCC_OK_PIN     GPIO_PIN_12
 #endif
 
-/* Programming mode button (active-low) and LED (active-high) */
+/* Programming button: pressed = high, external 10k pull-down; the net is
+ * also BOOT0. Programming LED line: no LED is fitted on this board.
+ * $PROD/docs/hardware/HARDWARE-FACTS.md "PG9 就是 BOOT0 网", "KNX 接口" */
 #ifndef KNX_PROG_KEY_PORT
 #  define KNX_PROG_KEY_PORT     GPIOG
 #  define KNX_PROG_KEY_PIN      GPIO_PIN_9
@@ -59,7 +81,7 @@
 #endif
 
 /* -----------------------------------------------------------------------
- * Relay outputs - OpenPLC Bridge MPU schematic
+ * Relay outputs - Lower Deck relays 1 and 2 (terminals B01-B04)
  * --------------------------------------------------------------------- */
 #ifndef KNX_RELAY1_PORT
 #  define KNX_RELAY1_PORT       GPIOI
@@ -103,7 +125,7 @@
 #define KNX_APP_NVM_FLASH_ADDR        (KNX_NVM_FLASH_ADDR + KNX_FLASH_SIZE)
 
 /* -----------------------------------------------------------------------
- * UART receive ring buffer
+ * UART receive ring buffer (Platform UART methods only, see above)
  * --------------------------------------------------------------------- */
 #ifndef KNX_UART_RXBUF_SIZE
 #  define KNX_UART_RXBUF_SIZE         256u
@@ -117,7 +139,8 @@
 #endif
 
 /* -----------------------------------------------------------------------
- * NVIC interrupt priority for USART1 (lower number = higher priority).
+ * NVIC interrupt priority for USART1 (Platform UART methods only; lower
+ * number = higher priority).
  * Must be >= configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY if FreeRTOS is used.
  * --------------------------------------------------------------------- */
 #ifndef KNX_UART_IRQ_PRIORITY

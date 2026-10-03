@@ -33,7 +33,7 @@ typedef struct {
 extern "C" {
 #endif
 
-/* Returns the built-in 2-channel relay profile (relay outputs on PE6/PE5). */
+/* Returns the built-in 2-channel relay profile (relay outputs on PI8/PI10). */
 const KnxRelayProfile *knx_profile_relay_2ch(void);
 
 /* Initialise relay GPIO and set outputs to their power-up states from config. */
