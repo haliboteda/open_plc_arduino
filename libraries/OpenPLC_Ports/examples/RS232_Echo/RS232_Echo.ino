@@ -6,7 +6,8 @@
  * Connect: a PC through an RS232 adapter (real RS232 levels, not a 3.3 V
  *   USB-TTL adapter), 115200 8N1, in any terminal program.
  * Expect: what you type in that terminal comes straight back. The same port
- *   also carries the board's own status lines every few seconds.
+ *   also carries the board's own lines: the bootloader's at power-up, and one
+ *   "[NET] ip=..." line once the board has an address.
  * Serial Monitor: the board's USB port, 115200 baud.
  */
 

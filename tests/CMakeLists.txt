@@ -58,3 +58,10 @@ target_include_directories(knx_tp1_test PRIVATE ${KNX})
 foreach(c codec rx_ack rx_other rx_nak rx_busy tx_ack tx_priority tx_noack tx_busy collision)
   add_test(NAME T3-09.${c} COMMAND knx_tp1_test ${c})
 endforeach()
+
+# --- T3-10: the YMODEM receiver against scripted senders -----------------------
+add_executable(ymodem_test ${PORTS}/openplc_ymodem.c ymodem/test_main.c)
+target_include_directories(ymodem_test PRIVATE ${PORTS})
+foreach(c one_file short_packets bad_crc duplicate cancel idle noise refuse short_file)
+  add_test(NAME T3-10.${c} COMMAND ymodem_test ${c})
+endforeach()

@@ -30,6 +30,7 @@ OpenPLC 板子每个端口一个例程。从 **文件 ▸ 示例 ▸ OpenPLC_Por
 | `Ethernet_IP` | 以太网 |
 | `CAN_Counter` | CAN |
 | `SD_ReadWrite` | SD 卡 |
+| `SD_FileReceive` | SD 卡：PC 经 RS232 发来的文件（YMODEM） |
 
 KNX 和外部 SDRAM 有各自的库 `OpenPLC_KNX` 和 `OpenPLC_SDRAM`，例程也在各自的库里。
 

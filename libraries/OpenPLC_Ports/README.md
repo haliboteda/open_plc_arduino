@@ -34,6 +34,7 @@ One example per port of the OpenPLC board. Open one from
 | `Ethernet_IP` | Ethernet |
 | `CAN_Counter` | CAN |
 | `SD_ReadWrite` | SD card |
+| `SD_FileReceive` | SD card: a file sent from the PC over RS232 (YMODEM) |
 
 KNX and the external SDRAM have their own libraries, `OpenPLC_KNX` and
 `OpenPLC_SDRAM`, with their own examples.

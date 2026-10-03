@@ -45,6 +45,7 @@ CTESTS = [
     ("T3-07", "AI / AO in mV and mA apply the calibration, or fall back (CTest)", "^T3-07[.]"),
     ("T3-08", "the reset cause the bootloader publishes reaches the sketch (CTest)", "^T3-08[.]"),
     ("T3-09", "KNX TP1 data link: codec, acknowledge, repeats, collision (CTest)", "^T3-09[.]"),
+    ("T3-10", "YMODEM receiver: name and length, retries, cancel (CTest)", "^T3-10[.]"),
 ]
 
 

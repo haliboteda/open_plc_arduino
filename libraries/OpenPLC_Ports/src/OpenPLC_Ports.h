@@ -37,4 +37,6 @@ calib_status_t openplcCalibrationStatus(void);
  * already cleared the flag it looks at. */
 openplc_reset_cause_t openplcResetCause(void);
 
+#include "openplc_ymodem.h"   /* openplcYmodemReceive(): files over a serial port */
+
 #endif /* OPENPLC_PORTS_H_ */
