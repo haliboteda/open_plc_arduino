@@ -46,6 +46,7 @@ CTESTS = [
     ("T3-08", "the reset cause the bootloader publishes reaches the sketch (CTest)", "^T3-08[.]"),
     ("T3-09", "KNX TP1 data link: codec, acknowledge, repeats, collision (CTest)", "^T3-09[.]"),
     ("T3-10", "YMODEM receiver: name and length, retries, cancel (CTest)", "^T3-10[.]"),
+    ("T3-12", "OpenPLC_SD file operations on FatFs over a RAM disk (CTest)", "^T3-12[.]"),
 ]
 
 

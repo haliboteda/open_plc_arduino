@@ -1,6 +1,4 @@
 /*
- * First install "STM32duino STM32SD" from the Library Manager (it brings FatFs).
- *
  * SD_FileReceive -- a file from the PC, over RS232, onto the microSD card.
  *
  * What it does: waits for a file sent with YMODEM on the RS232 port, writes it
@@ -19,7 +17,7 @@
  * Serial Monitor: the board's USB port, 115200 baud.
  */
 
-#include <STM32SD.h>
+#include <OpenPLC_SD.h>
 #include <OpenPLC_Ports.h>
 
 OPENPLC_APP_VERSION(1, 0, 0);

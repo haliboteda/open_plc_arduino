@@ -1,6 +1,4 @@
 /*
- * First install "STM32duino STM32SD" from the Library Manager (it brings FatFs).
- *
  * SD_ReadWrite -- the microSD card slot.
  *
  * What it does: writes a line to TEST.TXT on the card, reads the file back and
@@ -13,7 +11,7 @@
  * Serial Monitor: the board's USB port, 115200 baud.
  */
 
-#include <STM32SD.h>
+#include <OpenPLC_SD.h>
 
 OPENPLC_APP_VERSION(1, 0, 0);
 

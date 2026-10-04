@@ -65,3 +65,18 @@ target_include_directories(ymodem_test PRIVATE ${PORTS})
 foreach(c one_file short_packets bad_crc duplicate cancel idle noise refuse short_file)
   add_test(NAME T3-10.${c} COMMAND ymodem_test ${c})
 endforeach()
+
+# --- T3-12: OpenPLC_SD's file operations on the real FatFs over a RAM disk ------
+enable_language(CXX)
+set(SDLIB "${CORE_ROOT}/libraries/OpenPLC_SD/src")
+set(FATFS "${CORE_ROOT}/libraries/FatFs/src")
+add_executable(sd_lib_test
+  ${SDLIB}/OpenPLC_SD.cpp
+  ${FATFS}/ff.c ${FATFS}/ffunicode.c ${FATFS}/ffsystem.c ${FATFS}/diskio.c ${FATFS}/ff_gen_drv.c
+  sd_lib/test_main.cpp)
+# stubs first: its Arduino.h and ffconf.h stand in for the STM32 ones.
+target_include_directories(sd_lib_test PRIVATE sd_lib/stubs ${SDLIB} ${FATFS})
+target_compile_definitions(sd_lib_test PRIVATE OPENPLC_SD_HOST_TEST)
+foreach(c write_read append seek_peek remove_exists dirs root unmounted)
+  add_test(NAME T3-12.${c} COMMAND sd_lib_test ${c})
+endforeach()
