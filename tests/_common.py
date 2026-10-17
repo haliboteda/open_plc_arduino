@@ -24,8 +24,8 @@ REPO = TESTS.parent
 
 # Kept in step with $PROD/docs/build/BUILD-AND-TEST.md: pnum selects the
 # variant header, so a wrong FQBN would compile a different variant.
-FQBN = ("OpenPLC_Alpha:stm32:OPEN-PLC:pnum=PLC_H743,usb=CDCgen,xusb=FS,"
-        "upload_method=cdcMethod,knxrole=dual_device")
+FQBN = ("OpenPLC_Alpha:stm32:OPEN-PLC:pnum=PLC_H743,usb=CDCgen,"
+        "upload_method=cdcMethod")
 
 
 def Section(text):

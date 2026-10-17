@@ -45,6 +45,22 @@ plausible-looking uninitialised data is exactly the bug this library removes.
 **3. SDRAM does not survive a power cut.** It is working memory, not storage.
 Anything that must outlive a power-down belongs in flash or on the SD card.
 
+## How fast it is
+
+Measured 2026-10-14 on the board, as shipped (480 MHz, D-cache off, MPU off),
+MiB/s; method in `OpenPLC_Test/onboard/sdram/RAM_Speed`.
+
+| | DTCM | AXI SRAM (normal variables) | SDRAM |
+|---|---|---|---|
+| 32-bit sequential write | 1331 | 1046 | 223 |
+| 32-bit sequential read | 1331 | 179 | 62 |
+| `memcpy` | 189 | 43 | **4.4** |
+
+SDRAM is about 3x slower than a normal variable for reads, and `memcpy` into or
+out of it is very slow, because the shipped `memcpy` copies byte by byte and SDRAM
+is not cached. To move bulk data, copy 32-bit words in a loop. Turning the
+D-cache on does not speed SDRAM up (with the MPU off it is uncached).
+
 ## Why you cannot declare a variable "in SDRAM"
 
 There is no `__attribute__((section(".sdram_bss")))` to put a big array
@@ -70,7 +86,8 @@ data. What to do about it is the application's call — a data logger might carr
 on with a shorter in-SRAM history, while something that needs the buffer to
 function should say so and stop.
 
-The bootloader runs the same check at startup and prints either
-`SDRAM staging buffer OK` or `** SDRAM SELF-TEST FAILED **` on the RS232
-terminals, which is the quickest way to tell a board problem from a sketch
-problem.
+When the board stays in upload mode, the bootloader runs the same check and
+writes either `SDRAM staging buffer OK` or `** SDRAM SELF-TEST FAILED **` to
+its boot log (lines starting `[sys][BL]`), which shows on USB port 1 (`Serial`)
+once the computer opens it. That is the quickest way to tell a board problem
+from a sketch problem.

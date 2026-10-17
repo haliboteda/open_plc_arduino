@@ -120,6 +120,8 @@ typedef struct {
     /* received frames handed to the main loop */
     uint8_t  rxq[STKNX_RX_QUEUE][STKNX_FRAME_MAX];
     uint16_t rxq_len[STKNX_RX_QUEUE];
+    uint8_t  rxq_addr[STKNX_RX_QUEUE];   /* the frame was for this device */
+    uint8_t  monitor;          /* also hand up good frames for others (no acknowledge) */
     volatile uint8_t rxq_head;
     volatile uint8_t rxq_tail;
 
@@ -141,8 +143,9 @@ uint8_t stknx_link_tick(stknx_link_t *l, uint16_t now_us, uint16_t *next_len_us)
 /* Main loop. send: 1 = taken, 0 = a frame is still in flight or n is out of range. */
 int      stknx_link_send(stknx_link_t *l, const uint8_t *f, uint16_t n);
 int      stknx_link_send_result(stknx_link_t *l);
-/* One received frame (check octet included) into out, or 0 when none is waiting. */
-uint16_t stknx_link_receive(stknx_link_t *l, uint8_t *out, uint16_t cap);
+/* One received frame (check octet included) into out, or 0 when none is waiting.
+ * *addressed (may be NULL) = the frame was for this device and was acknowledged. */
+uint16_t stknx_link_receive(stknx_link_t *l, uint8_t *out, uint16_t cap, uint8_t *addressed);
 
 #ifdef __cplusplus
 }

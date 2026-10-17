@@ -43,6 +43,8 @@ class Platform
 
         // basic stuff
         virtual void restart() = 0;
+        // OpenPLC: called by the restart service just before restart(); eraseCode is valid only for a master reset.
+        virtual void restartRequested(bool /*masterReset*/, uint8_t /*eraseCode*/) {}
         virtual void fatalError() = 0;
 
         //multicast socket

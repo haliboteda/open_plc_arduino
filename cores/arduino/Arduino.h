@@ -39,6 +39,9 @@
  * must use. Included here so a sketch never has to include anything itself. */
 #include "openplc_app_version.h"
 
+/* The system log and the OPENPLC_SYSTEM_LOG() macro (R3-22, R3-23). */
+#include "openplc_syslog.h"
+
 /*
  * OpenPLC core networking lives under core/, but it depends on STM32duino_LwIP
  * symbols provided as an Arduino library. Make this dependency visible from the
@@ -67,7 +70,12 @@ void yield(void);
 } // extern "C"
 
 #ifdef OPENPLC_UDP_SERVER_AUTOSTART
-extern HardwareSerial Serial_Test;
+#include "RS232Serial.h"
+extern RS232Serial RS232;
+#include "RS485Serial.h"
+extern RS485Serial RS485;
+#include "OpenPLCNet.h"
+extern OpenPLCNet Net;
 #endif
 
 #endif // __cplusplus

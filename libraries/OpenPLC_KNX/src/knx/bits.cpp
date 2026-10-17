@@ -179,6 +179,9 @@ uint16_t crc16Dnp(uint8_t* input, uint16_t length)
 
 // Produce print and println for Arduino STM32 by forwarding to KNX_DEBUG_SERIAL.
 #if defined(ARDUINO) && defined(ARDUINO_ARCH_STM32) && !defined(KNX_NO_PRINT)
+#ifdef KNX_DEBUG_TO_SYSLOG
+SystemLogPrint openplc_knx_debug_log(OPENPLC_SYSLOG_TAG_KNX);
+#endif
 void print(const char str[])               { KNX_DEBUG_SERIAL.print(str); }
 void print(char c)                         { KNX_DEBUG_SERIAL.print(c); }
 void print(unsigned char b, int base)      { KNX_DEBUG_SERIAL.print(b, base); }

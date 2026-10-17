@@ -166,32 +166,6 @@ void CemiFrame::fillTelegramTP(uint8_t* data)
     data[len - 1] = calcCrcTP(data, len - 1);
 }
 
-#ifdef USE_RF
-
-uint16_t CemiFrame::telegramLengthtRF() const
-{
-    return totalLenght() - 3;
-}
-
-void CemiFrame::fillTelegramRF(uint8_t* data)
-{
-    uint16_t len = telegramLengthtRF();
-
-    // We prepare the actual KNX telegram for RF here only.
-    // The packaging into blocks with CRC16 (Format based on FT3 Data Link Layer (IEC 870-5))
-    // is done in the RF Data Link Layer code.
-    // RF always uses the Extended Frame Format. However, the length field is missing (right before the APDU)
-    // as there is already a length field at the beginning of the raw RF frame which is also used by the
-    // physical layer to control the HW packet engine of the transceiver.
-
-    data[0] = _ctrl1[1] & 0x0F; // KNX CTRL field for RF (bits 3..0 EFF only), bits 7..4 are set to 0 for asynchronous RF frames
-    memcpy(data + 1, _ctrl1 + 2, 4); // SA, DA
-    data[5] = (_ctrl1[1] & 0xF0) | ((_rfLfn & 0x7) << 1) | ((_ctrl1[0] & 0x10) >> 4); // L/NPCI field: AT, Hopcount, LFN, AET
-    memcpy(data + 6, _ctrl1 + 7, len - 6); // APDU
-
-    //printHex("cEMI_fill: ", &data[0], len);
-}
-#endif
 uint8_t* CemiFrame::data()
 {
     return _data;
@@ -323,37 +297,6 @@ void CemiFrame::destinationAddress(uint16_t value)
 {
     pushWord(value, _ctrl1 + 4);
 }
-#ifdef USE_RF
-uint8_t* CemiFrame::rfSerialOrDoA() const
-{
-    return _rfSerialOrDoA;
-}
-
-void CemiFrame::rfSerialOrDoA(const uint8_t* rfSerialOrDoA)
-{
-    _rfSerialOrDoA = (uint8_t*)rfSerialOrDoA;
-}
-
-uint8_t CemiFrame::rfInfo() const
-{
-    return _rfInfo;
-}
-
-void CemiFrame::rfInfo(uint8_t rfInfo)
-{
-    _rfInfo = rfInfo;
-}
-
-uint8_t CemiFrame::rfLfn() const
-{
-    return _rfLfn;
-}
-
-void CemiFrame::rfLfn(uint8_t rfLfn)
-{
-    _rfLfn = rfLfn;
-}
-#endif
 NPDU& CemiFrame::npdu()
 {
     return _npdu;

@@ -1,5 +1,7 @@
 #pragma once
 
+// OpenPLC: RF (0x27B0, 0x2920) removed from this vendored copy.
+
 #ifndef NO_KNX_CONFIG
 
     #ifdef ARDUINO_ARCH_SAMD
@@ -14,25 +16,17 @@
 
     // Normal devices
     // TP1: 0x07B0
-    // RF: 0x27B0
     // IP: 0x57B0
     //#define MASK_VERSION 0x07B0
-    //#define MASK_VERSION 0x27B0
     //#define MASK_VERSION 0x57B0
 
     // Couplers
     // IP/TP1: 0x091A
-    // TP1/RF: 0x2920
     //#define MASK_VERSION 0x091A
-    //#define MASK_VERSION 0x2920
 
     // Data Linklayer Driver Options
     #if MASK_VERSION == 0x07B0
         #define USE_TP
-    #endif
-
-    #if MASK_VERSION == 0x27B0
-        #define USE_RF
     #endif
 
     #if MASK_VERSION == 0x57B0
@@ -42,18 +36,6 @@
     #if MASK_VERSION == 0x091A
         #define USE_TP
         #define USE_IP
-    #endif
-
-    /* OpenPLC extension: IP+TP dual application device (MASK 0x5780).
-     * Has group objects like a normal device AND communicates on both media. */
-    #if MASK_VERSION == 0x5780
-        #define USE_TP
-        #define USE_IP
-    #endif
-
-    #if MASK_VERSION == 0x2920
-        #define USE_TP
-        #define USE_RF
     #endif
 
     /* Enable KNXnet/IP Tunneling when IP transport is active.

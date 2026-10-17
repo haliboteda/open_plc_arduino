@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "stm32h743_openplc_platform.h"
 #include "knx_nvm.h"
 #include <string.h>
@@ -32,6 +33,23 @@ void Stm32H743OpenPLCPlatform::restart()
     NVIC_SystemReset();
 }
 
+/* One system log line before an ETS restart, so the log shows who caused the
+ * reboot (R3-19). openplc_syslog_write() returns with the record in SRAM4,
+ * which the soft reset that follows keeps. */
+void Stm32H743OpenPLCPlatform::restartRequested(bool masterReset, uint8_t eraseCode)
+{
+    char line[64];
+    int n;
+
+    if (masterReset) {
+        n = snprintf(line, sizeof(line),
+                     "restart requested by ETS (master reset, erase code %u)", eraseCode);
+    } else {
+        n = snprintf(line, sizeof(line), "restart requested by ETS (basic)");
+    }
+    openplc_syslog_write(OPENPLC_SYSLOG_TAG_KNX, line, (size_t)n);
+}
+
 void Stm32H743OpenPLCPlatform::fatalError()
 {
     __disable_irq();
@@ -46,29 +64,29 @@ uint32_t Stm32H743OpenPLCPlatform::uniqueSerialNumber()
 /* =========================================================================
  * Network info - read from LwIP netif_default
  *
- * LwIP stores addresses in network byte order (big-endian).
- * The reference library expects host byte order, so lwip_ntohl() is applied
- * to every address returned here.
+ * Returned as LwIP stores them, in network byte order: the stack applies
+ * htonl() itself (knx/ip_parameter_object.cpp), so converting here as well
+ * puts the address on the wire byte-reversed.
  * ======================================================================= */
 
 uint32_t Stm32H743OpenPLCPlatform::currentIpAddress()
 {
     if (netif_default != nullptr)
-        return lwip_ntohl(netif_ip4_addr(netif_default)->addr);
+        return netif_ip4_addr(netif_default)->addr;
     return 0u;
 }
 
 uint32_t Stm32H743OpenPLCPlatform::currentSubnetMask()
 {
     if (netif_default != nullptr)
-        return lwip_ntohl(netif_ip4_netmask(netif_default)->addr);
+        return netif_ip4_netmask(netif_default)->addr;
     return 0u;
 }
 
 uint32_t Stm32H743OpenPLCPlatform::currentDefaultGateway()
 {
     if (netif_default != nullptr)
-        return lwip_ntohl(netif_ip4_gw(netif_default)->addr);
+        return netif_ip4_gw(netif_default)->addr;
     return 0u;
 }
 
@@ -217,7 +235,7 @@ bool Stm32H743OpenPLCPlatform::sendBytesUniCast(uint32_t addr, uint16_t port,
  * NVM - Eeprom type, backed by the KNX sector (layout in knx_config.h)
  *
  * getEepromBuffer: allocate RAM buffer, load from Flash on first call
- * commitToEeprom:  rewrite the sector, keeping the application NVM block
+ * commitToEeprom:  erase the sector and write the buffer back
  * ======================================================================= */
 
 uint8_t* Stm32H743OpenPLCPlatform::getEepromBuffer(uint32_t size)
@@ -240,5 +258,5 @@ void Stm32H743OpenPLCPlatform::commitToEeprom()
     if (_eepromBuf == nullptr || _eepromSize == 0u) return;
 
     /* caller (Platform base) doesn't check the return value */
-    (void)knx_nvm_sector_write(_eepromBuf, _eepromSize, NULL);
+    (void)knx_nvm_sector_write(_eepromBuf, _eepromSize);
 }

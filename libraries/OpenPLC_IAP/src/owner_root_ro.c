@@ -34,7 +34,7 @@
 
 typedef struct {
 	uint8_t  type;
-	uint8_t  reserved0;        /* was `slots` through format_ver 2 */
+	uint8_t  reserved0;        /* always 0 */
 	uint16_t format_ver;
 	uint32_t generation;
 	uint32_t flags;
@@ -216,6 +216,13 @@ bool owner_root_ro_get(uint8_t out[64])
 	}
 	memcpy(out, s_effective->root_pubkey, 64U);
 	return true;
+}
+
+uint32_t owner_root_ro_generation(void)
+{
+	resolve_chain();
+
+	return (s_effective != NULL) ? s_effective->generation : 0U;
 }
 
 bool owner_root_ro_is_revoked(const uint8_t leaf_pubkey[64])

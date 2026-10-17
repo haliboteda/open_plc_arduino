@@ -1,50 +1,50 @@
 /*
- * SD_FileReceive -- a file from the PC, over RS232, onto the microSD card.
+ * SD_FileReceive -- a file from the PC, over USB, onto the microSD card.
  *
- * What it does: waits for a file sent with YMODEM on the RS232 port, writes it
- * to the card under the name it was sent with, then reads it back and prints
- * its CRC-32. Reports when a card is inserted or removed.
- * Connect: a FAT32- or exFAT-formatted microSD card in the slot, and a PC
- *   through an RS232 adapter (real RS232 levels, not a 3.3 V USB-TTL adapter),
- *   115200 8N1. Send with Tera Term (File > Transfer > YMODEM > Send) or
- *   lrzsz's "sb". The board prints one "[NET]" line on RS232 when it gets an
- *   address; the sender retries past it, but with no Ethernet cable there is
- *   nothing to retry.
+ * What it does: waits for a file sent with YMODEM on the board's USB port,
+ * writes it to the card under the name it was sent with, then reads it back
+ * and prints its CRC-32. Reports when a card is inserted or removed.
+ * Connect: a FAT32- or exFAT-formatted microSD card in the slot. Send from
+ *   the board's USB port with Tera Term (File > Transfer > YMODEM > Send) or
+ *   lrzsz's "sb"; close the Serial Monitor on that port first.
  * Expect: "SD: card inserted"; while a card is in, the board sends a "C" on
- *   RS232 once a second, which is YMODEM asking for a file. After a send
+ *   USB once a second, which is YMODEM asking for a file. After a send
  *   "SD: wrote NAME, 12345 bytes, crc32=1A2B3C4D". The CRC-32 matches the one
  *   of the file on the PC (for example "crc32 FILE" on Linux).
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port -- the same port YMODEM uses, so
+ *   the result line is printed only after the transfer has ended.
  */
 
 #include <OpenPLC_SD.h>
 #include <OpenPLC_Ports.h>
 
-OPENPLC_APP_VERSION(1, 0, 0);
+OPENPLC_APP_VERSION(1, 1, 0);
 
 const uint32_t debounceMs = 50;
 bool cardIn = false;
+bool cardReadable = false;
 bool lastSample = false;
 uint32_t lastSampleMs = 0;
 
 File file;
 char fileName[OPENPLC_YMODEM_NAME_MAX];
 uint32_t fileSize = 0;
+char report[128] = "";   // held back until YMODEM has let go of the port
 
-int rs232Read(void *, uint32_t timeoutMs)
+int usbRead(void *, uint32_t timeoutMs)
 {
   uint32_t start = millis();
-  while (!Serial_Test.available()) {
+  while (!Serial.available()) {
     if (millis() - start >= timeoutMs) {
       return -1;
     }
   }
-  return Serial_Test.read();
+  return Serial.read();
 }
 
-void rs232Write(void *, uint8_t b)
+void usbWrite(void *, uint8_t b)
 {
-  Serial_Test.write(b);
+  Serial.write(b);
 }
 
 bool openFile(void *, const char *name, uint32_t size)
@@ -76,9 +76,7 @@ void closeFile(void *, bool ok)
 {
   file.close();
   if (!ok) {
-    Serial.print("SD: transfer of ");
-    Serial.print(fileName);
-    Serial.println(" did not complete");
+    snprintf(report, sizeof(report), "SD: transfer of %s did not complete", fileName);
     return;
   }
   // Read back what is on the card, not what was received.
@@ -92,26 +90,24 @@ void closeFile(void *, bool ok)
     total += n;
   }
   f.close();
-  Serial.print("SD: wrote ");
-  Serial.print(fileName);
-  Serial.print(", ");
-  Serial.print(total);
-  Serial.print(" bytes, crc32=");
-  char hex[9];
-  snprintf(hex, sizeof(hex), "%08lX", (unsigned long)(crc ^ 0xFFFFFFFFUL));
-  Serial.println(hex);
+  snprintf(report, sizeof(report), "SD: wrote %s, %lu bytes, crc32=%08lX",
+           fileName, (unsigned long)total, (unsigned long)(crc ^ 0xFFFFFFFFUL));
 }
 
-const openplc_ymodem_io_t io = {nullptr, rs232Read, rs232Write, openFile, writeData, closeFile};
+const openplc_ymodem_io_t io = {nullptr, usbRead, usbWrite, openFile, writeData, closeFile};
 
-// The card-detect switch pulls SDMMC_CD_Pin low while a card is in.
+void printCardInserted()
+{
+  Serial.println(cardReadable ? "SD: card inserted" : "SD: card inserted, but it could not be read");
+}
+
 void watchCard()
 {
   if (millis() - lastSampleMs < debounceMs) {
     return;
   }
   lastSampleMs = millis();
-  bool now = digitalRead(SDMMC_CD_Pin) == LOW;
+  bool now = SD.cardPresent();
   if (now != lastSample) {
     lastSample = now;   // must read the same twice in a row
     return;
@@ -121,29 +117,54 @@ void watchCard()
   }
   cardIn = now;
   if (cardIn) {
-    Serial.println(SD.begin(SDMMC_CD_Pin) ? "SD: card inserted" : "SD: card inserted, but it could not be read");
+    cardReadable = SD.begin();
+    printCardInserted();
   } else {
     SD.end();
     Serial.println("SD: card removed");
   }
 }
 
+void printBanner()
+{
+  Serial.println("SD_FileReceive: send a file with YMODEM on USB.");
+  if (cardIn) {
+    printCardInserted();  // a card inserted before the monitor connected
+  }
+}
+
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect()
+{
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
-  pinMode(RS232_EN_Pin, OUTPUT);
-  digitalWrite(RS232_EN_Pin, HIGH);  // the transceiver is off until this pin is high
-  Serial_Test.begin(115200);
-  pinMode(SDMMC_CD_Pin, INPUT);      // the board has its own pull-up
-  Serial.println("SD_FileReceive: send a file with YMODEM on RS232.");
 }
 
 void loop()
 {
+  printBannerOnConnect();
   watchCard();
   if (cardIn) {
     // Asks the PC for a file for one second, then comes back to watch the card.
     openplcYmodemReceive(&io, 1000);
+    if (report[0] != '\0') {
+      Serial.println(report);
+      report[0] = '\0';
+    }
   }
 }

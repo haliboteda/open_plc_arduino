@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Cross-compiles network_discovery for every supported platform.
 
     python build.py

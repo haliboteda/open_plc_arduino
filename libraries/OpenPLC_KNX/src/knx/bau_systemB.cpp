@@ -239,6 +239,7 @@ void BauSystemB::restartRequestIndication(Priority priority, HopCountType hopTyp
 
     // Flush the EEPROM before resetting
     _memory.writeMemory();
+    _platform.restartRequested(restartType == RestartType::MasterReset, (uint8_t)eraseCode);
     _platform.restart();
 }
 

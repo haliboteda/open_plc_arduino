@@ -8,7 +8,7 @@ It ships with the board package; nothing to install from the Library Manager.
 ```cpp
 #include <OpenPLC_SD.h>
 
-SD.begin(SDMMC_CD_Pin);              // false: no card, or it cannot be read
+SD.begin();   // false: no card, or it cannot be read
 File f = SD.open("LOG.TXT", FILE_WRITE);
 f.println("hello");
 f.close();
@@ -16,7 +16,7 @@ f.close();
 
 | Call | Does |
 |---|---|
-| `SD.begin(SDMMC_CD_Pin)` / `SD.end()` | Mount / unmount the card. The board's card-detect pin reads low while a card is in |
+| `SD.begin()` / `SD.end()` | Mount / unmount the card. The board's card-detect pin reads low while a card is in |
 | `SD.cardPresent()` | Whether the detect pin says a card is in |
 | `SD.open(path, FILE_READ)` | Open for reading. A directory opens too; walk it with `openNextFile()` |
 | `SD.open(path, FILE_WRITE)` | Create if missing, write at the end |

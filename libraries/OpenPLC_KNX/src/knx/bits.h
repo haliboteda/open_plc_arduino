@@ -121,15 +121,21 @@
     #define ABS(x)    ((x > 0) ? (x) : (-x))
 #endif
 
-/* On Arduino STM32, delegate print()/println() free functions to a
- * HardwareSerial object.  Override KNX_DEBUG_SERIAL before including
- * this header if you want output on a different port. */
+/* OpenPLC: the stack's debug print()/println() are off unless KNX_DEBUG is
+ * defined (-DKNX_DEBUG); KNX_NO_PRINT is upstream's switch for that. */
+#if defined(ARDUINO_ARCH_STM32) && !defined(KNX_DEBUG) && !defined(KNX_NO_PRINT)
+#  define KNX_NO_PRINT
+#endif
+
+/* On Arduino STM32, delegate print()/println() free functions to a Print
+ * object: by default the system log, as [sys][KNX] lines (R3-22). Override
+ * KNX_DEBUG_SERIAL before including this header for another port. */
 #if defined(ARDUINO_ARCH_STM32) && !defined(KNX_DEBUG_SERIAL)
-#  define KNX_DEBUG_SERIAL Serial_Test
+#  define KNX_DEBUG_SERIAL openplc_knx_debug_log
+#  define KNX_DEBUG_TO_SYSLOG
 #  ifndef KNX_NO_PRINT
-     /* Arduino.h (included above for ARDUINO_ARCH_STM32) provides HardwareSerial.
-      * Forward-declare the instance so bits.cpp can forward print() calls to it. */
-     extern HardwareSerial Serial_Test;
+     /* Defined in bits.cpp; SystemLogPrint comes from Arduino.h. */
+     extern SystemLogPrint openplc_knx_debug_log;
 #  endif
 #endif
 

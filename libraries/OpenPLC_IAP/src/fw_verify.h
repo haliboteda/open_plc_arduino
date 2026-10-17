@@ -19,7 +19,6 @@
 extern "C" {
 #endif
 
-#define FW_PUBLIC_KEY_SIZE 64U
 #define FW_SIGNATURE_SIZE  64U
 
 bool fw_verify_signature_with_key(const uint8_t pubkey[64],

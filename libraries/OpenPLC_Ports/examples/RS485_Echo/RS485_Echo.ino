@@ -3,38 +3,48 @@
  *
  * What it does: sends back every line it receives on RS485, and reports it on
  * the Serial Monitor.
- * Connect: a PC through a USB-RS485 adapter, A to A and B to B, 115200 8N1.
+ * Connect: a PC through a USB-RS485 adapter to terminals C10 (A) / C11 (B),
+ *   A to A and B to B, 115200 8N1.
  * Expect: each line you send comes back.
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port.
  */
 
 OPENPLC_APP_VERSION(1, 0, 0);
 
-HardwareSerial RS485(RS485_RX_Pin, RS485_TX_Pin);
 String line;
 
-void send(const String &s) {
-  digitalWrite(RS485_DIR_Pin, HIGH);  // drive the bus only while sending
-  RS485.print(s);
-  RS485.flush();                      // wait for the last byte to leave
-  digitalWrite(RS485_DIR_Pin, LOW);
+void printBanner() {
+  Serial.println("RS485_Echo: send a line over RS485.");
+}
+
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
 }
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
-  pinMode(RS485_DIR_Pin, OUTPUT);
-  digitalWrite(RS485_DIR_Pin, LOW);
-  RS485.begin(115200);
-  Serial.println("RS485_Echo: send a line over RS485.");
+  RS485.begin(115200);  // drives the bus only while sending
 }
 
 void loop() {
+  printBannerOnConnect();
   while (RS485.available()) {
     char c = RS485.read();
     line += c;
     if (c == '\n') {
-      send(line);
+      RS485.print(line);
       Serial.print("RS485 echoed: ");
       Serial.print(line);
       line = "";

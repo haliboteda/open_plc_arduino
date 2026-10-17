@@ -1,5 +1,5 @@
 /*
- * OpenPLC_CAN -- classic CAN on FDCAN1 (CAN_TX_Pin / CAN_RX_Pin), polled.
+ * OpenPLC_CAN -- classic CAN on FDCAN1 (CAN_TX / CAN_RX), polled.
  *
  *     CAN.begin(500000);
  *     CAN.write(0x123, data, 8);

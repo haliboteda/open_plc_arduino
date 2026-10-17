@@ -215,9 +215,9 @@ static void t_rx_ack(void)
 	check(k == 1 && r == STKNX_ACK, "an addressed frame is answered with ACK");
 	uint32_t want = end + (11 + STKNX_ACK_GAP_BITS) * BIT;
 	check(k == 1 && rt >= want - 10 && rt <= want + 10, "the ACK starts 15 bit periods after the stop bit (+-10 us)");
-	uint16_t n = stknx_link_receive(&L, buf, sizeof(buf));
+	uint16_t n = stknx_link_receive(&L, buf, sizeof(buf), NULL);
 	check(n == 9 && buf[3] == 0x08 && buf[4] == 0x01, "the frame reaches the main loop with its octets");
-	check(stknx_link_receive(&L, buf, sizeof(buf)) == 0, "and only once");
+	check(stknx_link_receive(&L, buf, sizeof(buf), NULL) == 0, "and only once");
 }
 
 static void t_rx_other(void)
@@ -226,7 +226,23 @@ static void t_rx_other(void)
 	uint32_t rt = 0, end = 0;
 	int k = rx_case(0x0802, 0, &r, &rt, &end);
 	check(k == 0 && ndut == 0, "a frame for somebody else gets no acknowledge");
-	check(stknx_link_receive(&L, buf, sizeof(buf)) == 0, "and is not handed up");
+	check(stknx_link_receive(&L, buf, sizeof(buf), NULL) == 0, "and is not handed up");
+}
+
+/* Monitoring: frames for others are handed up too, never acknowledged. */
+static void t_rx_monitor(void)
+{
+	uint8_t r = 0, buf[STKNX_FRAME_MAX], ours = 1;
+	uint32_t rt = 0, end = 0;
+	L.monitor = 1;
+	int k = rx_case(0x0802, 0, &r, &rt, &end);
+	check(k == 0 && ndut == 0, "monitoring: a frame for somebody else still gets no acknowledge");
+	uint16_t n = stknx_link_receive(&L, buf, sizeof(buf), &ours);
+	check(n == 9 && buf[4] == 0x02 && ours == 0, "but it is handed up, marked as not ours");
+	ndut = 0;
+	k = rx_case(0x0801, 0, &r, &rt, &end);
+	n = stknx_link_receive(&L, buf, sizeof(buf), &ours);
+	check(k == 1 && r == STKNX_ACK && n == 9 && ours == 1, "a frame for this device is acknowledged and marked as ours");
 }
 
 static void t_rx_nak(void)
@@ -235,7 +251,7 @@ static void t_rx_nak(void)
 	uint32_t rt = 0, end = 0;
 	int k = rx_case(0x0801, 1, &r, &rt, &end);
 	check(k == 1 && r == STKNX_NAK, "an addressed frame with a bad check octet is answered with NAK");
-	check(stknx_link_receive(&L, buf, sizeof(buf)) == 0, "and is not handed up");
+	check(stknx_link_receive(&L, buf, sizeof(buf), NULL) == 0, "and is not handed up");
 }
 
 static void t_rx_busy(void)
@@ -309,7 +325,7 @@ static void t_tx_ack(void)
 	check(nf == 1 && memcmp(got[0], f, 9) == 0, "the frame goes out once, octets as given, 13 bit periods apart");
 	check(stknx_link_send_result(&L) == STKNX_SEND_OK, "the ACK confirms the send");
 	uint8_t buf[STKNX_FRAME_MAX];
-	check(stknx_link_receive(&L, buf, sizeof(buf)) == 0, "our own frame is not handed up as received");
+	check(stknx_link_receive(&L, buf, sizeof(buf), NULL) == 0, "our own frame is not handed up as received");
 }
 
 static void t_tx_noack(void)
@@ -386,7 +402,7 @@ static void t_collision(void)
 	}
 	check(extra == 0, "after losing arbitration the engine puts no further pulse on the bus");
 	uint8_t buf[STKNX_FRAME_MAX];
-	uint16_t r = stknx_link_receive(&L, buf, sizeof(buf));
+	uint16_t r = stknx_link_receive(&L, buf, sizeof(buf), NULL);
 	check(r == 9 && memcmp(buf, pf, 9) == 0, "the winner's frame is received intact");
 
 	/* It owes the winner an ACK, then retries after the bus is idle. */
@@ -408,6 +424,7 @@ int main(int argc, char **argv)
 	else if (strcmp(s, "rx_ack") == 0)    { t_rx_ack(); }
 	else if (strcmp(s, "rx_other") == 0)  { t_rx_other(); }
 	else if (strcmp(s, "rx_nak") == 0)    { t_rx_nak(); }
+	else if (strcmp(s, "rx_monitor") == 0) { t_rx_monitor(); }
 	else if (strcmp(s, "rx_busy") == 0)   { t_rx_busy(); }
 	else if (strcmp(s, "tx_ack") == 0)    { t_tx_ack(); }
 	else if (strcmp(s, "tx_priority") == 0) { t_tx_priority(); }

@@ -48,7 +48,6 @@ class CemiServer
 
     private:
         uint16_t _clientAddress = 0;
-        uint8_t _frameNumber = 0;
 
         void handleLData(CemiFrame& frame);
         void handleMPropRead(CemiFrame& frame);

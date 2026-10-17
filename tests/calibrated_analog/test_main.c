@@ -84,8 +84,8 @@ static void build_valid_area(void)
 }
 
 /* Nominal values the library's conversion must start from. */
-static float nominal_ai1(uint32_t raw) { return raw * 2500.0f / 4095.0f * (90.6f / 22.6f); }
-static float nominal_ai2(uint32_t raw) { return raw * 2500.0f / 4095.0f / 124.0f; }
+static float nominal_ai1(uint32_t raw) { return raw * 2500.0f / 65535.0f * (90.6f / 22.6f); }
+static float nominal_ai2(uint32_t raw) { return raw * 2500.0f / 65535.0f / 124.0f; }
 
 static void expect_calibrated(void)
 {

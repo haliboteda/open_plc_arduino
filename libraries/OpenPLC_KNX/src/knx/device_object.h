@@ -43,7 +43,7 @@ public:
         uint8_t defaultHopCount();
     private:
         uint8_t _prgMode = 0;
-#if MASK_VERSION == 0x091A || MASK_VERSION == 0x2920
+#if MASK_VERSION == 0x091A
         uint16_t _ownAddress = 0xFF00; // 15.15.0; couplers have 15.15.0 as default PA
 #else
         uint16_t _ownAddress = 0xFFFF; // 15.15.255;

@@ -84,6 +84,9 @@ WEAK void SystemClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
   PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
   PeriphClkInitStruct.PLL2.PLL2FRACN = 0.0;
+  /* ADC clock as the fixture firmware sets it: per_ck (HSI at reset), divided in
+   * the ADC. $PROD/docs/modules/M3/CALIBRATED-ANALOG.md */
+  PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_CLKP;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   PeriphClkInitStruct.QspiClockSelection = RCC_QSPICLKSOURCE_D1HCLK;
   PeriphClkInitStruct.SdmmcClockSelection = RCC_SDMMCCLKSOURCE_PLL;

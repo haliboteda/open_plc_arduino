@@ -55,7 +55,7 @@ endforeach()
 set(KNX "${CORE_ROOT}/libraries/OpenPLC_KNX/src")
 add_executable(knx_tp1_test ${KNX}/stknx_tp1.c knx_tp1/test_main.c)
 target_include_directories(knx_tp1_test PRIVATE ${KNX})
-foreach(c codec rx_ack rx_other rx_nak rx_busy tx_ack tx_priority tx_noack tx_busy collision)
+foreach(c codec rx_ack rx_other rx_monitor rx_nak rx_busy tx_ack tx_priority tx_noack tx_busy collision)
   add_test(NAME T3-09.${c} COMMAND knx_tp1_test ${c})
 endforeach()
 
@@ -79,4 +79,33 @@ target_include_directories(sd_lib_test PRIVATE sd_lib/stubs ${SDLIB} ${FATFS})
 target_compile_definitions(sd_lib_test PRIVATE OPENPLC_SD_HOST_TEST)
 foreach(c write_read append seek_peek remove_exists dirs root unmounted)
   add_test(NAME T3-12.${c} COMMAND sd_lib_test ${c})
+endforeach()
+
+# --- T3-22: after a KNX role change or a torn write nothing is restored -------
+add_executable(knx_role_test
+  ${KNX}/knx/memory.cpp ${KNX}/knx/device_object.cpp ${KNX}/knx/interface_object.cpp
+  ${KNX}/knx/property.cpp ${KNX}/knx/data_property.cpp ${KNX}/knx/platform.cpp
+  ${KNX}/knx/bits.cpp ${KNX}/knx_nvm.cpp
+  knx_role/test_main.cpp)
+# stubs: a fake stm32h7xx_hal.h for knx_config.h; the fake flash is in test_main.cpp.
+target_include_directories(knx_role_test PRIVATE knx_role/stubs ${KNX})
+# knx/config.h requires a MASK_VERSION; the role under test is set in hardwareType
+# by the test itself. memory.cpp gets malloc from Arduino.h on the board, so the
+# host build pulls in <cstdlib>.
+target_compile_definitions(knx_role_test PRIVATE KNX_NO_PRINT KNX_FLASH_SIZE=1024 MASK_VERSION=0x07B0)
+target_compile_options(knx_role_test PRIVATE "SHELL:-include cstdlib"
+  "SHELL:-include ${CMAKE_CURRENT_SOURCE_DIR}/knx_role/stubs/host_byteorder.h")
+foreach(c same_tp same_router tp_to_router router_to_tp legacy torn_write)
+  add_test(NAME T3-22.${c} COMMAND knx_role_test ${c})
+endforeach()
+
+# --- T3-24: boot log ring in SRAM4 -------------------------------------------
+add_executable(boot_log_test
+  ${CORE_ROOT}/cores/arduino/stm32/boot_log.c boot_log/test_main.c)
+target_include_directories(boot_log_test PRIVATE
+  boot_log/stubs ${CORE_ROOT}/cores/arduino/stm32)
+target_compile_options(boot_log_test PRIVATE
+  -include ${CMAKE_CURRENT_SOURCE_DIR}/boot_log/stubs/test_hooks.h)
+foreach(c garbage write_read wrap split corrupt sent unsent_dropped)
+  add_test(NAME T3-24.${c} COMMAND boot_log_test ${c})
 endforeach()

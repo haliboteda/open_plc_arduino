@@ -20,7 +20,7 @@ class TransportLayer
         void networkLayer(NetworkLayer& layer);
         void groupAddressTable(AddressTableObject& addrTable);
 
-        #pragma region from network layer
+        // from network layer
         void dataIndividualIndication(uint16_t destination, HopCountType hopType, Priority priority, uint16_t source, TPDU& tpdu);
         void dataIndividualConfirm(AckType ack, uint16_t destination, HopCountType hopType, Priority priority, TPDU& tpdu, bool status);
         void dataGroupIndication(uint16_t destination, HopCountType hopType, Priority priority, uint16_t source, TPDU& tpdu);
@@ -29,9 +29,8 @@ class TransportLayer
         void dataBroadcastConfirm(AckType ack, HopCountType hopType, Priority priority, TPDU& tpdu, bool status);
         void dataSystemBroadcastIndication(HopCountType hopType, Priority priority, uint16_t source, TPDU& tpdu);
         void dataSystemBroadcastConfirm(AckType ack, HopCountType hopType, TPDU& tpdu, Priority priority, bool status);
-        #pragma endregion
 
-        #pragma region from application layer
+        // from application layer
         /**
          * Request to send an APDU that via multicast. See 3.2 of @cite knx:3/3/4.
          * See also ApplicationLayer::dataGroupConfirm and ApplicationLayer::dataGroupIndication.
@@ -60,16 +59,14 @@ class TransportLayer
 
         uint8_t getTpciSeqNum();
         uint16_t getConnectionAddress();
-        #pragma endregion
 
-        #pragma region other
+        // other
         void connectionTimeoutIndication();
         void ackTimeoutIndication();
         void loop();
-        #pragma endregion
 
     private:
-        #pragma region States
+        // States
         Priority _savedPriority = LowPriority;
         CemiFrame _savedFrame;
         Priority _savedPriorityConnecting;
@@ -114,7 +111,6 @@ class TransportLayer
         uint16_t _ackTimeoutMillis = 3000;
         uint8_t _repCount = 0;
         uint8_t _maxRepCount = 3;
-        #pragma endregion
         ApplicationLayer& _applicationLayer;
         AddressTableObject* _groupAddressTable;
         NetworkLayer* _networkLayer;

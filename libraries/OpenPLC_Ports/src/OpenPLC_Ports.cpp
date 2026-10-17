@@ -19,14 +19,14 @@ static const calib_area_t *analog_ready(void)
 float openplcReadAI1_mV(void)
 {
   const calib_area_t *cal = analog_ready();
-  analogReadResolution(12);
+  analogReadResolution(16);
   return openplc_ai1_mv_from_raw(analogRead(AIN_1), &cal->ch[CALIB_CH_AI1]);
 }
 
 float openplcReadAI2_mA(void)
 {
   const calib_area_t *cal = analog_ready();
-  analogReadResolution(12);
+  analogReadResolution(16);
   return openplc_ai2_ma_from_raw(analogRead(AIN_2), &cal->ch[CALIB_CH_AI2]);
 }
 
@@ -63,9 +63,4 @@ bool openplcEnableVref(void)
     }
   }
   return true;
-}
-
-openplc_reset_cause_t openplcResetCause(void)
-{
-  return openplc_reset_cause();
 }

@@ -67,7 +67,7 @@ uint16_t AddressTableObject::getTsap(uint16_t addr)
     return 0;
 }
 
-#pragma region SaveRestore
+// SaveRestore
 
 const uint8_t* AddressTableObject::restore(const uint8_t* buffer)
 {
@@ -78,7 +78,6 @@ const uint8_t* AddressTableObject::restore(const uint8_t* buffer)
     return buffer;
 }
 
-#pragma endregion
 
 bool AddressTableObject::contains(uint16_t addr)
 {

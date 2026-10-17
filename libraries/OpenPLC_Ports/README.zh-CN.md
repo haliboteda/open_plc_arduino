@@ -8,10 +8,21 @@ OpenPLC 板子每个端口一个例程。从 **文件 ▸ 示例 ▸ OpenPLC_Por
 ## 每个例程都是同一个样子
 
 - 开头的注释说四件事：**做什么**、**接什么**、**应该看到什么**，以及
-  **串口监视器**怎么设（板子的 USB 口，115200 波特率）。
+  输出在哪看：**板子 USB 口上的串口监视器**。例程用 `Serial` 打印，`Serial` 即 USB 口 1（也可写 `SerialUSB`），波特率设多少都行。
+  每次上传或断电后要关掉串口再重开（板子复位，USB 口会重新出现一次；IDE 自带的串口监视器会自己重连），其他串口助手要勾 DTR。
+  例程不等电脑：开头那几行说明在串口监视器每次连上时打印，复位后重开串口监视器就能看到。
+  IDE 端口列表里板子的口标着 `OPEN-PLC`；打开串口监视器时板上心跳灯（LED3）快闪约 2 s，几块板同时插着也分得清。
 - 第一行代码是 `OPENPLC_APP_VERSION(1, 0, 0);` —— 每个 sketch 都要有这一行。
 - 例程如果要用库管理器里的库，开头注释的第一行会写明是哪个。
 - 代码在端口允许的范围内尽量短。没有东西判断过不过；你把看到的和开头注释写的对照。
+
+## 哪个对象是哪个口
+
+| 对象 | 端口 |
+|---|---|
+| `Serial` / `SerialUSB` | USB 口 1（板上的 USB 接口） |
+| `RS232` | 端子 C05 / C06，真 RS232 电平；`RS232.begin()` 时才打开 |
+| `RS485` | 端子 C10（A）/ C11（B） |
 
 ## 端口
 
@@ -19,7 +30,8 @@ OpenPLC 板子每个端口一个例程。从 **文件 ▸ 示例 ▸ OpenPLC_Por
 |---|---|
 | `DI_Inputs` | 数字输入 DI1–DI8 |
 | `DO_Outputs` | 数字输出 DO1–DO8 |
-| `Relays` | 继电器 RY1–RY6 |
+| `DO_PWM` | DO1–DO8 的 PWM，占空比、频率和分辨率从串口监视器设 |
+| `Relays` | 继电器 RY1–RY6，走一轮就停；轮数和每路吸合时长从串口监视器设 |
 | `SystemLED` | 系统指示灯 |
 | `AI_Inputs` | 模拟输入 AI1（电压）和 AI2（电流） |
 | `AO_Outputs` | 模拟输出 AO1–AO2（电流） |
@@ -30,14 +42,15 @@ OpenPLC 板子每个端口一个例程。从 **文件 ▸ 示例 ▸ OpenPLC_Por
 | `Ethernet_IP` | 以太网 |
 | `CAN_Counter` | CAN |
 | `SD_ReadWrite` | SD 卡 |
-| `SD_FileReceive` | SD 卡：PC 经 RS232 发来的文件（YMODEM） |
+| `SD_FileReceive` | SD 卡：PC 经 USB 发来的文件（YMODEM） |
+| `FixtureDemo` | 不是端口：产线工装的第 6 步。在 RS232 上讲工装面板的 `pt.*` 协议，每个端口都经本板卡包访问 |
 
 KNX 和外部 SDRAM 有各自的库 `OpenPLC_KNX` 和 `OpenPLC_SDRAM`，例程也在各自的库里。
 
 ## 模拟量端口要用内部基准
 
 板子没有外部电压基准。`openplcEnableVref()` 打开芯片内部的 2.5 V 基准；
-模拟量和温度的例程都先调用它。不开的话，所有模拟量读数都没有意义。
+`openplcReadAI*` / `openplcWriteAO_mA` 自己会打开它；用 `analogRead()` 读板温的程序要先调用它。不开的话，所有模拟量读数都没有意义。
 
 ## 用 mV、mA 读写模拟量，并套用这块板的校准值
 

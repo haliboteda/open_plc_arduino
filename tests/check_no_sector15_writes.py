@@ -7,6 +7,10 @@ A library (or cores/<x>, variants/<x>) is flagged when one of its files calls a
 flash write or erase API and one of its files names sector 15 -- per library,
 because the address usually sits in a header macro. Reading it is allowed.
 
+Also flagged: a FLASH_EraseInitTypeDef variable whose VoltageRange is never
+assigned. HAL ORs that field into FLASH_CR, where bit 3 is BER, so a stale
+value turns a sector erase into a whole-bank erase (KEX-13 in $PROD/maps/knx-examples).
+
 Usage: check_no_sector15_writes.py [<core root>]   (default: this repo)
 Exit 0 nothing writes sector 15, 1 something does.
 """
@@ -29,6 +33,8 @@ SECTOR15 = (
 BANK2 = re.compile(r"FLASH_BANK_2")
 SECTOR7 = re.compile(r"FLASH_SECTOR_7\b")
 
+ERASE_INIT = re.compile(r"\bFLASH_EraseInitTypeDef\s+(\w+)")
+
 COMMENTS = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
 
 
@@ -45,7 +51,7 @@ def main():
         Fail("%s not found" % root)
         return 1
 
-    writers, namers = {}, {}
+    writers, namers, no_range = {}, {}, []
     for sub in SCAN_DIRS:
         for f in sorted((root / sub).rglob("*")):
             if f.suffix not in SUFFIXES or not f.is_file():
@@ -57,12 +63,18 @@ def main():
                 writers.setdefault(unit, rel)
             if names_sector15(code):
                 namers.setdefault(unit, rel)
+            for var in ERASE_INIT.findall(code):
+                if not re.search(r"\b%s\s*\.\s*VoltageRange\s*=" % re.escape(var), code):
+                    no_range.append((rel, var))
 
     offenders = sorted(set(writers) & set(namers))
     for u in offenders:
         Fail("%s writes flash (%s) and names sector 15 (%s)" % (u, writers[u].name, namers[u].name))
     if offenders:
         print("      Sector 15 belongs to the bootloader (calibration + firmware metadata).")
+    for rel, var in no_range:
+        Fail("%s: %s.VoltageRange not set (stale bits can set BER and erase the whole bank)" % (rel, var))
+    if offenders or no_range:
         return 1
     Ok("no file under %s writes flash sector 15" % ", ".join(SCAN_DIRS))
     return 0

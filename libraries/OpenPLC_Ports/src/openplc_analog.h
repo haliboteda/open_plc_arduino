@@ -13,10 +13,11 @@
 extern "C" {
 #endif
 
-#define OPENPLC_ADC_FULL   4095U
+#define OPENPLC_ADC_FULL   4095U    /* 12-bit DAC code (AO) */
+#define OPENPLC_AI_FULL    65535U   /* 16-bit AI reading, as the fixture firmware takes it */
 #define OPENPLC_AO_MAX_MA  20.0f
 
-/* Nominal conversion, then gain * nominal + offset. raw is a 12-bit reading. */
+/* Nominal conversion, then gain * nominal + offset. raw is a 16-bit reading. */
 float openplc_ai1_mv_from_raw(uint32_t raw, const calib_channel_t *c);
 float openplc_ai2_ma_from_raw(uint32_t raw, const calib_channel_t *c);
 

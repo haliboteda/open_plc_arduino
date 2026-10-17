@@ -239,21 +239,21 @@
 /*-------- RS232 - Upper Deck Klemmblock C ---------------------------------*/
 /* USART3 AF7 - Terminals: C05=TxD, C06=RxD                                */
 #define RS232_UART_INSTANCE   3
-#define RS232_TX_Pin          PC10  /* USART3_TX → terminal C05             */
-#define RS232_RX_Pin          PC11  /* USART3_RX ← terminal C06             */
-#define RS232_EN_Pin          PB10  /* RS232 transceiver enable (active-high)*/
+#define RS232_TX          PC10  /* USART3_TX → terminal C05             */
+#define RS232_RX          PC11  /* USART3_RX ← terminal C06             */
+#define RS232_EN          PB10  /* RS232 transceiver enable (active-high)*/
 
 /*-------- RS485 - Upper Deck Klemmblock C ---------------------------------*/
-/* USART2 AF7 - Terminals: C09=RS485-A/B, C10=Direction                    */
+/* USART2 AF7. Terminals: $PROD/docs/hardware/HARDWARE-FACTS.md            */
 #define RS485_UART_INSTANCE   2
-#define RS485_TX_Pin          PD5   /* USART2_TX / RS485 DI                 */
-#define RS485_RX_Pin          PD6   /* USART2_RX / RS485 RO                 */
-#define RS485_DIR_Pin         PD4   /* RS485 direction (USART2_DE)          */
+#define RS485_TX              PD5   /* USART2_TX / RS485 DI                 */
+#define RS485_RX              PD6   /* USART2_RX / RS485 RO                 */
+#define RS485_DIR             PD4   /* RS485 direction (USART2_DE)          */
 
 /*-------- CAN - Upper Deck Klemmblock C -----------------------------------*/
 /* FDCAN1 - Terminals: C07=CAN-L, C08=CAN-H                                */
-#define CAN_TX_Pin   PB9   /* FDCAN1_TX → terminal C07                     */
-#define CAN_RX_Pin   PI9   /* FDCAN1_RX ← terminal C08                     */
+#define CAN_TX       PB9   /* FDCAN1_TX → terminal C07                     */
+#define CAN_RX       PI9   /* FDCAN1_RX ← terminal C08                     */
 
 /*-------- USB - Bridge MPU ------------------------------------------------*/
 /* USB Full-Speed Device (USB-C connector)                                   */
@@ -261,10 +261,7 @@
 #define USB_DP_Pin   PA12  /* USB_FS2_D_P (D+)                              */
 
 /*-------- SD CARD - Bridge MPU (SDMMC1, 1-bit mode) ----------------------*/
-#define SDMMC_CLK_Pin  PC12  /* SDMMC1_CK                                   */
-#define SDMMC_CMD_Pin  PD2   /* SDMMC1_CMD                                  */
-#define SDMMC_D0_Pin   PC8   /* SDMMC1_D0                                   */
-#define SDMMC_CD_Pin   PE6   /* Card detect (active-low)                    */
+#define SDMMC_CD   PE6   /* Card detect (active-low)                        */
 
 /*-------- SPI6 - JunctionLink expansion connector -------------------------*/
 /* SPI2 is the primary SPI (uses PIN_SPI_* below); SPI6 is secondary        */
@@ -460,7 +457,7 @@
 // UART Definitions
 // UART4 on JunctionLink expansion connector (PH13=TX, PH14=RX, AF8)
 // When USB CDC is selected in Arduino IDE, 'Serial' maps to USB and these
-// pins become Serial1 (hardware UART4).
+// pins become Serial4 (hardware UART4).
 #ifndef SERIAL_UART_INSTANCE
   #define SERIAL_UART_INSTANCE  4
 #endif
@@ -471,9 +468,10 @@
   #define PIN_SERIAL_TX         PH13   /* UART4_TX on JunctionLink connector */
 #endif
 
-// printf / stdout console: USART3 (AF7) on PC10/PC11 -> MAX3221 -> RS232
-// terminals C05/C06. Deliberately NOT UART4: UART4 is the expansion port's
-// peripheral (PIN_SERIAL_TX/RX above) and a peripheral has one handle slot.
+// The core's debug UART. Nothing in the core uses it: printf / stdout go to
+// the system log (_write() in cores/arduino/Print.cpp, R3-22). Left on USART3
+// (AF7) on PC10/PC11 rather than the default, UART4, which is the expansion
+// port's peripheral (PIN_SERIAL_TX/RX above).
 // DEBUG_PINNAME_TX must stay explicit -- without it the core takes the first
 // USART3 TX row in PeripheralPins.c, which on this board is PB10 = RS232_EN.
 // Pinned by case P4 (TestCase/host/variant_check/uart_routing/).

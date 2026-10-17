@@ -1,11 +1,11 @@
 """Every board-package test that needs no board. Run it after every change.
 
-    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07, T3-08, T3-09
+    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07..T3-12, T3-22, T3-24
     python tests/selfcheck.py --full   the same, plus P5 (about 45 minutes)
 
 Needs: arduino-cli (PATH or ARDUINO_CLI, plus ARDUINO_CLI_CONFIG for the IDE's
-bundled one), the board package installed in the IDE, cmake and a host C
-compiler for T2-21, T3-07, T3-08 and T3-09. A missing tool is reported as SKIP by name, never as PASS.
+bundled one), the board package installed in the IDE, cmake and a host C/C++
+compiler for the CTest cases (T2-21, T3-xx). A missing tool is reported as SKIP by name, never as PASS.
 Paths and variables: tests/_common.py.
 
 Exit 0 = nothing failed, 1 = something failed.
@@ -47,6 +47,8 @@ CTESTS = [
     ("T3-09", "KNX TP1 data link: codec, acknowledge, repeats, collision (CTest)", "^T3-09[.]"),
     ("T3-10", "YMODEM receiver: name and length, retries, cancel (CTest)", "^T3-10[.]"),
     ("T3-12", "OpenPLC_SD file operations on FatFs over a RAM disk (CTest)", "^T3-12[.]"),
+    ("T3-22", "after a KNX role change or a torn write nothing is restored from the data area (CTest)", "^T3-22[.]"),
+    ("T3-24", "SRAM4 boot log: init, wraparound, split, corrupt reset, sent (CTest)", "^T3-24[.]"),
 ]
 
 

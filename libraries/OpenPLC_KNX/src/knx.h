@@ -6,7 +6,7 @@
  * BAU variants.  The platform (Stm32H743OpenPLCPlatform) is pulled in
  * automatically via knx_facade.h.
  *
- * Typical use in user code:
- *   #include <OpenPLC_KNX.h>   // includes knx.h transitively
+ * Sketches include <OpenPLC_KNX.h> (which includes this) and use the KNX
+ * object it declares.
  */
 #include "knx_facade.h"

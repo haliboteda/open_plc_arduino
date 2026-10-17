@@ -10,15 +10,12 @@
 static Sd2Card s_card;
 static SdFatFs s_fs;
 
-bool SDClass::begin(uint32_t detect, uint32_t level)
+bool SDClass::begin()
 {
     if (_mounted) {
         end();
     }
-    _detect = detect;
-    _level = level;
-    uint32_t pin = (detect == OPENPLC_SD_NO_DETECT) ? SD_DETECT_NONE : detect;
-    if (!s_card.init(pin, level)) {
+    if (!s_card.init(SDMMC_CD, LOW)) {
         return false;
     }
     if (!s_fs.init()) {

@@ -6,5 +6,5 @@
  *
  * KNX_NO_AUTOMATIC_GLOBAL_INSTANCE is always set (defined in
  * stm32h743_openplc_platform.h), so no global `knx` instance is created
- * here.  The application uses the `KNX` instance defined in OpenPLC_KNX.cpp.
+ * here.  The one instance (knxStack, internal) is in OpenPLC_KNX.cpp.
  */

@@ -61,8 +61,8 @@ bool OpenPLC_CAN_Class::begin(uint32_t bitrate)
   }
   __HAL_RCC_FDCAN_CLK_ENABLE();
 
-  pinmap_pinout(digitalPinToPinName(CAN_TX_Pin), PinMap_CAN_TD);
-  pinmap_pinout(digitalPinToPinName(CAN_RX_Pin), PinMap_CAN_RD);
+  pinmap_pinout(digitalPinToPinName(CAN_TX), PinMap_CAN_TD);
+  pinmap_pinout(digitalPinToPinName(CAN_RX), PinMap_CAN_RD);
 
   s_h.Instance                  = FDCAN1;
   s_h.Init.FrameFormat          = FDCAN_FRAME_CLASSIC;

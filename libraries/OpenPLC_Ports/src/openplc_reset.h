@@ -22,12 +22,12 @@ typedef enum {
   OPENPLC_RESET_BROWNOUT,
 } openplc_reset_cause_t;
 
-/* Decodes RCC->RSR bits. A watchdog also pulses NRST, so its flag wins over
- * the pin flag; same order as the bootloader's boot log. */
-openplc_reset_cause_t openplc_reset_cause_from_rsr(uint32_t rsr);
-
-/* The cause the bootloader published for this boot. */
-openplc_reset_cause_t openplc_reset_cause(void);
+/* Why the board last reset: watchdog, power-on, reset button, software. Use it
+ * at the top of setup() to decide what to do after a watchdog reset; the board
+ * package decides nothing on its own (decision 80). Upstream
+ * IWatchdog::isReset() always reads false on this board: the bootloader has
+ * already cleared the flag it looks at. */
+openplc_reset_cause_t openplcResetCause(void);
 
 #ifdef __cplusplus
 }

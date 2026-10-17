@@ -179,6 +179,24 @@ static void rf_check_addressed(stknx_link_t *l)
     l->rf_addressed = (uint8_t)(l->addressed(l->ctx, dst, grp) != 0u);
 }
 
+/* 1 = queued for the main loop, 0 = the queue is full. */
+static uint8_t rx_enqueue(stknx_link_t *l, uint16_t n, uint8_t addressed)
+{
+    uint8_t h    = l->rxq_head;
+    uint8_t next = (uint8_t)((h + 1u) % STKNX_RX_QUEUE);
+
+    if (next == l->rxq_tail) {
+        return 0u;
+    }
+    memcpy(l->rxq[h], l->rf, n);
+    l->rxq_len[h]  = n;
+    l->rxq_addr[h] = addressed;
+    STKNX_BARRIER();
+    l->rxq_head = next;
+    l->rx_frames++;
+    return 1u;
+}
+
 static void frame_done(stknx_link_t *l, uint16_t t0_last)
 {
     uint16_t n = l->rf_len;
@@ -194,25 +212,19 @@ static void frame_done(stknx_link_t *l, uint16_t t0_last)
         l->rx_bad++;
     }
     if (!l->rf_addressed) {
+        if (good && l->monitor) {
+            (void)rx_enqueue(l, n, 0u);   /* not ours: no acknowledge either way */
+        }
         return;
     }
 
     if (!good) {
         reply = STKNX_NAK;
+    } else if (rx_enqueue(l, n, 1u)) {
+        reply = STKNX_ACK;
     } else {
-        uint8_t h    = l->rxq_head;
-        uint8_t next = (uint8_t)((h + 1u) % STKNX_RX_QUEUE);
-        if (next == l->rxq_tail) {
-            reply = STKNX_BUSY;
-            l->rx_busy++;
-        } else {
-            memcpy(l->rxq[h], l->rf, n);
-            l->rxq_len[h] = n;
-            STKNX_BARRIER();
-            l->rxq_head = next;
-            l->rx_frames++;
-            reply = STKNX_ACK;
-        }
+        reply = STKNX_BUSY;
+        l->rx_busy++;
     }
 
     /* The acknowledge starts 15 bit periods after the last character's stop bit. */
@@ -460,7 +472,7 @@ int stknx_link_send_result(stknx_link_t *l)
     return (s == TX_DONE_OK) ? STKNX_SEND_OK : STKNX_SEND_FAILED;
 }
 
-uint16_t stknx_link_receive(stknx_link_t *l, uint8_t *out, uint16_t cap)
+uint16_t stknx_link_receive(stknx_link_t *l, uint8_t *out, uint16_t cap, uint8_t *addressed)
 {
     uint8_t t = l->rxq_tail;
 
@@ -473,6 +485,9 @@ uint16_t stknx_link_receive(stknx_link_t *l, uint8_t *out, uint16_t cap)
         n = 0u;   /* caller's buffer is too small: drop rather than truncate */
     } else {
         memcpy(out, l->rxq[t], n);
+    }
+    if (addressed != 0) {
+        *addressed = l->rxq_addr[t];
     }
     STKNX_BARRIER();
     l->rxq_tail = (uint8_t)((t + 1u) % STKNX_RX_QUEUE);

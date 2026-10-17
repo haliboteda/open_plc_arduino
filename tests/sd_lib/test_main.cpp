@@ -59,11 +59,9 @@ static const Diskio_drvTypeDef RAM_Driver = { ram_init, ram_status, ram_read, ra
 static char drive[4];
 static FATFS volume;
 
-bool SDClass::begin(uint32_t detect, uint32_t level)
+bool SDClass::begin()
 {
     static bool formatted;
-    _detect = detect;
-    _level = level;
     if (!formatted) {
         static BYTE work[FF_MAX_SS];
         MKFS_PARM opt = { FM_ANY, 0, 0, 0, 0 };

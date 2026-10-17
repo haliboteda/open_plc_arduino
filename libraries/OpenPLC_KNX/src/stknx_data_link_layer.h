@@ -24,6 +24,10 @@ class ITpUartCallBacks
         virtual TPAckType isAckRequired(uint16_t address, bool isGrpAddr) = 0;
 };
 
+/* A frame seen on the bus, check octet included; forUs = acknowledged by this device. */
+typedef void (*StknxBusFrameFn)(const uint8_t* frame, uint16_t len, bool forUs);
+typedef void (*StknxSendDoneFn)(bool ok);
+
 #ifndef STKNX_TX_QUEUE
 #  define STKNX_TX_QUEUE  8u
 #endif
@@ -39,6 +43,16 @@ class StknxDataLinkLayer : public DataLinkLayer
         void enabled(bool value) override;
         bool enabled() const override;
         DptMedium mediumType() const override;
+
+        /* The board has one STKNX, so one instance whatever the role. */
+        static StknxDataLinkLayer* instance() { return _instance; }
+
+        /* Hand every good frame on the bus to fn; nullptr stops. */
+        void monitor(StknxBusFrameFn fn);
+        /* Send a complete TP frame (check octet included) outside the stack;
+         * done reports the outcome. false = one is still waiting or the link is off. */
+        bool sendRaw(const uint8_t* frame, uint16_t len, StknxSendDoneFn done);
+        uint16_t individualAddress() { return _deviceObject.individualAddress(); }
 
     protected:
         bool sendFrame(CemiFrame& frame) override;
@@ -56,7 +70,15 @@ class StknxDataLinkLayer : public DataLinkLayer
         uint8_t  _txCount = 0;
         TpFrame* _txInFlight = nullptr;
 
+        StknxBusFrameFn _monitorFn = nullptr;
+        uint8_t         _raw[STKNX_FRAME_MAX];
+        uint16_t        _rawLen = 0;
+        bool            _rawInFlight = false;
+        StknxSendDoneFn _rawDone = nullptr;
+
         stknx_link_t _link;
+
+        static StknxDataLinkLayer* _instance;
 };
 
 #endif

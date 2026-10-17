@@ -58,14 +58,14 @@ arduino-cli compile --warnings all --config-file <arduino-cli.yaml> --fqbn <见 
 本仓自己的测试都在 `tests/`，只测板卡包，不需要别的仓（决策 78）。**不进发布包**：`.gitattributes` 里 `tests/ export-ignore`，GitHub 按 tag 打的发布包不含它。
 
 ```
-python tests/selfcheck.py          # P3、P19、P4、P15、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12，几分钟
+python tests/selfcheck.py          # P3、P19、P4、P15、T2-21、T3-07、T3-08、T3-09、T3-10、T3-12、T3-22、T3-24，几分钟
 python tests/selfcheck.py --full   # 再加 P5（全部例程能编过），约 45 分钟
 ```
 
 | 用例 | 测什么 | 在哪 |
 |---|---|---|
 | P3 | IDE 装着的那份（`$CORE_LIVE`）和本仓一致 | `tests/check_core_sync.py` |
-| P19 | 板卡包里没有代码写 flash 扇区 15 | `tests/check_no_sector15_writes.py` |
+| P19 | 板卡包里没有代码写 flash 扇区 15；擦除结构体都设了 `VoltageRange` | `tests/check_no_sector15_writes.py` |
 | P4 | 变体头断言（FMC 保留脚、UART 走线） | `tests/variant_check/` |
 | P15 | app 起始地址保持 1024 对齐 | `tests/vector_alignment/` |
 | P5 | 全部例程能编过 | `tests/examples_build/` |
@@ -75,6 +75,8 @@ python tests/selfcheck.py --full   # 再加 P5（全部例程能编过），约 
 | T3-09 | KNX TP1 数据链路层：字节编解码、应答时刻、重发、冲突停发（编真的 `stknx_tp1.c`，假总线驱动） | `tests/knx_tp1/`，CMake/CTest |
 | T3-10 | YMODEM 接收：首包取名字和长度、截断末包、CRC 错重传、重复包、CAN 中止（编真的 `openplc_ymodem.c`，写好的发送端字节流） | `tests/ymodem/`，CMake/CTest |
 | T3-12 | `OpenPLC_SD` 的文件操作：内存盘上写、追加、读回、删、建目录、列目录（编真的 FatFs 和 `OpenPLC_SD.cpp`） | `tests/sd_lib/`，CMake/CTest |
+| T3-22 | KNX 换角色（TP 设备 / IP 路由器，或不带角色的旧头部）后开机一个字节都不恢复、个体地址是默认值；同角色照常恢复；`knx_nvm_sector_write()` 在任意一次 flash word 写入后断电，头部都还是 `0xFF`（编真的 `knx/memory.cpp`、`knx/device_object.cpp`、`knx_nvm.cpp`，内存里的假数据区和假 flash 驱动） | `tests/knx_role/`，CMake/CTest |
+| T3-24 | SRAM4 开机日志缓存：乱码时静默初始化、写读、写满丢最旧整条、超 200 字节拆条、损坏时重置并只留一条 `[sys][LOG]`、`sent` 只吐没吐过的（编真的 `cores/arduino/stm32/boot_log.c`，格式见 `$PROD/docs/modules/M1/BOOT-LOG.md`） | `tests/boot_log/`，CMake/CTest |
 
 **不用本机配置文件**，路径全从环境变量来，缺什么就报 SKIP 并点名：`ARDUINO_CLI`（IDE 自带的那个不在 PATH 上）、`ARDUINO_CLI_CONFIG`、`CMAKE`（不在 PATH 上时）；`ARDUINO15` / `CORE_LIVE` 一般不用设，按平台默认位置找。T2-21、T3-07 的本机编译器写在 `tests/CMakeUserPresets.json`（gitignored，preset 名 `local`，继承 `tests/CMakePresets.json` 的 `host`）。
 

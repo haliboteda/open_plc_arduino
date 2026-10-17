@@ -29,13 +29,6 @@ OWN_LIBRARIES = ("OpenPLC_Ports", "OpenPLC_SDRAM", "OpenPLC_IAP", "OpenPLC_Net",
 # (library, example) -> why it cannot build for this board.
 EXCLUDED = {}
 
-# (library, example) -> the KNX Role it is written for, when not the default.
-# These refuse to compile for any other role.
-KNX_ROLE = {
-    ("OpenPLC_KNX", "KNX_Switch"): "tp_device",
-    ("OpenPLC_KNX", "KNX_Inputs"): "tp_device",
-}
-
 SKIP_DIRS = {"__pycache__", ".vscode", "build"}
 
 
@@ -44,11 +37,6 @@ def walk_dirs(root):
     for child in sorted(p for p in root.iterdir() if p.is_dir() and p.name not in SKIP_DIRS):
         yield child
         yield from walk_dirs(child)
-
-
-def fqbn_for(lib, name):
-    role = KNX_ROLE.get((lib, name))
-    return FQBN.replace("knxrole=dual_device", "knxrole=" + role) if role else FQBN
 
 
 def main():
@@ -88,7 +76,7 @@ def main():
     for lib, name, path in sketches:
         Section("P5  %s / %s" % (lib, name))
         build_path = scratch("ex_%s_%s" % (lib, name))
-        out, rc = run_capture(compile_argv(cli, "--warnings", "all", "--fqbn", fqbn_for(lib, name),
+        out, rc = run_capture(compile_argv(cli, "--warnings", "all", "--fqbn", FQBN,
                                            "--build-path", build_path, path))
         lines = [ln for ln in re.split(r"\r?\n", out)]
         if rc == 0:

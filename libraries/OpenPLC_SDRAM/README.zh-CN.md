@@ -62,5 +62,6 @@ PLC 在这里不需要堆，堆只会带来碎片和一种新的出错方式。
 怎么处理由应用程序决定 —— 数据记录器可以改用 SRAM 里更短的历史继续跑，
 而离开这块缓冲区就干不了活的程序应该说出来并停下。
 
-bootloader 启动时做同样的检查，并在 RS232 端子上打印 `SDRAM staging buffer OK` 或
-`** SDRAM SELF-TEST FAILED **`，这是区分板子问题和 sketch 问题最快的办法。
+板子留在上传模式时，bootloader 做同样的检查，把 `SDRAM staging buffer OK` 或
+`** SDRAM SELF-TEST FAILED **` 写进开机日志（以 `[sys][BL]` 开头的行），电脑打开 USB 口 1（`Serial`）就能看到。
+这是区分板子问题和 sketch 问题最快的办法。

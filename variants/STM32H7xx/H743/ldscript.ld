@@ -49,8 +49,10 @@ MEMORY
      Because the address is outside every MEMORY region the linker cannot place
      anything there, in this image or any future one -- a guarantee, not a
      convention. Keep this identical to the bootloader's
-     open_plc_cube_ide/STM32H743IIKX_FLASH.ld. */
-  RAM_D3    (xrw)    : ORIGIN = 0x38000020,   LENGTH = 64K - 32
+     open_plc_cube_ide/STM32H743IIKX_FLASH.ld.
+     The next 4096 bytes are the boot log, carved out the same way: see
+     $PROD/docs/modules/M1/BOOT-LOG.md. */
+  RAM_D3    (xrw)    : ORIGIN = 0x38001020,   LENGTH = 64K - 32 - 4096
   /* LD_MAX_SIZE is already the app's own size (upload.maximum_size ==
      IAP_APP_MAX_SIZE), so the offset must not be subtracted again. */
   FLASH    (rx)    : ORIGIN = 0x8000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE

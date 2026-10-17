@@ -3,13 +3,10 @@
  * open_plc_cube_ide/IAPServer/owner_slot.c, for code that needs to know which
  * root this board currently trusts but has no business writing that area.
  *
- * Added 2026-09-04 alongside the session-auth switch to ECDSA-via-certificate
- * (see $PROD/docs/modules/M2-ownership.md): the app needs a trusted root to check a
- * certificate against for `openplc_server_reboot`, and the only place that
- * answer lives is the root area in sector 15 -- there was no channel handing
- * it to the app before this. The area is
- * memory-mapped flash on the same chip the app is running on (no WRP/RDP), so
- * this reads it directly rather than inventing a new communication path.
+ * The app needs the trusted root to check the certificate on
+ * `openplc_server_reboot` ($PROD/docs/modules/M2-ownership.md). The root area
+ * in sector 15 is memory-mapped flash on the same chip, so this reads it
+ * directly.
  *
  * Deliberately read-only and deliberately a SEPARATE module from
  * owner_slot.c, not a shared library: only the bootloader is allowed to
@@ -39,13 +36,15 @@ extern "C" {
  * false when the board has no root (decision 72), and nothing verifies. */
 bool owner_root_ro_get(uint8_t out[64]);
 
+/* Generation of the record in force, 0 when there is none. Mirror of
+ * owner_slot_generation() in open_plc_cube_ide/IAPServer/owner_slot.c. */
+uint32_t owner_root_ro_generation(void);
+
 /*
  * Has this leaf been revoked by a signed 'R' record in the trusted chain?
  * Mirror of owner_slot_is_revoked() in open_plc_cube_ide/IAPServer/owner_slot.c
  * -- same comparison (first 16 bytes only), same R4 exemption (an entry
- * naming the root currently in force is skipped, never honoured). Added
- * 2026-09-20 alongside the 'R' record type; see the file header above for why
- * this module exists at all.
+ * naming the root currently in force is skipped, never honoured).
  */
 bool owner_root_ro_is_revoked(const uint8_t leaf_pubkey[64]);
 

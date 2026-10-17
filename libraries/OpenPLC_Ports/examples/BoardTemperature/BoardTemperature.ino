@@ -5,21 +5,42 @@
  * short-circuit protection, the other at the digital-output switches.
  * Connect: nothing.
  * Expect: both close to room temperature, rising when the outputs work hard.
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port.
  */
 
 #include <OpenPLC_Ports.h>
 
 OPENPLC_APP_VERSION(1, 0, 0);
 
-void setup() {
-  Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
-  if (!openplcEnableVref()) {
+bool vrefOk = false;
+
+void printBanner() {
+  if (!vrefOk) {
     Serial.println("BoardTemperature: the internal reference did not start; readings are meaningless.");
   }
-  analogReadResolution(12);
   Serial.println("BoardTemperature: degrees C, once a second.");
+}
+
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
+void setup() {
+  Serial.begin(115200);
+  vrefOk = openplcEnableVref();
+  analogReadResolution(12);
 }
 
 float celsius(int pin) {
@@ -28,6 +49,7 @@ float celsius(int pin) {
 }
 
 void loop() {
+  printBannerOnConnect();
   Serial.print("protection = ");
   Serial.print(celsius(TEMP_SCPROT), 1);
   Serial.print(" C   output switches = ");

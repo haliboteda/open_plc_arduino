@@ -5,7 +5,9 @@
 #include "stm32_def.h"
 #include "IAP_boot_handoff.h"
 
-openplc_reset_cause_t openplc_reset_cause_from_rsr(uint32_t rsr)
+/* A watchdog also pulses NRST, so its flag wins over the pin flag; same order
+ * as the bootloader's boot log. */
+static openplc_reset_cause_t reset_cause_from_rsr(uint32_t rsr)
 {
   if ((rsr & (RCC_RSR_IWDG1RSTF | RCC_RSR_WWDG1RSTF)) != 0U) {
     return OPENPLC_RESET_WATCHDOG;
@@ -26,12 +28,12 @@ openplc_reset_cause_t openplc_reset_cause_from_rsr(uint32_t rsr)
   return OPENPLC_RESET_UNKNOWN;
 }
 
-openplc_reset_cause_t openplc_reset_cause(void)
+openplc_reset_cause_t openplcResetCause(void)
 {
   uint32_t rsr;
 
   if (!boot_handoff_published_reset_rsr(&rsr)) {
     return OPENPLC_RESET_UNKNOWN;
   }
-  return openplc_reset_cause_from_rsr(rsr);
+  return reset_cause_from_rsr(rsr);
 }

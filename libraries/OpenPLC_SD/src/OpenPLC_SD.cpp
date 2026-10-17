@@ -192,5 +192,7 @@ bool SDClass::rmdir(const char *path)
 
 bool SDClass::cardPresent()
 {
-    return _detect == OPENPLC_SD_NO_DETECT || digitalRead(_detect) == (int)_level;
+    /* Low while a card is in; the board has the pull-up ($PROD/docs/hardware/HARDWARE-FACTS.md "SDIO1_CD"). */
+    pinMode(SDMMC_CD, INPUT);
+    return digitalRead(SDMMC_CD) == LOW;
 }

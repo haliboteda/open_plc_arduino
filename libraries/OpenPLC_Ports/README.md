@@ -8,8 +8,16 @@ One example per port of the OpenPLC board. Open one from
 ## Every example follows the same shape
 
 - The header comment says four things: **what it does**, **what to connect**,
-  **what you should see**, and how to set up the **Serial Monitor** (the
-  board's USB port, 115200 baud).
+  **what you should see**, and where to read the output: the **Serial
+  Monitor on the board's USB port**. The examples print with `Serial`, which
+  is USB port 1 (also `SerialUSB`); the baud rate setting does not matter.
+  Reopen the port after every upload or power cycle (the board resets and
+  the port reappears; the IDE's Serial Monitor reconnects by itself), and
+  turn DTR on in other terminals. The examples never wait for the PC: their
+  opening lines are printed each time the Serial Monitor connects, so after a
+  reset reopen the monitor to see them. In the IDE's port list the board's
+  port is marked `OPEN-PLC`, and opening the Serial Monitor blinks the
+  heartbeat LED (LED3) fast for about 2 s, so you can tell boards apart.
 - The first line of code is `OPENPLC_APP_VERSION(1, 0, 0);` — every sketch
   needs one.
 - If the example needs a library from the Library Manager, the header's first
@@ -17,13 +25,22 @@ One example per port of the OpenPLC board. Open one from
 - The code is as short as the port allows. Nothing checks pass or fail; you
   compare what you see with what the header says.
 
+## Which object is which port
+
+| Object | Port |
+|---|---|
+| `Serial` / `SerialUSB` | USB port 1 (the board's USB connector) |
+| `RS232` | terminals C05 / C06, real RS232 levels; opened by `RS232.begin()` |
+| `RS485` | terminals C10 (A) / C11 (B) |
+
 ## Ports
 
 | Example | Port |
 |---|---|
 | `DI_Inputs` | Digital inputs DI1–DI8 |
 | `DO_Outputs` | Digital outputs DO1–DO8 |
-| `Relays` | Relays RY1–RY6 |
+| `DO_PWM` | PWM on DO1–DO8, duty, frequency and resolution from the Serial Monitor |
+| `Relays` | Relays RY1–RY6, one round and stop; rounds and time per relay from the Serial Monitor |
 | `SystemLED` | The system LED |
 | `AI_Inputs` | Analog inputs AI1 (voltage) and AI2 (current) |
 | `AO_Outputs` | Analog outputs AO1–AO2 (current) |
@@ -34,7 +51,8 @@ One example per port of the OpenPLC board. Open one from
 | `Ethernet_IP` | Ethernet |
 | `CAN_Counter` | CAN |
 | `SD_ReadWrite` | SD card |
-| `SD_FileReceive` | SD card: a file sent from the PC over RS232 (YMODEM) |
+| `SD_FileReceive` | SD card: a file sent from the PC over USB (YMODEM) |
+| `FixtureDemo` | Not a port: the production fixture's step 6. Speaks the fixture panel's `pt.*` protocol on RS232 and reaches every port through this package |
 
 KNX and the external SDRAM have their own libraries, `OpenPLC_KNX` and
 `OpenPLC_SDRAM`, with their own examples.
@@ -42,8 +60,9 @@ KNX and the external SDRAM have their own libraries, `OpenPLC_KNX` and
 ## Analog ports need the internal reference
 
 The board has no external voltage reference. `openplcEnableVref()` turns on the
-chip's internal 2.5 V reference; the analog and temperature examples call it
-first. Without it every analog reading is meaningless.
+chip's internal 2.5 V reference. The `openplcReadAI*` / `openplcWriteAO_mA`
+functions turn it on themselves; a sketch that reads the board temperature with
+`analogRead()` calls it first. Without it every analog reading is meaningless.
 
 ## Analog values in mV and mA, with this board's calibration
 

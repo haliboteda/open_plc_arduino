@@ -28,9 +28,13 @@ add_library(core_bin STATIC EXCLUDE_FROM_ALL
   IPAddress.cpp
   itoa.c
   main.cpp
+  OpenPLCNet.cpp
+  openplc_syslog.cpp
   pins_arduino.c
   Print.cpp
   RingBuffer.cpp
+  RS232Serial.cpp
+  RS485Serial.cpp
   stm32/OpenAMP/libmetal/device.c
   stm32/OpenAMP/libmetal/generic/condition.c
   stm32/OpenAMP/libmetal/generic/cortexm/sys.c

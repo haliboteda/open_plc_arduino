@@ -6,36 +6,50 @@
  * Connect: an Ethernet cable to a network with a DHCP server.
  * Expect: "link up", then an address. From a PC on the same network,
  *   ping that address, or look for the board under Tools > Port in the IDE.
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port.
  */
-
-#include <OpenPLC_Net_Autostart.h>
 
 OPENPLC_APP_VERSION(1, 0, 0);
 
 int last_link = -1;
 bool shown_ip = false;
 
+void printBanner() {
+  Serial.println("Ethernet_IP: waiting for link and address.");
+  last_link = -1;  // and the current link and address right after it
+}
+
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
 void setup() {
   Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
-  Serial.println("Ethernet_IP: waiting for link and address.");
 }
 
 void loop() {
-  int link = openplc_net_link_up();
+  printBannerOnConnect();
+  int link = Net.linkUp();
   if (link != last_link) {
     Serial.println(link ? "link up" : "link down");
     last_link = link;
     shown_ip = false;
   }
-  unsigned char ip[4];
-  if (!shown_ip && openplc_net_get_ipv4(ip)) {
+  if (!shown_ip && Net.hasIP()) {
     Serial.print("address ");
-    for (int i = 0; i < 4; i++) {
-      Serial.print(ip[i]);
-      Serial.print(i < 3 ? "." : "\n");
-    }
+    Serial.println(Net.localIP());
     shown_ip = true;
   }
   delay(200);

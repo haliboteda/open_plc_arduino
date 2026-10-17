@@ -7,7 +7,7 @@ OpenPLC 板子的 microSD 卡座，带 FAT32 / exFAT 文件系统。随板卡包
 ```cpp
 #include <OpenPLC_SD.h>
 
-SD.begin(SDMMC_CD_Pin);              // 返回 false：没插卡，或卡读不了
+SD.begin();   // 返回 false：没插卡，或卡读不了
 File f = SD.open("LOG.TXT", FILE_WRITE);
 f.println("hello");
 f.close();
@@ -15,7 +15,7 @@ f.close();
 
 | 调用 | 做什么 |
 |---|---|
-| `SD.begin(SDMMC_CD_Pin)` / `SD.end()` | 挂载 / 卸载卡。板子的卡检测脚插着卡时读到低 |
+| `SD.begin()` / `SD.end()` | 挂载 / 卸载卡。板子的卡检测脚插着卡时读到低 |
 | `SD.cardPresent()` | 检测脚是否说插着卡 |
 | `SD.open(path, FILE_READ)` | 只读打开。目录也能打开，用 `openNextFile()` 逐项列 |
 | `SD.open(path, FILE_WRITE)` | 没有就创建，从末尾接着写 |

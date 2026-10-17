@@ -6,10 +6,11 @@
 #define OPENPLC_LOG_LINE(msg) printf("%s\n", (msg))
 #endif
 
-/* Pin voltage in mV for a 12-bit reading against the internal 2.5 V reference. */
+/* Pin voltage in mV against the internal 2.5 V reference: the same nominal the
+ * fixture fits the calibration to ($PROD/docs/modules/M3/CALIBRATED-ANALOG.md). */
 static float pin_mv(uint32_t raw)
 {
-	return (float)raw * 2500.0f / (float)OPENPLC_ADC_FULL;
+	return (float)raw * 2500.0f / (float)OPENPLC_AI_FULL;
 }
 
 float openplc_ai1_mv_from_raw(uint32_t raw, const calib_channel_t *c)

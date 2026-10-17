@@ -24,20 +24,14 @@ extern "C" {
 #include "lwip/netif.h"
 }
 
-/* Must be defined before pulling in any reference-library header */
+/* MASK_VERSION comes from the sketch's OPENPLC_KNX_ROLE() line, through the
+ * header prebuild.sh generates and force-includes into every unit.
+ * $PROD/docs/modules/M3-app-runtime.md R3-24 */
 #ifndef MASK_VERSION
-#  define MASK_VERSION 0x5780u   /* IP+TP dual device by default; no menu selection needed */
+#  error "OpenPLC_KNX: no KNX role. Add OPENPLC_KNX_ROLE(TP_DEVICE); or OPENPLC_KNX_ROLE(IP_ROUTER); on its own line in the .ino file"
 #endif
 #ifndef KNX_NO_AUTOMATIC_GLOBAL_INSTANCE
 #  define KNX_NO_AUTOMATIC_GLOBAL_INSTANCE
-#endif
-
-/* Suppress the reference library's global print/println free-function
- * declarations.  On ARDUINO_ARCH_STM32 the implementations are never
- * provided (bits.cpp only implements them for ESP_PLATFORM), which causes
- * linker errors.  The KNX stack debug output is not needed in production. */
-#ifndef KNX_NO_PRINT
-#  define KNX_NO_PRINT
 #endif
 
 #include <knx/platform.h>
@@ -55,6 +49,7 @@ public:
 
     /* --- System -------------------------------------------------------- */
     void     restart()            override;
+    void     restartRequested(bool masterReset, uint8_t eraseCode) override;
     void     fatalError()         override;
     uint32_t uniqueSerialNumber() override;
 

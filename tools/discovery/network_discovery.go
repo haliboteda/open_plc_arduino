@@ -242,12 +242,17 @@ func handleResponse(ip string, payload []byte) {
 
 	now := time.Now()
 	if existing, ok := discovered[ip]; ok {
-		if existing.uid == uid {
+		props := existing.info.Properties
+		if existing.uid == uid && props["deviceName"] == deviceName &&
+			props["serverName"] == serverName && props["version"] == version {
 			existing.lastSeen = now
 			return
 		}
-		// Same IP, different device UID (DHCP lease reassigned) - swap it out.
-		logf("IP %s now reports a different uid (%q -> %q), replacing", ip, existing.uid, uid)
+		// A new UID (DHCP lease reassigned) or a new role/version (e.g. the board
+		// rebooted into its bootloader). The protocol has no "change" event, so
+		// the IDE only relabels the port on remove + add.
+		logf("IP %s changed identity (%q %s %s -> %q %s %s), replacing", ip,
+			existing.uid, props["serverName"], props["version"], uid, serverName, version)
 		emit(event{EventType: "remove", Port: existing.info})
 		delete(discovered, ip)
 	}
@@ -292,26 +297,39 @@ var (
 	activeConns = map[string]ifaceConn{} // keyed by local IP
 )
 
-func launchConn(ic ifaceConn) {
+func launchConn(key string, ic ifaceConn) {
 	logf("startDiscovery: broadcasting via %s -> %s", ic.name, ic.bcast)
 	fmt.Fprintf(os.Stderr, "[network_discovery] broadcasting via %s -> %s\n", ic.name, ic.bcast)
-	go func() {
-		defer ic.conn.Close()
-		buf := make([]byte, 1024)
-		for {
-			select {
-			case <-stopChan:
-				return
-			default:
-			}
-			ic.conn.SetReadDeadline(time.Now().Add(readTimeout))
-			n, addr, err := ic.conn.ReadFromUDP(buf)
-			if err != nil {
+	go readLoop(key, ic, stopChan)
+}
+
+// readLoop serves one socket until stop closes or the socket fails. A failed
+// socket is dropped from activeConns so the next interface rescan reopens it.
+func readLoop(key string, ic ifaceConn, stop chan struct{}) {
+	defer ic.conn.Close()
+	buf := make([]byte, 1024)
+	for {
+		select {
+		case <-stop:
+			return
+		default:
+		}
+		ic.conn.SetReadDeadline(time.Now().Add(readTimeout))
+		n, addr, err := ic.conn.ReadFromUDP(buf)
+		if err != nil {
+			if ne, ok := err.(net.Error); ok && ne.Timeout() {
 				continue
 			}
-			handleResponse(addr.IP.String(), buf[:n])
+			logf("read via %s failed, dropping the socket: %v", ic.name, err)
+			connsMu.Lock()
+			if cur, ok := activeConns[key]; ok && cur.conn == ic.conn {
+				delete(activeConns, key)
+			}
+			connsMu.Unlock()
+			return
 		}
-	}()
+		handleResponse(addr.IP.String(), buf[:n])
+	}
 }
 
 func syncPhysicalConns() {
@@ -325,14 +343,13 @@ func syncPhysicalConns() {
 			continue
 		}
 		activeConns[localIP] = ic
-		launchConn(ic)
+		launchConn(localIP, ic)
 	}
 }
 
-// The board rate-limits discovery replies per source IP, so a broadcast sent
-// while IAPTool is flashing from this same host can consume the budget and make
-// the flashing tool's own query go unanswered. Standing aside costs one skipped
-// refresh; not standing aside costs a failed upload.
+// Stand aside while IAPTool is uploading from this host, so a discovery poll
+// never competes with the upload's own query for the board's reply budget.
+// Standing aside costs one skipped refresh; not standing aside can cost an upload.
 func uploadInProgress() bool {
 	info, err := os.Stat(filepath.Join(os.TempDir(), uploadLockName))
 	if err != nil {
@@ -378,7 +395,7 @@ func startDiscovery() {
 		}
 		ic := ifaceConn{conn: conn, bcast: net.IPv4bcast, name: "fallback"}
 		activeConns["fallback"] = ic
-		launchConn(ic)
+		launchConn("fallback", ic)
 		logf("startDiscovery: no physical NICs, using fallback broadcast")
 		fmt.Fprintln(os.Stderr, "[network_discovery] no physical NICs found, using fallback broadcast")
 	}

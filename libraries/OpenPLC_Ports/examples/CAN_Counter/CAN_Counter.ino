@@ -11,7 +11,7 @@
  * Expect: the other node sees ID 0x123 once a second with the counter going up;
  * frames it sends appear here as "RX id=... len=... data=...".
  *
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port.
  */
 
 #include <OpenPLC_CAN.h>
@@ -20,18 +20,42 @@ OPENPLC_APP_VERSION(1, 0, 0);
 
 uint32_t counter = 0;
 uint32_t lastSend = 0;
+bool canFailed = false;
 
-void setup() {
-  Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
-  if (!CAN.begin(500000)) {
+void printBanner() {
+  if (canFailed) {
     Serial.println("CAN_Counter: CAN did not start.");
-    while (true) {}
+    return;
   }
   Serial.println("CAN_Counter: sending ID 0x123 every second, printing what arrives.");
 }
 
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
+void setup() {
+  Serial.begin(115200);
+  if (!CAN.begin(500000)) {
+    canFailed = true;
+    while (true) { printBannerOnConnect(); }
+  }
+}
+
 void loop() {
+  printBannerOnConnect();
   if (millis() - lastSend >= 1000) {
     lastSend = millis();
     uint8_t data[4] = {

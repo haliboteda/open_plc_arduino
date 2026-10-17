@@ -23,7 +23,6 @@
 /* Creates the file if needed and writes at its end, as Arduino's SD does. */
 #define FILE_WRITE (FA_READ | FA_WRITE | FA_OPEN_APPEND)
 
-#define OPENPLC_SD_NO_DETECT 0xFFFFFFFFUL
 #define OPENPLC_SD_PATH_MAX  256
 
 class File : public Stream {
@@ -62,9 +61,8 @@ class File : public Stream {
 
 class SDClass {
   public:
-    /* detect: the card-detect pin (SDMMC_CD_Pin on this board), read as
-     * "card in" at level. False if no card is in or it cannot be mounted. */
-    bool begin(uint32_t detect = OPENPLC_SD_NO_DETECT, uint32_t level = LOW);
+    /* False if no card is in or it cannot be mounted. */
+    bool begin();
     bool end();
     bool cardPresent();
 
@@ -75,8 +73,6 @@ class SDClass {
     bool rmdir(const char *path);
 
   private:
-    uint32_t _detect = OPENPLC_SD_NO_DETECT;
-    uint32_t _level = LOW;
     bool _mounted = false;
 };
 

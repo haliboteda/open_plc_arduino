@@ -242,12 +242,9 @@ extern "C" {
     switch (file) {
       case STDOUT_FILENO:
       case STDERR_FILENO:
-        /* Used for core_debug() */
-#if defined (VIRTIO_LOG)
-        virtio_log((uint8_t *)ptr, (uint32_t)len);
-#elif defined(HAL_UART_MODULE_ENABLED) && !defined(HAL_UART_MODULE_ONLY)
-        uart_debug_write((uint8_t *)ptr, (uint32_t)len);
-#endif
+        /* printf() and core_debug() go into the system log, never to a UART:
+         * the RS232 terminals belong to the sketch (R3-22, R3-23). */
+        openplc_syslog_stdout(ptr, (size_t)len);
         break;
       case STDIN_FILENO:
         break;

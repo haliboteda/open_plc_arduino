@@ -7,32 +7,26 @@
  * LibreTiny …) have been removed.  The only supported configuration is:
  *
  *   Platform : Stm32H743OpenPLCPlatform   (inherits Platform directly)
- *   BAU      : Bau5780  (MASK_VERSION 0x5780, IP+TP device, default)
- *           or Bau07B0  (MASK_VERSION 0x07B0, TP device)
- *           or Bau57B0  (MASK_VERSION 0x57B0, IP device)
- *           or Bau091A  (MASK_VERSION 0x091A, IP/TP1 coupler)
+ *   BAU      : Bau07B0  (MASK_VERSION 0x07B0, TP device)
+ *           or Bau091A  (MASK_VERSION 0x091A, IP router / IP-TP1 coupler)
  *
- * KNX_NO_AUTOMATIC_GLOBAL_INSTANCE is always defined - the global KNX
- * instance is created explicitly in OpenPLC_KNX.cpp.
+ * KNX_NO_AUTOMATIC_GLOBAL_INSTANCE is always defined - the one instance
+ * (knxStack, internal) is created in OpenPLC_KNX.cpp.
  */
 
-/* Bug 1 fix: MASK_VERSION must be defined before knx/config.h checks it.
- * stm32h743_openplc_platform.h (included below) also sets this default,
- * but it comes after the config.h include.  Set it here so a direct
- * #include "knx_facade.h" also works without the platform header first. */
+/* MASK_VERSION must be set before knx/config.h checks it; it comes from the
+ * sketch's OPENPLC_KNX_ROLE() line (see stm32h743_openplc_platform.h). */
 #ifndef MASK_VERSION
-#  define MASK_VERSION 0x5780u   /* IP+TP dual device - both transports active */
+#  error "OpenPLC_KNX: no KNX role. Add OPENPLC_KNX_ROLE(TP_DEVICE); or OPENPLC_KNX_ROLE(IP_ROUTER); on its own line in the .ino file"
 #endif
 
 #include "knx/bits.h"
 #include "knx/config.h"
 #include "knx/bau07B0.h"
 #include "knx/bau091A.h"
-#include "knx/bau57B0.h"
-#include "knx/bau5780.h"
 
-/* Our platform - already defines KNX_NO_AUTOMATIC_GLOBAL_INSTANCE and
- * MASK_VERSION if not set by the user.  Include it exactly once here. */
+/* Our platform - already defines KNX_NO_AUTOMATIC_GLOBAL_INSTANCE.
+ * Include it exactly once here. */
 #include "stm32h743_openplc_platform.h"
 
 #ifndef USERDATA_SAVE_SIZE
@@ -320,19 +314,8 @@ template <class P, class B> class KnxFacade : private SaveRestore
             return _bau.parameters().getFloat(addr, enc);
         }
 
-/* getGroupObject is only valid for application devices (TP, IP, or both).
- * Bau091A (coupler) inherits BauSystemBCoupler which has no GroupObjectTable.
- *
- * 0x5780 was missing from this list until 2026-08-17, and it is the DEFAULT
- * knxrole (dual_device, "IP+TP Device"). Bau5780 derives from BauSystemBDevice
- * exactly like Bau07B0 and Bau57B0 do, so it has a group object table and
- * always did -- only this guard disagreed. The effect was that the default KNX
- * configuration could not use group objects at all, which is most of what KNX
- * application code does, and two of this library's own examples (KNX_Basic,
- * KNX_IP_Test) did not compile with the default FQBN.
- *
- * Found by TestCase/host/examples_build, which builds every example. */
-#if (MASK_VERSION == 0x07B0) || (MASK_VERSION == 0x57B0) || (MASK_VERSION == 0x5780)
+/* Only a device has group objects; Bau091A (coupler) has no GroupObjectTable. */
+#if MASK_VERSION == 0x07B0
         GroupObject& getGroupObject(uint16_t goNr)
         {
             return _bau.groupObjectTable().get(goNr);

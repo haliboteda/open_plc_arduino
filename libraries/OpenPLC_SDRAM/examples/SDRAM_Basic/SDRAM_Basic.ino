@@ -1,11 +1,11 @@
 /*
  * SDRAM_Basic -- the smallest useful thing.
  *
- * Claims 4 MB of the board's external SDRAM, writes a pattern, reads it back.
+ * Claims 4 MB of the board's external SDRAM, writes a pattern, reads it back,
+ * once at start-up; prints the result each time the Serial Monitor connects.
  *
- * Wiring: none. Output goes to the RS232 terminals C05/C06 (115200 8N1).
- * ⚠️ Those are real RS-232 levels (+/-12 V). A 3.3 V USB-TTL adapter connected
- * there can be damaged -- use an RS-232 adapter.
+ * Wiring: none.
+ * Serial Monitor: on the board's USB port.
  */
 
 // Every sketch declares its own version. The upload tool compares it with
@@ -15,60 +15,96 @@ OPENPLC_APP_VERSION(1, 0, 0);
 #include <OpenPLC_SDRAM.h>
 
 const size_t BUFFER_BYTES = 4UL * 1024UL * 1024UL;   // 4 MB
+const size_t WORDS = BUFFER_BYTES / sizeof(uint32_t);
 uint32_t *buffer = nullptr;
 
+// What setup() found, kept so it can be printed again.
+const char *failure = nullptr;  // why it stopped, or nullptr
+bool ready = false;
+size_t readyMb = 0;
+bool verified = false;
+uint32_t firstWord = 0;
+size_t bad = 0;
+size_t stillFreeMb = 0;
+
+void printBanner() {
+  if (ready) {
+    Serial.print("SDRAM ready, ");
+    Serial.print(readyMb);
+    Serial.println(" MB free");
+  }
+  if (failure != nullptr) {
+    Serial.println(failure);
+    return;
+  }
+  if (!verified) {
+    return;
+  }
+  Serial.print("first word before writing: ");
+  Serial.println(firstWord);
+  Serial.print("wrote and verified ");
+  Serial.print(WORDS);
+  Serial.print(" words, mismatches: ");
+  Serial.println(bad);
+  Serial.print("still free: ");
+  Serial.print(stillFreeMb);
+  Serial.println(" MB");
+}
+
+// Prints the result each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
 void setup() {
-  // The RS232 transceiver is off after reset; the sketch has to turn it on or
-  // nothing reaches the terminals.
-  pinMode(RS232_EN_Pin, OUTPUT);
-  digitalWrite(RS232_EN_Pin, HIGH);
-  Serial_Test.begin(115200);
+  Serial.begin(115200);
   delay(200);
 
   // begin() powers up the SDRAM chip and checks it answers. It returns false
   // on a board where the memory is not usable -- decide here what that means
   // for your application. Carrying on and hoping is the one bad option.
   if (!SDRAM.begin()) {
-    Serial_Test.println("SDRAM not available - stopping");
-    while (true) { delay(1000); }
+    failure = "SDRAM not available - stopping";
+    while (true) { printBannerOnConnect(); }
   }
 
-  Serial_Test.print("SDRAM ready, ");
-  Serial_Test.print(SDRAM.available() / (1024UL * 1024UL));
-  Serial_Test.println(" MB free");
+  ready = true;
+  readyMb = SDRAM.available() / (1024UL * 1024UL);
 
   // alloc() returns memory that is already zeroed. There is no free(): ask for
   // what you need once, in setup(), and keep it.
   buffer = (uint32_t *)SDRAM.alloc(BUFFER_BYTES);
   if (buffer == nullptr) {
-    Serial_Test.println("allocation failed - stopping");
-    while (true) { delay(1000); }
+    failure = "allocation failed - stopping";
+    while (true) { printBannerOnConnect(); }
   }
 
-  const size_t words = BUFFER_BYTES / sizeof(uint32_t);
-
   // Proof that it really is zeroed, before we write anything.
-  Serial_Test.print("first word before writing: ");
-  Serial_Test.println(buffer[0]);
+  firstWord = buffer[0];
 
-  for (size_t i = 0; i < words; i++) {
+  for (size_t i = 0; i < WORDS; i++) {
     buffer[i] = (uint32_t)i * 2654435761UL;
   }
 
-  size_t bad = 0;
-  for (size_t i = 0; i < words; i++) {
+  for (size_t i = 0; i < WORDS; i++) {
     if (buffer[i] != (uint32_t)i * 2654435761UL) { bad++; }
   }
 
-  Serial_Test.print("wrote and verified ");
-  Serial_Test.print(words);
-  Serial_Test.print(" words, mismatches: ");
-  Serial_Test.println(bad);
-  Serial_Test.print("still free: ");
-  Serial_Test.print(SDRAM.available() / (1024UL * 1024UL));
-  Serial_Test.println(" MB");
+  stillFreeMb = SDRAM.available() / (1024UL * 1024UL);
+  verified = true;
 }
 
 void loop() {
-  delay(1000);
+  printBannerOnConnect();
 }

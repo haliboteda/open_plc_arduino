@@ -9,6 +9,9 @@
 
 #define LOW  0
 #define HIGH 1
+#define SDMMC_CD 0
+/* A macro so the mode name never has to exist here: <windows.h> has its own INPUT. */
+#define pinMode(pin, mode) ((void)(pin))
 
 int digitalRead(uint32_t pin);
 

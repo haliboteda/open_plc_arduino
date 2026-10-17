@@ -20,7 +20,7 @@ bool openplcEnableVref(void);
 
 /* AI / AO in mV and mA with this board's calibration; nominal conversion and
  * one log line when the calibration is not valid. They enable the reference
- * themselves and leave the ADC and DAC at 12 bits. See
+ * themselves and leave the ADC at 16 bits and the DAC at 12. See
  * $PROD/docs/modules/M3/CALIBRATED-ANALOG.md. */
 float openplcReadAI1_mV(void);
 float openplcReadAI2_mA(void);
@@ -28,14 +28,7 @@ float openplcReadAI2_mA(void);
 void openplcWriteAO_mA(uint8_t channel, float mA);
 calib_status_t openplcCalibrationStatus(void);
 
-#include "openplc_reset.h"
-
-/* Why the board last reset: watchdog, power-on, reset button, software. Use it
- * at the top of setup() to decide what to do after a watchdog reset; the board
- * package decides nothing on its own (decision 80). Upstream
- * IWatchdog::isReset() always reads false on this board: the bootloader has
- * already cleared the flag it looks at. */
-openplc_reset_cause_t openplcResetCause(void);
+#include "openplc_reset.h"   /* openplcResetCause() */
 
 #include "openplc_ymodem.h"   /* openplcYmodemReceive(): files over a serial port */
 

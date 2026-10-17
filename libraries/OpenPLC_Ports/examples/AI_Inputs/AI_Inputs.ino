@@ -8,16 +8,14 @@
  * Expect: first a line saying whether the board is calibrated, then the
  *   printed values follow the source (full scale 10000 mV and 20 mA). An
  *   uncalibrated board still reads, with the nominal conversion.
- * Serial Monitor: the board's USB port, 115200 baud.
+ * Serial Monitor: on the board's USB port.
  */
 
 #include <OpenPLC_Ports.h>
 
 OPENPLC_APP_VERSION(1, 1, 0);
 
-void setup() {
-  Serial.begin(115200);
-  while (!Serial && millis() < 3000) {}
+void printBanner() {
   if (openplcCalibrationStatus() == CALIB_OK) {
     Serial.println("AI_Inputs: this board is calibrated.");
   } else {
@@ -26,7 +24,28 @@ void setup() {
   Serial.println("AI_Inputs: AI1 in mV, AI2 in mA, once a second.");
 }
 
+// Prints the description each time the Serial Monitor connects, not once in
+// setup(): every reset re-enumerates USB and drops what setup() printed (README).
+void printBannerOnConnect() {
+  static bool wasConnected = false;
+  static uint32_t lastCheck = 0;
+  if (millis() - lastCheck < 250) {
+    return;  // (bool)Serial takes 10 ms on USB
+  }
+  lastCheck = millis();
+  bool now = (bool)Serial;
+  if (now && !wasConnected) {
+    printBanner();
+  }
+  wasConnected = now;
+}
+
+void setup() {
+  Serial.begin(115200);
+}
+
 void loop() {
+  printBannerOnConnect();
   Serial.print("AI1 = ");
   Serial.print(openplcReadAI1_mV(), 0);
   Serial.print(" mV   AI2 = ");
