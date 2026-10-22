@@ -49,7 +49,7 @@ MEMORY
      Because the address is outside every MEMORY region the linker cannot place
      anything there, in this image or any future one -- a guarantee, not a
      convention. Keep this identical to the bootloader's
-     open_plc_cube_ide/STM32H743IIKX_FLASH.ld.
+     OpenPLC_BootLoader/STM32H743IIKX_FLASH.ld.
      The next 4096 bytes are the boot log, carved out the same way: see
      $PROD/docs/modules/M1/BOOT-LOG.md. */
   RAM_D3    (xrw)    : ORIGIN = 0x38001020,   LENGTH = 64K - 32 - 4096

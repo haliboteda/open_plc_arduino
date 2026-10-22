@@ -2,7 +2,7 @@
  * sha256.h
  *
  * Small standalone SHA-256 implementation (FIPS 180-4), no HAL/peripheral
- * dependency. Kept identical to open_plc_cube_ide/IAPServer/sha256.h -- the
+ * dependency. Kept identical to OpenPLC_BootLoader/IAPServer/sha256.h -- the
  * app-side UDP reboot-trigger auth (iap_auth.c) needs the same HMAC-SHA256
  * the bootloader uses, and this is a separate build/toolchain so it can't
  * share that source file directly.

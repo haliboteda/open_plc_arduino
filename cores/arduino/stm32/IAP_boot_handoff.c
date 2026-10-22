@@ -1,7 +1,7 @@
 /*
  * IAP_boot_handoff.c
  *
- * See IAP_boot_handoff.h. Mirrors open_plc_cube_ide/IAPServer/IAP_boot_handoff.c -- the
+ * See IAP_boot_handoff.h. Mirrors OpenPLC_BootLoader/IAPServer/IAP_boot_handoff.c -- the
  * two copies differ only in the include block below, same arrangement as
  * iap_auth.c / iap_keyderive.c.
  *

@@ -6,7 +6,7 @@
  * the network could remotely knock a running PLC off the air with a single
  * unauthenticated UDP packet.
  *
- * Mirrors open_plc_cube_ide/IAPServer/iap_auth.h (bootloader side) minus the
+ * Mirrors OpenPLC_BootLoader/IAPServer/iap_auth.h (bootloader side) minus the
  * firmware-signature pieces, which don't apply here. The one real difference:
  * the bootloader checks a certificate against owner_slot_root() (in-process,
  * same flash it already owns); this side checks it against

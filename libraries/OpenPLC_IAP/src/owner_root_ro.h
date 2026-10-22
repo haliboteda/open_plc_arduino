@@ -1,6 +1,6 @@
 /*
  * owner_root_ro.h -- read-only mirror of the owner-record chain resolution in
- * open_plc_cube_ide/IAPServer/owner_slot.c, for code that needs to know which
+ * OpenPLC_BootLoader/IAPServer/owner_slot.c, for code that needs to know which
  * root this board currently trusts but has no business writing that area.
  *
  * The app needs the trusted root to check the certificate on
@@ -16,7 +16,7 @@
  * talked into becoming one.
  *
  * Must match, byte-for-byte, the record layout and resolution logic in:
- *   - open_plc_cube_ide/IAPServer/owner_slot.h/.c
+ *   - OpenPLC_BootLoader/IAPServer/owner_slot.h/.c
  * Any change to the on-flash format has to land in both, or this side will
  * either reject valid records or -- worse -- resolve to the wrong root.
  */
@@ -37,12 +37,12 @@ extern "C" {
 bool owner_root_ro_get(uint8_t out[64]);
 
 /* Generation of the record in force, 0 when there is none. Mirror of
- * owner_slot_generation() in open_plc_cube_ide/IAPServer/owner_slot.c. */
+ * owner_slot_generation() in OpenPLC_BootLoader/IAPServer/owner_slot.c. */
 uint32_t owner_root_ro_generation(void);
 
 /*
  * Has this leaf been revoked by a signed 'R' record in the trusted chain?
- * Mirror of owner_slot_is_revoked() in open_plc_cube_ide/IAPServer/owner_slot.c
+ * Mirror of owner_slot_is_revoked() in OpenPLC_BootLoader/IAPServer/owner_slot.c
  * -- same comparison (first 16 bytes only), same R4 exemption (an entry
  * naming the root currently in force is skipped, never honoured).
  */

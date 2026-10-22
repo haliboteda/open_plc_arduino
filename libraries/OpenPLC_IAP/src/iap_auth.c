@@ -1,7 +1,7 @@
 /*
  * iap_auth.c
  *
- * See iap_auth.h. Mirrors open_plc_cube_ide/IAPServer/iap_auth.c. The nonce is
+ * See iap_auth.h. Mirrors OpenPLC_BootLoader/IAPServer/iap_auth.c. The nonce is
  * 16 bytes straight from the RNG peripheral -- no backup register, nothing that
  * has to survive a power cycle. See $PROD/docs/tables/DECISIONS.md, decision 66.
  */

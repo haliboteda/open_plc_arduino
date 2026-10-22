@@ -1,7 +1,7 @@
 /*
  * fw_verify.h -- ECDSA (secp256r1) signature verification, using the vendored
  * micro-ecc library (uecc/). Mirrors the one function of
- * open_plc_cube_ide/IAPServer/fw_verify.h this side needs.
+ * OpenPLC_BootLoader/IAPServer/fw_verify.h this side needs.
  *
  * No fw_verify_signature() here (the bootloader's convenience wrapper around
  * "the root this board trusts") -- this side's equivalent question is

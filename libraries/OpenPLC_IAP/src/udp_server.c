@@ -36,7 +36,7 @@ static volatile uint16_t udp_server_last_rx_len_value = 0u;
  * on one host ($PROD/docs/tables/DECISIONS.md, decision 3). Normal load is
  * ~2 replies/s.
  *
- * Mirrored in the bootloader: open_plc_cube_ide/IAPServer/udp_server.c. Change
+ * Mirrored in the bootloader: OpenPLC_BootLoader/IAPServer/udp_server.c. Change
  * one, change both. */
 #define DISCOVERY_MAX_REPLIES_PER_SEC 50U
 
@@ -209,7 +209,7 @@ static void log_read_reply(struct udp_pcb *pcb, const ip_addr_t *addr, u16_t por
 
 /* Read-only queries: getuid, getpubkey, getowner, getapprevoked.
  * Format and limits: $PROD/docs/modules/M1/IAP-PROTOCOL.md "只读查询".
- * Mirrored in the bootloader: open_plc_cube_ide/IAPServer/udp_server.c
+ * Mirrored in the bootloader: OpenPLC_BootLoader/IAPServer/udp_server.c
  * (mirror 21). The four query_* accessors are this side's;
  * iap_query_reply() and query_reply_allowed() must stay textually identical
  * to the bootloader's. */
@@ -318,7 +318,7 @@ static void udp_server_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
       (strcmp(recv_buf, "openplc_server_where_r_y") == 0) ||
       (strcmp(recv_buf, "ping") == 0)) {
     /* Identity string contract, shared with the bootloader's
-     * iap_identity_string() (open_plc_cube_ide/IAPServer/IAP_server.c): the PC
+     * iap_identity_string() (OpenPLC_BootLoader/IAPServer/IAP_server.c): the PC
      * tool splits it on "_", so it is exactly five fields --
      * name_uid_role_pkgversion_appversion -- and no field may contain an
      * underscore. The bootloader has nothing to report for the last one and

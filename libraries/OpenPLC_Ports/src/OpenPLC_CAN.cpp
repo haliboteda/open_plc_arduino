@@ -1,5 +1,5 @@
 /*
- * Ported from open_plc_cube_ide TestCase/common/port_can.c (runs on this
+ * Ported from OpenPLC_BootLoader TestCase/common/port_can.c (runs on this
  * board): same timing table, FIFO sizes and "accept everything" filter.
  */
 

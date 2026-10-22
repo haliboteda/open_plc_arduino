@@ -1,5 +1,5 @@
 /*
- * iap_cert.h -- mirrors open_plc_cube_ide/IAPServer/iap_cert.h byte-for-byte.
+ * iap_cert.h -- mirrors OpenPLC_BootLoader/IAPServer/iap_cert.h byte-for-byte.
  * See that file for the full design note.
  */
 

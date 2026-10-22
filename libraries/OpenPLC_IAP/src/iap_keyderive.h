@@ -6,7 +6,7 @@
  * field.
  *
  * Must match, byte-for-byte:
- *   - open_plc_cube_ide/IAPServer/iap_keyderive.h/.c (bootloader side)
+ *   - OpenPLC_BootLoader/IAPServer/iap_keyderive.h/.c (bootloader side)
  */
 
 #ifndef OPENPLC_NET_IAP_KEYDERIVE_H_

@@ -12,13 +12,13 @@
 
 ## ⚠️ 共享文档不在这个仓库里
 
-出处在 `open_plc_cube_ide`：
+出处在 `OpenPLC_Docs`（`$PROD`）：
 
 ```
-git clone git@github.com:haliboteda/open_plc_cube_ide.git
+git clone git@github.com:haliboteda/OpenPLC_Docs.git
 ```
 
-读它根目录的 `CLAUDE.md`。
+读它根目录的 `README.md`。
 
 ## ⚠️ 改动方向是单向的：live → repo
 

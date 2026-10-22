@@ -1,7 +1,7 @@
 /*
  * iap_keyderive.c
  *
- * Mirrors open_plc_cube_ide/IAPServer/iap_keyderive.c. See iap_keyderive.h.
+ * Mirrors OpenPLC_BootLoader/IAPServer/iap_keyderive.c. See iap_keyderive.h.
  */
 
 #include "iap_keyderive.h"

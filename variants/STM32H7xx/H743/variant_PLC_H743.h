@@ -288,7 +288,7 @@
  * board (DOUT/DIN/AIN/AOUT/RS232/RS485/CAN/KNX). It was a missing guard, not
  * a wiring mistake.
  *
- * Source of truth: open_plc_cube_ide Core/Src/fmc.c, the FMC GPIO
+ * Source of truth: OpenPLC_BootLoader Core/Src/fmc.c, the FMC GPIO
  * Configuration comment block in HAL_FMC_MspInit(). Keep in step with it.  */
 
 /* 16-bit data bus */

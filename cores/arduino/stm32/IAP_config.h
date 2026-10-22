@@ -47,6 +47,6 @@
  * The boot-mode request no longer lives in an RTC backup register; see
  * IAP_boot_handoff.h for the replacement and for why the register was the wrong
  * place for it. Keep this file in step with the bootloader's
- * open_plc_cube_ide/Core/Inc/IAP_config.h. */
+ * OpenPLC_BootLoader/Core/Inc/IAP_config.h. */
 
 #endif /* IAP_CONFIG_H */

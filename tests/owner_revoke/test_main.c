@@ -25,7 +25,7 @@
  * Aligned because owner_record_t has 32-bit fields. */
 _Alignas(8) uint8_t fake_owner_area[FAKE_OWNER_AREA_SIZE];
 
-/* Field offsets and sizes: open_plc_cube_ide/IAPServer/owner_slot.h.
+/* Field offsets and sizes: OpenPLC_BootLoader/IAPServer/owner_slot.h.
  * Two segments: 32 'O' records of 160 bytes, then 96 'R' records of 32. */
 #define SEG_O_BASE        0U
 #define REC_SIZE        160U

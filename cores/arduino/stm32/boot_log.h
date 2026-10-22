@@ -5,7 +5,7 @@
  * kept across resets, lost on power-off. Format and rules:
  * $PROD/docs/modules/M1/BOOT-LOG.md.
  *
- * Mirrored byte for byte between open_plc_cube_ide/IAPServer/ and
+ * Mirrored byte for byte between OpenPLC_BootLoader/IAPServer/ and
  * open_plc_arduino/cores/arduino/stm32/ (mirror 19 in
  * $PROD/docs/repo/ARCHITECTURE.md, checked by P2).
  */

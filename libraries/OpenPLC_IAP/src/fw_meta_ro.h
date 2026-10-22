@@ -4,7 +4,7 @@
  *
  * Read-only for the same reason as owner_root_ro.h: only the bootloader writes
  * sector 15. Must match the record layout and scan in
- * open_plc_cube_ide/IAPServer/bootloader_state.c (mirror 21 in
+ * OpenPLC_BootLoader/IAPServer/bootloader_state.c (mirror 21 in
  * $PROD/docs/repo/ARCHITECTURE.md).
  */
 

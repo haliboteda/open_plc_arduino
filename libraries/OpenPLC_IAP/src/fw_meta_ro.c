@@ -6,7 +6,7 @@
 #include "iap_cert.h"
 #include <string.h>
 
-/* Must match open_plc_cube_ide/IAPServer/bootloader_state.c (IAP_META_BASE,
+/* Must match OpenPLC_BootLoader/IAPServer/bootloader_state.c (IAP_META_BASE,
  * IAP_MARKER_ADDR, IAP_META_SLOT_SIZE, IAP_METADATA_SLOTS, IAP_REC_METADATA).
  * Layout: $PROD/docs/modules/M1/SECTOR-15.md. */
 #define FW_META_BASE        0x081E4000UL   /* end of the root area */
@@ -29,7 +29,7 @@ typedef struct {
 } fw_meta_rec_t;
 
 _Static_assert(sizeof(fw_meta_rec_t) == (FW_META_REC_SLOTS * FW_META_SLOT_SIZE),
-		"fw_meta_rec_t must match iap_meta_rec_t in open_plc_cube_ide/IAPServer/bootloader_state.c");
+		"fw_meta_rec_t must match iap_meta_rec_t in OpenPLC_BootLoader/IAPServer/bootloader_state.c");
 
 bool fw_meta_ro_installed_leaf(uint8_t out[64])
 {

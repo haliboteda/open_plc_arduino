@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* Must match open_plc_cube_ide/IAPServer/owner_slot.h exactly -- see the note
+/* Must match OpenPLC_BootLoader/IAPServer/owner_slot.h exactly -- see the note
  * at the top of owner_root_ro.h. */
 /* Overridable only so a host test can point this at a RAM buffer instead of
  * memory-mapped flash; the firmware build never defines it. See T2-21 in
@@ -55,9 +55,9 @@ typedef struct {
 } owner_revoke_rec_t;
 
 _Static_assert(sizeof(owner_record_t) == OWNER_RECORD_SIZE,
-		"owner_record_t must match open_plc_cube_ide/IAPServer/owner_slot.h exactly");
+		"owner_record_t must match OpenPLC_BootLoader/IAPServer/owner_slot.h exactly");
 _Static_assert(sizeof(owner_revoke_rec_t) == OWNER_REVOKE_REC_SIZE,
-		"owner_revoke_rec_t must match open_plc_cube_ide/IAPServer/owner_slot.h exactly");
+		"owner_revoke_rec_t must match OpenPLC_BootLoader/IAPServer/owner_slot.h exactly");
 _Static_assert(OWNER_SEG_O_SIZE + OWNER_SEG_R_SIZE == 8U * 1024U,
 		"the 'O' and 'R' segments must tile the 8K area exactly");
 

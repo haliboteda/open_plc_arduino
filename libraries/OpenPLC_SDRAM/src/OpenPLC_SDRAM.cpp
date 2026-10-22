@@ -2,7 +2,7 @@
  * See OpenPLC_SDRAM.h for why this is an API rather than a linker section.
  *
  * The controller setup, the power-up sequence and the pin map below are ported
- * from the bootloader's Core/Src/fmc.c in open_plc_cube_ide, which drives this
+ * from the bootloader's Core/Src/fmc.c in OpenPLC_BootLoader, which drives this
  * same chip on this same board. ⚠️ They are a second copy: change one, change
  * the other. The pin list is compared automatically by case P2
  * (IAPTranfer_Tool/TestCase/tools/check-mirror-sync.ps1, anchor "FMC pin map"),
