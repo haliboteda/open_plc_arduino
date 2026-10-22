@@ -23,6 +23,7 @@
 #include "fixture_proto.h"
 
 OPENPLC_APP_VERSION(1, 0, 0);   // keep in step with FX_DEMO_VERSION
+OPENPLC_SYSTEM_LOG(OFF);         // USB port 1 is a port under test here, not a log
 
 void setup() {
   RS232.begin(115200);

@@ -4,6 +4,7 @@
 
 #include "OpenPLC_Ports.h"
 #include "openplc_analog.h"
+#include "openplc_ao_dac.h"
 
 /* Reference on and calibration read, once, before the first conversion. */
 static const calib_area_t *analog_ready(void)
@@ -37,8 +38,17 @@ void openplcWriteAO_mA(uint8_t channel, float mA)
   }
   const calib_area_t *cal = analog_ready();
   const calib_channel_t *c = &cal->ch[(channel == 1U) ? CALIB_CH_AO1 : CALIB_CH_AO2];
-  analogWriteResolution(12);
-  analogWrite((channel == 1U) ? AOUT_1 : AOUT_2, openplc_ao_code_from_ma(mA, c));
+  uint32_t code = openplc_ao_code_from_ma(mA, c);
+  static bool started[2];
+
+  /* The core brings up the DAC clock and pin once; after that the buffer has to
+   * follow the code, which analogWrite() does not do (openplc_ao_dac.h). */
+  if (!started[channel - 1U]) {
+    analogWriteResolution(12);
+    analogWrite((channel == 1U) ? AOUT_1 : AOUT_2, code);
+    started[channel - 1U] = true;
+  }
+  openplc_ao_dac_write(channel, code);
 }
 
 calib_status_t openplcCalibrationStatus(void)

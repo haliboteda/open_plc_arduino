@@ -26,7 +26,7 @@ static SDRAM_HandleTypeDef hsdram1;
  */
 static void sdram_gpio_init(void)
 {
-  GPIO_InitTypeDef g = {0};
+  GPIO_InitTypeDef g = {};
   g.Mode = GPIO_MODE_AF_PP;
   g.Pull = GPIO_NOPULL;
   g.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -149,7 +149,7 @@ bool OpenPLC_SDRAM_Class::begin()
     return true;
   }
 
-  RCC_PeriphCLKInitTypeDef clk = {0};
+  RCC_PeriphCLKInitTypeDef clk = {};
   clk.PeriphClockSelection = RCC_PERIPHCLK_FMC;
   clk.FmcClockSelection = RCC_FMCCLKSOURCE_D1HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&clk) != HAL_OK) {
@@ -158,7 +158,7 @@ bool OpenPLC_SDRAM_Class::begin()
   __HAL_RCC_FMC_CLK_ENABLE();
   sdram_gpio_init();
 
-  FMC_SDRAM_TimingTypeDef t = {0};
+  FMC_SDRAM_TimingTypeDef t = {};
   hsdram1.Instance = FMC_SDRAM_DEVICE;
   hsdram1.Init.SDBank = FMC_SDRAM_BANK1;
   hsdram1.Init.ColumnBitsNumber = FMC_SDRAM_COLUMN_BITS_NUM_10;

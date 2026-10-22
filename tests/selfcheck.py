@@ -1,6 +1,6 @@
 """Every board-package test that needs no board. Run it after every change.
 
-    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07..T3-12, T3-22, T3-24
+    python tests/selfcheck.py          P3, P19, P4, P15, T2-21, T3-07..T3-12, T3-22, T3-24, T3-25
     python tests/selfcheck.py --full   the same, plus P5 (about 45 minutes)
 
 Needs: arduino-cli (PATH or ARDUINO_CLI, plus ARDUINO_CLI_CONFIG for the IDE's
@@ -49,6 +49,7 @@ CTESTS = [
     ("T3-12", "OpenPLC_SD file operations on FatFs over a RAM disk (CTest)", "^T3-12[.]"),
     ("T3-22", "after a KNX role change or a torn write nothing is restored from the data area (CTest)", "^T3-22[.]"),
     ("T3-24", "SRAM4 boot log: init, wraparound, split, corrupt reset, sent (CTest)", "^T3-24[.]"),
+    ("T3-25", "AO: DAC buffer off at code 0, on otherwise (CTest)", "^T3-25$"),
 ]
 
 

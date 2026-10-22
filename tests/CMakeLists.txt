@@ -39,6 +39,11 @@ foreach(c ok blank corrupt other)
   add_test(NAME T3-07.${c} COMMAND calib_test ${c})
 endforeach()
 
+# --- T3-25: AO buffer off at code 0, on otherwise (decision 152) -------------
+add_executable(ao_dac_test ao_dac/stubs/fake_dac.c ${PORTS}/openplc_ao_dac.c ao_dac/test_main.c)
+target_include_directories(ao_dac_test PRIVATE ao_dac/stubs ${PORTS})
+add_test(NAME T3-25 COMMAND ao_dac_test)
+
 # --- T3-08: the reset cause the bootloader publishes reaches the sketch -------
 add_executable(reset_cause_test
   ${CORE_ROOT}/cores/arduino/stm32/IAP_boot_handoff.c ${PORTS}/openplc_reset.c
