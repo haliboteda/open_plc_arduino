@@ -9,7 +9,7 @@ because the address usually sits in a header macro. Reading it is allowed.
 
 Also flagged: a FLASH_EraseInitTypeDef variable whose VoltageRange is never
 assigned. HAL ORs that field into FLASH_CR, where bit 3 is BER, so a stale
-value turns a sector erase into a whole-bank erase (KEX-13 in $PROD/maps/knx-examples).
+value turns a sector erase into a whole-bank erase.
 
 Usage: check_no_sector15_writes.py [<core root>]   (default: this repo)
 Exit 0 nothing writes sector 15, 1 something does.

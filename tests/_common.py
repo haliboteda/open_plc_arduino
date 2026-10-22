@@ -1,8 +1,7 @@
 """Shared helpers for the board package's own tests. Standard library only.
 
 No machine config file: every machine-local path comes from an environment
-variable or the platform's default location (decision 78; see
-$PROD/maps/test-architecture/issues/TA-07-do-component-repos-need-machine-config.md).
+variable or the platform's default location (decision 78).
 
     ARDUINO_CLI         arduino-cli to use; default: `arduino-cli` on PATH
     ARDUINO_CLI_CONFIG  its --config-file; default: none (arduino-cli's own)

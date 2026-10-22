@@ -569,7 +569,7 @@ WEAK const PinMap PinMap_QUADSPI_SSEL[] = {
 #if defined(HAL_PCD_MODULE_ENABLED) || defined(HAL_HCD_MODULE_ENABLED)
 /* Only D-/D+: the USB init switches every entry here to USB, and PA8/PA9/PA10
  * are DO5, DO6 and KNX_RX on this board.
- * See OpenPLC_Docs docs/hardware/HARDWARE-FACTS.md, section "USB FS". */
+ * See OpenPLC_Instruction docs/hardware/HARDWARE-FACTS.md, section "USB FS". */
 WEAK const PinMap PinMap_USB_OTG_FS[] = {
   {PA_11, USB_OTG_FS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG1_FS)}, // USB_OTG_FS_DM
   {PA_12, USB_OTG_FS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG1_FS)}, // USB_OTG_FS_DP
@@ -610,7 +610,7 @@ WEAK const PinMap PinMap_USB_OTG_HS[] = {
 #ifdef HAL_SD_MODULE_ENABLED
 /* Only the three pins wired to the microSD socket (1-bit bus): the STM32SD
  * library switches every entry here to SDMMC, so any extra entry steals a pin.
- * See OpenPLC_Docs docs/hardware/HARDWARE-FACTS.md, section "microSD". */
+ * See OpenPLC_Instruction docs/hardware/HARDWARE-FACTS.md, section "microSD". */
 WEAK const PinMap PinMap_SD[] = {
   {PC_8,      SDMMC1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF12_SDIO1)}, // SDMMC1_D0
   {PC_12,     SDMMC1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF12_SDIO1)}, // SDMMC1_CK

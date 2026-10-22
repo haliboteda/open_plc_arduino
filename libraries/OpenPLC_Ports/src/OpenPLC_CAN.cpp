@@ -51,7 +51,7 @@ bool OpenPLC_CAN_Class::begin(uint32_t bitrate)
   end();
 
   /* The Arduino clock setup runs on HSI and leaves HSE off; the timing table
-   * needs HSE. See OpenPLC_Docs maps/arduino-examples-and-ide-flow/IDE-03-findings.md. */
+   * needs HSE. */
   enableClock(HSE_CLOCK);
   RCC_PeriphCLKInitTypeDef p = {};
   p.PeriphClockSelection = RCC_PERIPHCLK_FDCAN;

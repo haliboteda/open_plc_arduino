@@ -111,7 +111,7 @@ static bool s_net_started;
 #endif
 
 /* delay() spins on yield(); service the network and the system log there too,
- * or the board is deaf for as long as the sketch waits. See OpenPLC_Docs
+ * or the board is deaf for as long as the sketch waits. See OpenPLC_Instruction
  * docs/modules/M3-app-runtime.md, R3-07. */
 extern "C" void yield(void)
 {

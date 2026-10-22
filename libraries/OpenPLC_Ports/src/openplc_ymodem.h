@@ -3,7 +3,7 @@
  *
  * YMODEM because the first packet carries the file's name and exact length,
  * and common PC tools send it (Tera Term, lrzsz's sb).
- * $PROD/maps/core-examples-on-board/issues/EXB-03-how-does-a-file-get-from-rs232-onto-the-sd-card.md
+ * Requirement: $PROD/docs/modules/M3-app-runtime.md, R3-13.
  */
 #ifndef OPENPLC_YMODEM_H_
 #define OPENPLC_YMODEM_H_

@@ -10,7 +10,7 @@
  * Expect: nothing on its own -- type pt.caps for the port list, or let the
  *   panel run it. Lines starting with ! are samples, OK / ERR are replies.
  * Which commands and ports it has, and how it differs from the fixture
- *   firmware: OpenPLC_Docs docs/modules/M4/PORTTOOL-FLOW.md "A.9".
+ *   firmware: OpenPLC_Instruction docs/modules/M4/PORTTOOL-FLOW.md "A.9".
  * Serial Monitor: the RS232 port (terminals C05 / C06, through an RS232 adapter), 115200 baud.
  */
 

@@ -223,7 +223,7 @@ SECTIONS
  * rounded up to a power of two, which the architecture requires. The hardware
  * itself only forces 128 (TBLOFF is bit[31:7], measured on the part
  * 2026-09-21); the larger number is the architectural rule, not the register.
- * See $PROD/maps/app-header-replaces-journal/issues/HDR-04-what-is-the-real-vtor-alignment.md
+ * See $PROD/docs/modules/M1-firmware-upgrade.md section 5, note 7 (P15).
  */
 ASSERT((LD_FLASH_OFFSET & 1023) == 0,
        "LD_FLASH_OFFSET must be a multiple of 1024: the application's vector table starts there and VTOR needs that alignment")
