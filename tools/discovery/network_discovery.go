@@ -22,7 +22,7 @@ const (
 	broadcastMessage  = "openplc_server_where_r_y"
 	broadcastInterval = 30 * time.Second
 
-	// Shared with IAPTool (IAPTranfer_Tool/uploadlock.go) -- both sides must
+	// Shared with IAPTool (OpenPLC_IAPTool/uploadlock.go) -- both sides must
 	// agree on the name and on how long a leftover lock stays believable.
 	uploadLockName   = "openplc-iap-upload.lock"
 	uploadLockMaxAge = 90 * time.Second
